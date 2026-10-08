@@ -7,8 +7,9 @@
 - `brand/brand-guide.md`: 학원 정보, 타깃, 톤앤매너, 금지 표현. **모든 콘텐츠의 기준.**
 - `docs/platform-playbook.md`: 채널별 역할, 포맷, 노출 요령.
 - `docs/research.md`: 리서치 요약과 출처.
-- `brand/blog-template.md`: 네이버 블로그 고정 양식.
-- `brand/timetable-a-hall-2026-10.png`: A홀 주간 시간표 원본.
+- `brand/blog-template.md`: 네이버 블로그 고정 양식 (A 수업 영상 / B 시간표·공지 / C 유입용).
+- `docs/blog-topics.md`: 블로그 유입용 글 주제 목록.
+- `brand/timetable-a-hall-2026-10.png`, `brand/timetable-b-hall-2026-10.png`: A·B홀 주간 시간표 원본.
 
 ## 조직도 (에이전트 = `.claude/agents/*.md`)
 | 부서 | 에이전트 | 하는 일 |
@@ -18,7 +19,7 @@
 | 콘텐츠제작팀 | `shortform-planner` | 숏폼 훅·대본·콘티, 1소스 멀티유즈 설계 |
 | 콘텐츠제작팀 | `shoot-director` | 촬영 샷리스트, 편집 포인트, 화면 자막 설계 (강사·원장용 현장 가이드) |
 | 채널캡션팀 | `caption-naver-clip` | 네이버 클립 제목·본문·해시태그 |
-| 채널캡션팀 | `caption-naver-blog` | 네이버 블로그 글 (고정 양식 `brand/blog-template.md`) |
+| 채널캡션팀 | `caption-naver-blog` | 네이버 블로그 글: 수업 영상 / 시간표·공지 / 유입용 정보 글 |
 | 채널캡션팀 | `caption-smartplace` | 스마트플레이스 소식·쿠폰·이벤트 문구 |
 | 채널캡션팀 | `caption-instagram` | 인스타 릴스·피드·스토리 캡션 |
 | 채널캡션팀 | `caption-tiktok` | 틱톡 캡션·검색형 자막 |

@@ -34,7 +34,7 @@ Claude Code에서 이 폴더를 열면 에이전트(`.claude/agents/`)와 워크
 | 오늘 찍은 영상 올릴 때 | `/one-source 토요일 키즈 K-POP, ○○ 안무 단체` | 채널별 캡션(블로그 포함) 동시 작성 → 검수 |
 | 주말에 다음 주 준비 | `/weekly-content 다음 주 목표: 토요일 K-POP반 신규 문의 10건` | 리서치 → 캘린더 → 숏폼 기획 → 촬영 가이드 → 캡션 → 검수 |
 | 주간 성과 정리 | `/weekly-report` + 지표 붙여넣기 | 퍼널 리포트 + 다음 주 실험 |
-| 홍보 영상 만들 때 | `/promo-video 4번 오시는 길` (번호는 `docs/promo-video-catalog.md`) | 기획안·콘티 → 편집 지시서·자막 SRT → 검수 |
+| 홍보 영상 만들 때 | `/promo-video 2번 토요일 K-POP반` (번호는 `docs/promo-video-catalog.md`) | 기획안·콘티 → 편집 지시서·자막 SRT → 검수 |
 | 블로그 유입용 글 | "caption-naver-blog로 유입용 글 하나 써줘" | `docs/blog-topics.md`에서 주제 골라 C형 글 작성 |
 | 리뷰·DM 왔을 때 | `/review-reply` + 내용 붙여넣기 | 답글/답변 A·B안 |
 | 특정 부서만 | "trend-researcher로 이번 주 챌린지 찾아줘" | 해당 에이전트만 호출 |

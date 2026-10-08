@@ -1,27 +1,28 @@
 # 로우댄스학원 수원점 마케팅 에이전트 팀
 
-RAW DANCE STUDIO SUWON의 마케팅을 **6개 부서, 15명의 AI 에이전트**로 나눠 기획부터 실행까지 운영하는 작업 공간입니다.
+RAW DANCE STUDIO SUWON의 마케팅을 **7개 부서, 17명의 AI 에이전트**로 나눠 기획부터 실행까지 운영하는 작업 공간입니다.
 Claude Code에서 이 폴더를 열면 에이전트(`.claude/agents/`)와 워크플로(`.claude/skills/`)가 자동으로 불러와집니다.
 
 ## 조직도
 ```
-                         총괄 PD (메인 Claude 세션)
-                                  │
- ┌──────────────┬───────────────┼──────────────────┬───────────────┬──────────────┐
- 전략기획실      콘텐츠제작팀      채널캡션팀            고객경험팀        품질관리실       성과분석실
- ├ trend-        ├ shortform-     ├ caption-naver-blog  ├ review-manager  └ compliance-   └ performance-
- │ researcher    │ planner        ├ caption-naver-clip  └ inquiry-          checker         analyst
- └ campaign-     └ shoot-         ├ caption-smartplace    concierge
-   strategist      director       ├ caption-instagram
-                                  ├ caption-tiktok
-                                  ├ caption-daangn
-                                  └ caption-youtube
+                              총괄 PD (메인 Claude 세션)
+                                       │
+ ┌────────────┬────────────┬───────────┼──────────────┬──────────────┬────────────┐
+ 전략기획실    콘텐츠제작팀   홍보영상팀    채널캡션팀       고객경험팀       품질관리실    성과분석실
+ ├ trend-     ├ shortform- ├ promo-     ├ naver-blog    ├ review-       └ compliance- └ performance-
+ │ researcher │ planner    │ video-     ├ naver-clip    │ manager         checker       analyst
+ └ campaign-  └ shoot-     │ producer   ├ smartplace    └ inquiry-
+   strategist   director   └ video-     ├ instagram       concierge
+                             editor     ├ tiktok
+                                        ├ daangn
+                                        └ youtube        (채널캡션팀 에이전트 이름 앞에 caption- 이 붙음)
 ```
 
 | 부서 | 왜 필요한가 |
 |---|---|
 | 전략기획실 | 입시·오디션 일정과 방학 시즌이 매출을 좌우하는 업종이라, 시즌 캘린더와 트렌드를 먼저 잡아야 함 |
-| 콘텐츠제작팀 | 원장님·강사님이 스마트폰으로 15분 안에 찍을 수 있게 훅·대본·샷리스트를 미리 준비 |
+| 콘텐츠제작팀 | 매일 올리는 수업 숏폼: 원장님이 스마트폰으로 15분 안에 찍을 수 있게 훅·대본·샷리스트를 미리 준비 |
+| 홍보영상팀 | 학원 소개·모집·강사 소개·오시는 길 같은 기획형 영상: 콘티, 나레이션, 편집 지시서, 자막 파일까지 |
 | 채널캡션팀 | 같은 영상이라도 10대 채널(틱톡·인스타·쇼츠)과 학부모 채널(네이버·당근)은 말투와 정보가 달라야 함 |
 | 고객경험팀 | 리뷰와 DM 응답 속도가 곧 등록 전환. 스마트플레이스 리뷰 답글도 노출 관리의 일부 |
 | 품질관리실 | 학원 광고는 교습비 표시 의무, 과장 광고 제재, 미성년 초상권 이슈가 있음 |
@@ -33,6 +34,7 @@ Claude Code에서 이 폴더를 열면 에이전트(`.claude/agents/`)와 워크
 | 오늘 찍은 영상 올릴 때 | `/one-source 토요일 키즈 K-POP, ○○ 안무 단체` | 채널별 캡션(블로그 포함) 동시 작성 → 검수 |
 | 주말에 다음 주 준비 | `/weekly-content 다음 주 목표: 토요일 K-POP반 신규 문의 10건` | 리서치 → 캘린더 → 숏폼 기획 → 촬영 가이드 → 캡션 → 검수 |
 | 주간 성과 정리 | `/weekly-report` + 지표 붙여넣기 | 퍼널 리포트 + 다음 주 실험 |
+| 홍보 영상 만들 때 | `/promo-video 4번 오시는 길` (번호는 `docs/promo-video-catalog.md`) | 기획안·콘티 → 편집 지시서·자막 SRT → 검수 |
 | 블로그 유입용 글 | "caption-naver-blog로 유입용 글 하나 써줘" | `docs/blog-topics.md`에서 주제 골라 C형 글 작성 |
 | 리뷰·DM 왔을 때 | `/review-reply` + 내용 붙여넣기 | 답글/답변 A·B안 |
 | 특정 부서만 | "trend-researcher로 이번 주 챌린지 찾아줘" | 해당 에이전트만 호출 |
@@ -49,9 +51,10 @@ brand/brand-guide.md       학원 정보·시간표·교습비·타깃·톤·금
 brand/blog-template.md     네이버 블로그 고정 양식 (A 수업 영상 / B 공지 / C 유입용)
 brand/timetable-*.png      A·B홀 주간 시간표 원본
 docs/blog-topics.md        블로그 유입용 글 주제 목록
+docs/promo-video-catalog.md 홍보영상 메뉴판 (10가지)
 docs/platform-playbook.md  채널별 역할·포맷·노출 요령
 docs/research.md           리서치 요약과 출처
-.claude/agents/            15개 에이전트 정의
-.claude/skills/            4개 워크플로 (one-source, weekly-content, weekly-report, review-reply)
+.claude/agents/            17개 에이전트 정의
+.claude/skills/            5개 워크플로 (one-source, weekly-content, weekly-report, review-reply, promo-video)
 content/                   산출물 (research/, plans/, reports/, 날짜_주제/)
 ```

@@ -9,6 +9,7 @@
 - `docs/research.md`: 리서치 요약과 출처.
 - `brand/blog-template.md`: 네이버 블로그 고정 양식 (A 수업 영상 / B 시간표·공지 / C 유입용).
 - `docs/blog-topics.md`: 블로그 유입용 글 주제 목록.
+- `docs/promo-video-catalog.md`: 홍보영상 메뉴판 (영상 종류 10가지와 기본값).
 - `brand/timetable-a-hall-2026-10.png`, `brand/timetable-b-hall-2026-10.png`: A·B홀 주간 시간표 원본.
 
 ## 조직도 (에이전트 = `.claude/agents/*.md`)
@@ -18,6 +19,8 @@
 | 전략기획실 | `campaign-strategist` | 월간·주간 콘텐츠 캘린더, 모집 캠페인(K-POP반·전문반·오디션반·토요일반) 기획 |
 | 콘텐츠제작팀 | `shortform-planner` | 숏폼 훅·대본·콘티, 1소스 멀티유즈 설계 |
 | 콘텐츠제작팀 | `shoot-director` | 촬영 샷리스트, 편집 포인트, 화면 자막 설계 (강사·원장용 현장 가이드) |
+| 홍보영상팀 | `promo-video-producer` | 기획형 홍보 영상(학원 소개·모집·강사 소개·오시는 길·하이라이트) 기획안·대본·콘티 |
+| 홍보영상팀 | `video-editor` | 편집 지시서(컷 순서·전환·음원), 자막 SRT, 채널별 버전 분리, 썸네일 문구 |
 | 채널캡션팀 | `caption-naver-clip` | 네이버 클립 제목·본문·해시태그 |
 | 채널캡션팀 | `caption-naver-blog` | 네이버 블로그 글: 수업 영상 / 시간표·공지 / 유입용 정보 글 |
 | 채널캡션팀 | `caption-smartplace` | 스마트플레이스 소식·쿠폰·이벤트 문구 |
@@ -37,6 +40,6 @@
 2. **과장 금지.** "100% 합격", "무조건 데뷔", "수원 1등" 같은 보장·최상급 표현은 쓰지 않는다 (상세 목록은 브랜드 가이드).
 3. **초상권.** 모든 수강생은 입회 시 초상권 동의서를 받으므로 콘텐츠마다 동의 확인을 묻거나 표시하지 않는다. 퇴원생·동의 철회 학생의 영상만 새로 쓰지 않는다. 학교명은 쓰지 않는다.
 4. **음원.** 상업 음원은 각 플랫폼 내 제공 음원 사용을 기본으로 안내한다.
-5. **결과물 저장.** 산출물은 `content/YYYY-MM-DD_<주제>/` 폴더에 채널별 파일(`naver-blog.md`, `naver-clip.md`, `smartplace.md`, `instagram.md`, `tiktok.md`, `daangn.md`, `youtube.md`)로 저장한다. 리포트는 `content/reports/`에 저장한다.
+5. **결과물 저장.** 산출물은 `content/YYYY-MM-DD_<주제>/` 폴더에 채널별 파일(`promo-video.md`, `edit-guide.md`, `subtitles.srt`, `naver-blog.md`, `naver-clip.md`, `smartplace.md`, `instagram.md`, `tiktok.md`, `daangn.md`, `youtube.md`)로 저장한다. 리포트는 `content/reports/`에 저장한다.
 6. **발행 전 검수.** 외부에 게시될 문구는 반드시 `compliance-checker`를 거친다.
 7. 모든 결과물은 한국어로, 바로 복사해 붙여넣을 수 있는 형태로 쓴다.

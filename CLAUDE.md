@@ -33,6 +33,18 @@
 | 품질관리실 | `compliance-checker` | 학원법·표시광고·초상권·음원 저작권·브랜드 톤 최종 검수 |
 | 성과분석실 | `performance-analyst` | 채널별 지표 리포트, 다음 주 개선안 |
 
+### 법무팀 (마케팅과 별도, `legal/README.md`)
+| 역할 | 에이전트 |
+|---|---|
+| 사건접수 | `legal-intake` |
+| 리서치 | `legal-researcher` |
+| 수석변호사(전략) | `legal-strategist` |
+| 레드팀(상대방 변호사) | `legal-opposing-counsel` |
+| 서면 작성 | `legal-drafter` |
+| 최종 검수 | `legal-reviewer` |
+
+법무 업무는 `.claude/skills/legal-case/` 워크플로를 따른다. 아래 마케팅 공통 규칙 5·6번(채널 파일 저장, compliance-checker 검수)은 법무에 적용하지 않는다. 사건 자료는 `legal/cases/`(커밋 제외)에만 저장한다.
+
 서브에이전트는 다른 서브에이전트를 부를 수 없다. **여러 부서를 거치는 업무는 메인 세션(총괄 PD 역할)이** `.claude/skills/`의 워크플로를 따라 순서대로 호출한다.
 
 ## 공통 규칙

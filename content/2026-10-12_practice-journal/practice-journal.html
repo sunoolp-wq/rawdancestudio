@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>연습일지</title>
+<style>
+  @page { size: A4; margin: 12mm 13mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "WenQuanYi Zen Hei", sans-serif; color: #111; margin: 0; font-size: 11pt; }
+  .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #111; padding-bottom: 6px; }
+  .brand { font-size: 8.5pt; letter-spacing: 3px; color: #555; }
+  h1 { margin: 2px 0 0; font-size: 24pt; letter-spacing: 6px; }
+  .meta { font-size: 11pt; text-align: right; line-height: 1.9; }
+  .meta span { display: inline-block; border-bottom: 1px solid #111; min-width: 34mm; }
+  .meta span.s { min-width: 12mm; }
+  .row { display: flex; gap: 4mm; margin-top: 5mm; }
+  .box { border: 1.3px solid #111; border-radius: 6px; padding: 3mm 4mm; flex: 1; }
+  .label { font-weight: bold; font-size: 11.5pt; margin-bottom: 2mm; }
+  .label small { font-weight: normal; color: #666; font-size: 8.5pt; margin-left: 2mm; }
+  .dots { font-size: 15pt; letter-spacing: 5px; }
+  .dots small { font-size: 8pt; letter-spacing: 0; color: #666; }
+  .line { border-bottom: 1px solid #999; height: 8.2mm; display: flex; align-items: flex-end; padding-bottom: 1mm; font-size: 10pt; color: #444; }
+  .line b { width: 18mm; font-weight: normal; }
+  .lines { height: 100%; }
+  .write { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 7.6mm, #bbb 7.6mm, #bbb 7.9mm); }
+  .h3 { height: 26mm; }
+  .h4 { height: 34mm; }
+  .arrow { font-size: 18pt; align-self: center; color: #444; }
+  .foot { margin-top: 5mm; display: flex; justify-content: space-between; align-items: center; font-size: 9pt; color: #555; }
+  .score { font-size: 12pt; color: #111; }
+  .score span { display: inline-block; border-bottom: 1px solid #111; width: 14mm; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div>
+      <div class="brand">RAW DANCE STUDIO SUWON</div>
+      <h1>연습일지</h1>
+    </div>
+    <div class="meta">
+      이름 <span></span><br>
+      <span class="s"></span>월 <span class="s"></span>일 (<span class="s"></span>)
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">오늘 컨디션</div>
+      <div class="dots">○ ○ ○ ○ ○ <small>나쁨 → 좋음</small></div>
+    </div>
+    <div class="box">
+      <div class="label">연습 시간</div>
+      <div class="line" style="border:none;height:auto;font-size:12pt;color:#111"><span style="display:inline-block;border-bottom:1px solid #111;width:22mm"></span>&nbsp;분</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">오늘 연습한 것</div>
+      <div class="line"><b>곡</b></div>
+      <div class="line"><b>구간</b></div>
+      <div class="line"><b>기본기</b></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">잘된 것 <small>한 가지만 써도 OK</small></div>
+      <div class="write h3"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">아쉬운 것</div>
+      <div class="write h3"></div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="box">
+      <div class="label">다음엔 이렇게</div>
+      <div class="write h3"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">선생님 코멘트 <small>수업에서 들은 말 그대로</small></div>
+      <div class="write h4"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">다음 연습 목표 <small>딱 하나</small></div>
+      <div class="write" style="height:8mm"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div>잘 쓰려고 하지 않아도 돼요. 한 줄이면 충분해요.</div>
+    <div class="score">오늘의 나 <span></span> / 10</div>
+  </div>
+</body>
+</html>

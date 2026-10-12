@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <title>연습일지</title>
 <style>
-  @page { size: A4; margin: 12mm 13mm; }
+  @page { size: A4; margin: 0; }
+  .page { width: 210mm; height: 297mm; padding: 12mm 11mm 10mm 20mm; overflow: hidden; page-break-after: always; }
+  .page.even { padding: 12mm 20mm 10mm 11mm; }
+  .page:last-child { page-break-after: auto; }
   * { box-sizing: border-box; }
   body { font-family: "WenQuanYi Zen Hei", sans-serif; color: #111; margin: 0; font-size: 11pt; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid #111; padding-bottom: 6px; }
@@ -32,14 +35,15 @@
 </style>
 </head>
 <body>
+<div class="page">
   <div class="head">
     <div>
       <div class="brand">RAW DANCE STUDIO SUWON</div>
       <h1>연습일지</h1>
     </div>
     <div class="meta">
-      이름 <span></span><br>
-      <span class="s"></span>월 <span class="s"></span>일 (<span class="s"></span>)
+      <span class="s"></span>월 <span class="s"></span>일 (<span class="s"></span>)<br>
+      몸무게 <span class="s"></span> kg
     </div>
   </div>
 
@@ -100,5 +104,76 @@
     <div>잘 쓰려고 하지 않아도 돼요. 한 줄이면 충분해요.</div>
     <div class="score">오늘의 나 <span></span> / 10</div>
   </div>
+</div>
+<div class="page even">
+  <div class="head">
+    <div>
+      <div class="brand">RAW DANCE STUDIO SUWON</div>
+      <h1>연습일지</h1>
+    </div>
+    <div class="meta">
+      <span class="s"></span>월 <span class="s"></span>일 (<span class="s"></span>)<br>
+      몸무게 <span class="s"></span> kg
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">오늘 컨디션</div>
+      <div class="dots">○ ○ ○ ○ ○ <small>나쁨 → 좋음</small></div>
+    </div>
+    <div class="box">
+      <div class="label">연습 시간</div>
+      <div class="line" style="border:none;height:auto;font-size:12pt;color:#111"><span style="display:inline-block;border-bottom:1px solid #111;width:22mm"></span>&nbsp;분</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">오늘 연습한 것</div>
+      <div class="line"><b>곡</b></div>
+      <div class="line"><b>구간</b></div>
+      <div class="line"><b>기본기</b></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">잘된 것 <small>한 가지만 써도 OK</small></div>
+      <div class="write h3"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">아쉬운 것</div>
+      <div class="write h3"></div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="box">
+      <div class="label">다음엔 이렇게</div>
+      <div class="write h3"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">선생님 코멘트 <small>수업에서 들은 말 그대로</small></div>
+      <div class="write h4"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="box">
+      <div class="label">다음 연습 목표 <small>딱 하나</small></div>
+      <div class="write" style="height:8mm"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div>잘 쓰려고 하지 않아도 돼요. 한 줄이면 충분해요.</div>
+    <div class="score">오늘의 나 <span></span> / 10</div>
+  </div>
+</div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # 인스타 피드: 입시반 모집 포스터 (2026-10-13)
 
-- 포스터: `poster.png` (1080×1350, 인스타 피드 4:5)
+- 포스터: `poster-a.png` (블랙+옐로) / `poster-b.png` (퍼플) — 눈에 띄는 버전, 생성 `make_poster_v2.py A|B` · 이전 차분한 버전 `poster.png`
 - 원본 HTML: `poster.html` (문구 수정 후 다시 만들 수 있음) · 생성 스크립트 `make_poster.py` (python3 make_poster.py 2028 poster.html)
 - 글꼴: 제목 Black Han Sans, 본문 Noto Sans KR, 영문 Montserrat (모두 Google Fonts 무료 글꼴, 상업적 이용 가능)
 - 원장님 캡션 초안을 바탕으로 수정. 바꾼 이유는 맨 아래 "수정 내역".

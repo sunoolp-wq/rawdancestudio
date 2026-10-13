@@ -1,0 +1,67 @@
+# 사용: python3 make_poster_v2.py A poster-a.html  (A: 블랙+옐로 / B: 퍼플)
+import sys
+theme=sys.argv[1]; out=sys.argv[2]
+T={
+ 'A':dict(bg='#09080f',bg2='radial-gradient(circle at 85% 18%,rgba(168,85,247,.55),rgba(168,85,247,0) 45%),radial-gradient(circle at 0% 100%,rgba(250,204,21,.18),rgba(250,204,21,0) 40%)',
+          h1a='#ffffff',h1b='#facc15',band='#8b5cf6',bandtx='#fff',stroke='rgba(168,85,247,.28)',card='rgba(255,255,255,.06)',cardbd='rgba(255,255,255,.14)',chk='#facc15',sub='#c9c9d3',tl='#a78bfa'),
+ 'B':dict(bg='#5b21b6',bg2='linear-gradient(160deg,#7c3aed 0%,#5b21b6 45%,#2e1065 100%)',
+          h1a='#ffffff',h1b='#facc15',band='#0a0a0f',bandtx='#facc15',stroke='rgba(255,255,255,.14)',card='rgba(10,10,15,.28)',cardbd='rgba(255,255,255,.18)',chk='#facc15',sub='#e9ddff',tl='#facc15'),
+}[theme]
+html=f'''<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+html,body{{width:1080px;height:1350px}}
+body{{font-family:"Noto Sans KR",sans-serif;color:#fff;background:{T['bg']};background-image:{T['bg2']};position:relative;overflow:hidden}}
+.bgtx{{position:absolute;right:-60px;top:250px;font-family:Montserrat;font-weight:900;font-size:470px;line-height:1;color:transparent;-webkit-text-stroke:3px {T['stroke']};letter-spacing:-10px}}
+.wrap{{position:relative;padding:56px 64px 0}}
+.top{{display:flex;justify-content:space-between;align-items:center}}
+.top img{{width:170px}}
+.pill{{background:#facc15;color:#0a0a0f;font-weight:900;font-size:30px;padding:12px 28px;border-radius:50px;letter-spacing:-0.5px}}
+.h1a{{margin-top:68px;font-family:"Black Han Sans";font-size:118px;line-height:1;color:{T['h1a']}}}
+.h1b{{margin-top:14px;font-family:"Black Han Sans";font-size:176px;line-height:1;color:{T['h1b']};letter-spacing:-2px;text-shadow:0 8px 0 rgba(0,0,0,.35)}}
+.band{{display:inline-block;margin-top:26px;background:{T['band']};color:{T['bandtx']};font-weight:900;font-size:36px;padding:10px 26px;transform:skewX(-10deg)}}
+.band span{{display:inline-block;transform:skewX(10deg)}}
+.who{{margin-top:44px;display:flex;align-items:center;gap:18px}}
+.who b{{font-family:"Black Han Sans";font-size:62px;line-height:1}}
+.who span{{font-size:26px;font-weight:700;color:{T['sub']};line-height:1.35}}
+.grid{{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:14px}}
+.c{{background:{T['card']};border:1.5px solid {T['cardbd']};border-radius:16px;padding:24px 24px;font-size:32px;font-weight:900;letter-spacing:-0.5px;display:flex;align-items:center;gap:14px}}
+.c i{{font-style:normal;color:#0a0a0f;background:{T['chk']};width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}}
+.tl{{margin-top:44px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}}
+.tl div{{border-left:4px solid {T['tl']};padding-left:12px}}
+.tl b{{display:block;font-family:Montserrat,"Noto Sans KR";font-weight:900;font-size:26px}}
+.tl span{{font-size:19px;font-weight:500;color:{T['sub']};line-height:1.35;display:block;margin-top:2px}}
+.cta{{position:absolute;left:0;right:0;bottom:92px;background:#facc15;color:#0a0a0f;padding:20px 64px;display:flex;justify-content:space-between;align-items:center}}
+.cta b{{font-size:34px;font-weight:900;letter-spacing:-1px}}
+.cta span{{font-size:25px;font-weight:700;text-align:right;line-height:1.3}}
+.legal{{position:absolute;left:0;right:0;bottom:0;height:92px;background:#0a0a0f;padding:16px 64px;font-size:17px;color:#b4b4c0;line-height:1.6}}
+.legal div{{display:flex;justify-content:space-between}}
+</style></head><body>
+<div class="bgtx">RAW</div>
+<div class="wrap">
+ <div class="top"><img src="raw-logo.png"><div class="pill">2028학년도 입시 대비</div></div>
+ <div class="h1a">예고·대학</div>
+ <div class="h1b">입시반 모집</div>
+ <div class="band"><span>실력으로 증명하는 무대</span></div>
+ <div class="who"><b>현 중2·고2</b><span>예고 · 대학<br>입시 준비생</span></div>
+ <div class="grid">
+  <div class="c"><i>✓</i>전 클래스 프리패스</div>
+  <div class="c"><i>✓</i>연습실 상시 개방</div>
+  <div class="c"><i>✓</i>월말평가 · 모의고사</div>
+  <div class="c"><i>✓</i>대회 · 공연 · 버스킹</div>
+ </div>
+ <div class="tl">
+  <div><b>10~12월</b><span>1:1 상담·레벨 체크</span></div>
+  <div><b>1~3월</b><span>기본기·작품 구상</span></div>
+  <div><b>4~8월</b><span>작품 완성·대회</span></div>
+  <div><b>9~10월</b><span>보완·모의고사</span></div>
+ </div>
+</div>
+<div class="cta"><b>지금 상담 예약 →</b><span>DM @rawdance_suwon · ☎ 031-225-6600<br>카카오톡 로우댄스수원점학원</span></div>
+<div class="legal">
+ <div><span>교습비 월 50만원 (전문반: 금 18:30~20:00 주 1회 + 전 클래스 프리패스)</span><span>학원등록 제8189호</span></div>
+ <div><span>수원시 팔달구 매산로 136, 4층 · 방문 상담 시 레벨 체크·1:1 입시 상담</span><span>콘서트·버스킹 참여 시 의상비 별도</span></div>
+</div>
+</body></html>'''
+open(out,'w',encoding='utf-8').write(html)

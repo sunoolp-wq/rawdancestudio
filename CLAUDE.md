@@ -10,6 +10,7 @@
 - `brand/blog-template.md`: 네이버 블로그 고정 양식 (A 수업 영상 / B 시간표·공지 / C 유입용).
 - `docs/blog-topics.md`: 블로그 유입용 글 주제 목록.
 - `docs/naver-ranking.md`: 네이버 플레이스 검색 순위 전략 (목표 키워드 단계, 하지 않는 것).
+- `docs/instagram-ads.md`: 인스타 릴스 광고 타깃·예산·음원 규칙.
 - `docs/promo-video-catalog.md`: 홍보영상 메뉴판 (영상 종류 10가지와 기본값).
 - `brand/timetable-a-hall-2026-10.png`, `brand/timetable-b-hall-2026-10.png`: A·B홀 주간 시간표 원본.
 

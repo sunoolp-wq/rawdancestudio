@@ -1,0 +1,68 @@
+import sys
+year=sys.argv[1]; out=sys.argv[2]
+html=f'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=Montserrat:wght@700;800&display=swap" rel="stylesheet"><style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+html,body{{width:1080px;height:1350px}}
+body{{font-family:"Noto Sans KR",sans-serif;font-weight:500;color:#fff;background:#0b0918;position:relative;overflow:hidden}}
+.glow{{position:absolute;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.35),rgba(139,92,246,0) 65%);top:-380px;right:-300px}}
+.glow2{{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(234,179,8,.14),rgba(234,179,8,0) 65%);bottom:-330px;left:-260px}}
+.wrap{{position:relative;padding:48px 70px 0}}
+.top{{display:flex;justify-content:space-between;align-items:center}}
+.top img{{width:190px}}
+.top .loc{{font-size:19px;font-weight:700;letter-spacing:5px;color:#a78bfa;text-align:right;line-height:1.6}}
+.tag{{font-weight:700;display:inline-block;margin-top:28px;padding:9px 24px;border:2px solid #eab308;color:#facc15;border-radius:40px;font-size:30px;letter-spacing:3px}}
+h1{{margin-top:16px;font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:100px;line-height:1.08;letter-spacing:0}}
+h1 .p{{color:#c4b5fd}}
+.sub{{margin-top:6px;font-size:29px;color:#e4e4e7;font-weight:500;letter-spacing:-0.5px}}
+.bar{{height:4px;width:120px;background:#8b5cf6;margin:20px 0 20px}}
+.grid{{display:grid;grid-template-columns:1fr 1fr;gap:16px}}
+.card{{background:rgba(139,92,246,.12);border:1.5px solid rgba(167,139,250,.45);border-radius:18px;padding:14px 22px}}
+.card b{{display:block;font-size:29px;font-weight:900;margin-bottom:6px;letter-spacing:-0.5px}}
+.card span{{font-size:21px;color:#c9c9d3;line-height:1.45;font-weight:400}}
+.h2{{margin-top:26px;font-family:Montserrat,sans-serif;font-weight:800;font-size:21px;letter-spacing:6px;color:#a78bfa}}
+.tl{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}}
+.st{{border-top:4px solid #8b5cf6;padding-top:12px}}
+.st:last-child{{border-color:#eab308}}
+.st b{{font-size:28px;font-weight:900;display:block}}
+.st span{{font-size:20px;font-weight:400;color:#c9c9d3;line-height:1.4;display:block;margin-top:4px}}
+.info{{margin-top:26px;display:flex;gap:16px}}
+.info div{{flex:1;background:#fff;color:#0b0918;border-radius:18px;padding:16px 22px}}
+.info small{{font-size:19px;font-weight:700;color:#6d28d9;letter-spacing:3px}}
+.info p{{font-size:29px;font-weight:900;margin-top:6px;line-height:1.35}}
+.info p em{{font-style:normal;font-weight:500;font-size:20px;color:#52525b;display:block;margin-top:4px}}
+.foot{{position:absolute;left:0;right:0;bottom:0;background:#8b5cf6;padding:22px 70px 20px}}
+.foot .c{{display:flex;justify-content:space-between;font-size:25px;font-weight:700}}
+.foot .l{{margin-top:6px;font-size:17px;font-weight:400;color:#ede9fe;display:flex;justify-content:space-between}}
+</style></head><body>
+<div class="glow"></div><div class="glow2"></div>
+<div class="wrap">
+ <div class="top"><img src="raw-logo.png"><div class="loc">SUWON<br>수원 팔달구 매산로</div></div>
+ <div class="tag">{year}학년도 입시 대비</div>
+ <h1>예고·대학<br><span class="p">입시반</span> 모집</h1>
+ <div class="sub">실력으로 증명하는 무대, 꿈을 현실로 만드는 RAW 입시반</div>
+ <div class="bar"></div>
+ <div class="grid">
+  <div class="card"><b>기본기 · 표현력 코칭</b><span>힙합 · 왁킹 · 걸스힙합 · 코레오 ·<br>힐코레오 · 걸리시 장르별 강사진</span></div>
+  <div class="card"><b>전 클래스 프리패스</b><span>K-POP 포함 전 클래스 수강<br>연습실 상시 개방</span></div>
+  <div class="card"><b>월말평가 · 모의고사</b><span>매월 실력 점검<br>입시 작품 레슨</span></div>
+  <div class="card"><b>실전 무대 경험</b><span>대회 · 공연 · 버스킹<br>참가 기회</span></div>
+ </div>
+ <div class="h2">TRAINING SCHEDULE</div>
+ <div class="tl">
+  <div class="st"><b>10~12월</b><span>1:1 상담<br>레벨 체크 · 목표 설정</span></div>
+  <div class="st"><b>1~3월</b><span>장르별 기본기<br>작품 구상</span></div>
+  <div class="st"><b>4~8월</b><span>입시 작품 완성<br>대회 · 공연 참가</span></div>
+  <div class="st"><b>9~10월</b><span>디테일 보완<br>모의고사 · 실전 대비</span></div>
+ </div>
+ <div class="info">
+  <div><small>대상</small><p>현 중2 · 고2<em>예고 · 대학 입시 준비생</em></p></div>
+  <div><small>상담 신청</small><p>DM · 카카오톡 예약<em>방문 상담 시 레벨 체크 · 1:1 입시 상담</em></p></div>
+ </div>
+</div>
+<div class="foot">
+ <div class="c"><span>☎ 031-225-6600</span><span>@rawdance_suwon</span><span>카카오톡 로우댄스수원점학원</span></div>
+ <div class="l"><span>수원시 팔달구 매산로 136, 4층</span><span>학원등록 제8189호</span></div>
+ <div class="l"><span>교습비 월 50만원 (전문반: 금 18:30~20:00 주 1회 + 전 클래스 프리패스)</span><span>콘서트·버스킹 참여 시 의상비 별도</span></div>
+</div>
+</body></html>'''
+open(out,'w',encoding='utf-8').write(html)

@@ -5,6 +5,7 @@
 
 naver-blog.md 본문(첫 번째와 두 번째 '---' 사이) 표기 규칙:
   <<소제목>>텍스트      → 맨 위 헤더 (24)
+  <<중제목>>텍스트      → 본문 중간 소제목 (19)
   <<강조>>텍스트        → 핵심 문장·학생 한마디 (19)
   <<작게>>텍스트        → 보조 설명 (13)
   표시 없음             → 본문 (16), '•'·'✅'로 시작하면 목록 (15)
@@ -22,8 +23,8 @@ import sys
 from pathlib import Path
 
 BASE = "font-family:'나눔다시시작해','NanumDaSiSiJagHae';text-align:center;font-weight:bold;margin:0;"
-SIZE = {"head": 24, "strong": 19, "body": 16, "list": 15, "small": 13}
-MARK = {"<<소제목>>": "head", "<<강조>>": "strong", "<<작게>>": "small"}
+SIZE = {"head": 24, "sub": 19, "strong": 19, "body": 16, "list": 15, "small": 13}
+MARK = {"<<소제목>>": "head", "<<중제목>>": "sub", "<<강조>>": "strong", "<<작게>>": "small"}
 
 
 def style(size):

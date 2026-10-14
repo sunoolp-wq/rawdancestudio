@@ -4,7 +4,11 @@
 결과: 같은 폴더에 naver-blog-copy.html (크롬에서 열고 '복사' → 네이버 에디터에 붙여넣기)
 
 naver-blog.md 본문(첫 번째와 두 번째 '---' 사이) 표기 규칙:
-  <<소제목>>텍스트      → 맨 위 헤더 (크게, 굵게)
+  <<소제목>>텍스트      → 맨 위 헤더 (24)
+  <<강조>>텍스트        → 핵심 문장·학생 한마디 (19)
+  <<작게>>텍스트        → 보조 설명 (13)
+  표시 없음             → 본문 (16), '•'·'✅'로 시작하면 목록 (15)
+  고정 블록 영역은 15, 해시태그는 13
   [구분선]              → 파란 칸: 에디터 툴바에서 구분선 넣을 자리
   [사진 …] [GIF …] [영상 …] [지도 …] [링크 카드 …] [이미지 …] → 파란 칸: 넣을 자리
   (사진 설명) …  (영상 제목) … → 바로 위 파란 칸에 합쳐서 표시 (사진 설명 칸에 넣을 글)
@@ -17,8 +21,16 @@ import re
 import sys
 from pathlib import Path
 
-TXT = "font-family:'나눔다시시작해','NanumDaSiSiJagHae';text-align:center;font-weight:bold;margin:0;"
-HEAD = TXT + "font-size:19px;"
+BASE = "font-family:'나눔다시시작해','NanumDaSiSiJagHae';text-align:center;font-weight:bold;margin:0;"
+SIZE = {"head": 24, "strong": 19, "body": 16, "list": 15, "small": 13}
+MARK = {"<<소제목>>": "head", "<<강조>>": "strong", "<<작게>>": "small"}
+
+
+def style(size):
+    return f"{BASE}font-size:{size}px;"
+
+
+TXT = style(SIZE["body"])
 SLOT = re.compile(r"\[(구분선|사진|GIF|영상|지도|링크 카드|이미지)[^\]]*\]")
 
 
@@ -32,28 +44,31 @@ def blocks(lines):
                 continue
         if SLOT.fullmatch(l.strip()):
             out.append(["slot", l.strip(), []])
-        elif l.startswith("<<소제목>>"):
-            out.append(["head", l[len("<<소제목>>"):], []])
         else:
-            out.append(["text", l, []])
+            for mk, kind in MARK.items():
+                if l.startswith(mk):
+                    out.append([kind, l[len(mk):], []])
+                    break
+            else:
+                out.append(["text", l, []])
     return out
 
 
-def render(lines):
+def render(lines, default="body"):
     html_out = []
     for kind, text, extra in blocks(lines):
         if kind == "slot":
             label = "── 구분선 넣기 ──" if text == "[구분선]" else text
             sub = "".join(f"<br><span class='cap'>{html.escape(x)}</span>" for x in extra)
             html_out.append(f'<p class="ph" style="{TXT}">▶ {html.escape(label)}{sub}</p>')
-        elif kind == "head":
-            html_out.append(f'<p style="{HEAD}">{html.escape(text)}</p>')
         elif not text.strip():
-            html_out.append(f'<p style="{TXT}"><br></p>')
+            html_out.append(f'<p style="{style(SIZE[default])}"><br></p>')
         else:
+            if kind == "text":
+                kind = "list" if default == "body" and text.lstrip()[:1] in ("•", "✅") else default
             e = html.escape(text)
             e = re.sub(r"\[확인필요:[^\]]*\]", lambda m: f'<span class="chk">{m.group(0)}</span>', e)
-            html_out.append(f'<p style="{TXT}">{e}</p>')
+            html_out.append(f'<p style="{style(SIZE[kind])}">{e}</p>')
     return "\n".join(html_out)
 
 
@@ -67,14 +82,15 @@ def main(src):
     while i_fix > 0 and (not lines[i_fix - 1].strip() or lines[i_fix - 1].strip() == "[구분선]"):
         i_fix -= 1
     i_tag = max(i for i, l in enumerate(lines) if l.startswith("#"))
-    parts = {"본문": lines[:i_fix], "고정 블록": lines[i_fix:i_tag], "해시태그": lines[i_tag:]}
+    parts = {"본문": (lines[:i_fix], "body"), "고정 블록": (lines[i_fix:i_tag], "list"),
+             "해시태그": (lines[i_tag:], "small")}
 
     secs = ""
-    for n, (name, ls) in enumerate(parts.items()):
+    for n, (name, (ls, default)) in enumerate(parts.items()):
         secs += (
             f'<section><div class="bar"><h2>{n + 1}. {name}</h2>'
             f'<button data-t="s{n}">복사</button><span class="ok" id="ok{n}"></span></div>'
-            f'<div class="paper" id="s{n}">{render(ls)}</div></section>\n'
+            f'<div class="paper" id="s{n}">{render(ls, default)}</div></section>\n'
         )
 
     page = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
@@ -83,14 +99,14 @@ def main(src):
 <style>
 :root{{--bg:#f4f4f2;--paper:#fff;--ink:#333;--muted:#777;--ph:#eef3ff;--phink:#3355aa;--chk:#ffe3e3;--chkink:#b00020;--btn:#03c75a}}
 body{{background:var(--bg);color:var(--ink);font-family:-apple-system,'Apple SD Gothic Neo',sans-serif;margin:0;padding:24px 16px}}
-.wrap{{max-width:460px;margin:0 auto}}
+.wrap{{max-width:375px;margin:0 auto}}
 h1{{font-size:18px;margin:0 0 4px}} .sub{{color:var(--muted);font-size:13px;margin:0 0 20px;line-height:1.7}}
 .title{{background:var(--paper);padding:12px 14px;border-radius:8px;margin-bottom:20px;font-size:15px}}
 section{{margin-bottom:28px}} .bar{{display:flex;align-items:center;gap:10px;margin-bottom:8px}}
 h2{{font-size:15px;margin:0}}
 button{{background:var(--btn);color:#fff;border:0;border-radius:6px;padding:7px 16px;font-size:14px;cursor:pointer}}
 .ok{{color:var(--btn);font-size:13px}}
-.paper{{background:var(--paper);padding:28px 16px;border-radius:8px;font-size:15px;line-height:1.9}}
+.paper{{background:var(--paper);padding:28px 0;border-radius:8px;line-height:1.9;width:343px;max-width:100%;margin:0 auto;box-sizing:content-box}}
 .ph{{background:var(--ph);color:var(--phink)!important;font-weight:normal!important;font-size:13px;border-radius:4px;padding:6px 10px!important;margin:6px 0!important;line-height:1.6}}
 .cap{{color:#555}}
 .chk{{background:var(--chk);color:var(--chkink)}}
@@ -119,7 +135,7 @@ document.querySelectorAll('button[data-t]').forEach((b,n)=>b.onclick=async()=>{{
 </script></body></html>"""
     dst = src.with_name("naver-blog-copy.html")
     dst.write_text(page, encoding="utf-8")
-    print(dst, {k: len(v) for k, v in parts.items()})
+    print(dst, {k: len(v[0]) for k, v in parts.items()})
 
 
 if __name__ == "__main__":

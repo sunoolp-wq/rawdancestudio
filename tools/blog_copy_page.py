@@ -4,12 +4,12 @@
 결과: 같은 폴더에 naver-blog-copy.html (크롬에서 열고 '복사' → 네이버 에디터에 붙여넣기)
 
 naver-blog.md 본문(첫 번째와 두 번째 '---' 사이) 표기 규칙:
-  <<소제목>>텍스트      → 맨 위 헤더 (24)
-  <<중제목>>텍스트      → 본문 중간 소제목 (19)
-  <<강조>>텍스트        → 핵심 문장·학생 한마디 (19)
+  <<소제목>>텍스트      → 맨 위 헤더 (30, 굵게)
+  <<중제목>>텍스트      → 본문 중간 소제목 (24, 굵게)
+  <<강조>>텍스트        → 핵심 문장·학생 한마디 (19, 굵게)
   <<작게>>텍스트        → 보조 설명 (13)
-  표시 없음             → 본문 (16), '•'·'✅'로 시작하면 목록 (15)
-  고정 블록 영역은 15, 해시태그는 13
+  표시 없음             → 본문 (15), '•'·'✅'로 시작하면 목록 (15)
+  고정 블록 영역은 15, 해시태그는 13. 굵게는 헤더·중제목·강조에만.
   [구분선]              → 파란 칸: 에디터 툴바에서 구분선 넣을 자리
   [사진 …] [GIF …] [영상 …] [지도 …] [링크 카드 …] [이미지 …] → 파란 칸: 넣을 자리
   (사진 설명) …  (영상 제목) … → 바로 위 파란 칸에 합쳐서 표시 (사진 설명 칸에 넣을 글)
@@ -22,16 +22,18 @@ import re
 import sys
 from pathlib import Path
 
-BASE = "font-family:'나눔다시시작해','NanumDaSiSiJagHae';text-align:center;font-weight:bold;margin:0;"
-SIZE = {"head": 24, "sub": 19, "strong": 19, "body": 16, "list": 15, "small": 13}
+BASE = "font-family:'나눔다시시작해','NanumDaSiSiJagHae';text-align:center;margin:0;"
+SIZE = {"head": 30, "sub": 24, "strong": 19, "body": 15, "list": 15, "small": 13}
+BOLD = {"head", "sub", "strong"}
 MARK = {"<<소제목>>": "head", "<<중제목>>": "sub", "<<강조>>": "strong", "<<작게>>": "small"}
 
 
-def style(size):
-    return f"{BASE}font-size:{size}px;"
+def style(kind):
+    weight = "bold" if kind in BOLD else "normal"
+    return f"{BASE}font-size:{SIZE[kind]}px;font-weight:{weight};"
 
 
-TXT = style(SIZE["body"])
+TXT = style("body")
 SLOT = re.compile(r"\[(구분선|사진|GIF|영상|지도|링크 카드|이미지)[^\]]*\]")
 
 
@@ -63,13 +65,15 @@ def render(lines, default="body"):
             sub = "".join(f"<br><span class='cap'>{html.escape(x)}</span>" for x in extra)
             html_out.append(f'<p class="ph" style="{TXT}">▶ {html.escape(label)}{sub}</p>')
         elif not text.strip():
-            html_out.append(f'<p style="{style(SIZE[default])}"><br></p>')
+            html_out.append(f'<p style="{style(default)}"><br></p>')
         else:
             if kind == "text":
                 kind = "list" if default == "body" and text.lstrip()[:1] in ("•", "✅") else default
             e = html.escape(text)
             e = re.sub(r"\[확인필요:[^\]]*\]", lambda m: f'<span class="chk">{m.group(0)}</span>', e)
-            html_out.append(f'<p style="{style(SIZE[kind])}">{e}</p>')
+            if kind in BOLD:
+                e = f"<b>{e}</b>"
+            html_out.append(f'<p style="{style(kind)}">{e}</p>')
     return "\n".join(html_out)
 
 
@@ -117,6 +121,7 @@ button{{background:var(--btn);color:#fff;border:0;border-radius:6px;padding:7px 
 <b>파란 칸</b> = 툴바에서 넣을 것 (사진·구분선·지도·링크). 넣은 뒤 파란 칸 줄은 삭제.<br>
 '사진 설명'은 사진을 넣고 사진 아래 설명 칸에 옮겨 적기.<br>
 <b>빨간 칸</b> = 발행 전 확인할 것.<br>
+글자 크기·굵게가 안 따라오면: 헤더 30 / 중제목 24 / 강조 19 굵게 / 본문 15 로 맞춰 주세요.<br>
 이 페이지 폭(약 휴대폰 화면)에서 줄이 끊기는 모양 그대로 모바일에서 보입니다.</p>
 <div class="title">제목: <b>{html.escape(title)}</b></div>
 {secs}</div>

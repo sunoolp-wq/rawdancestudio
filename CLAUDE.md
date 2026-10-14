@@ -9,6 +9,7 @@
 - `docs/research.md`: 리서치 요약과 출처.
 - `brand/blog-template.md`: 네이버 블로그 고정 양식 (A 수업 영상 / B 시간표·공지 / C 유입용).
 - `docs/blog-topics.md`: 블로그 유입용 글 주제 목록.
+- `docs/blog-log.md`: 블로그 발행 기록 (메인 키워드 겹침 방지).
 - `docs/naver-ranking.md`: 네이버 플레이스 검색 순위 전략 (목표 키워드 단계, 하지 않는 것).
 - `docs/instagram-ads.md`: 인스타 릴스 광고 타깃·예산·음원 규칙.
 - `docs/promo-video-catalog.md`: 홍보영상 메뉴판 (영상 종류 10가지와 기본값).
@@ -24,7 +25,10 @@
 | 홍보영상팀 | `promo-video-producer` | 기획형 홍보 영상(학원 소개·모집·강사 소개·오시는 길·하이라이트) 기획안·대본·콘티 |
 | 홍보영상팀 | `video-editor` | 편집 지시서(컷 순서·전환·음원), 자막 SRT, 채널별 버전 분리, 썸네일 문구 |
 | 채널캡션팀 | `caption-naver-clip` | 네이버 클립 제목·본문·해시태그 |
-| 채널캡션팀 | `caption-naver-blog` | 네이버 블로그 글: 수업 영상 / 시간표·공지 / 유입용 정보 글 |
+| 블로그팀 | `blog-strategist` | 블로그팀장: 월간 발행 계획, 글마다 메인 키워드·제목 배정, 키워드 겹침 방지, 발행 기록(`docs/blog-log.md`) |
+| 블로그팀 | `caption-naver-blog` | 블로그 작가: 고정 양식대로 A 수업 영상 / B 시간표·공지 / C 유입용 정보 글 |
+| 블로그팀 | `blog-photo-director` | 글마다 사진·영상·GIF 순서, 사진 설명, 대표 사진, 촬영 필요 컷 |
+| 블로그팀 | `blog-seo-editor` | 발행 전 검색 최적화 편집 (제목·키워드·구조·이전 글과 중복) |
 | 채널캡션팀 | `caption-smartplace` | 스마트플레이스 소식·쿠폰·이벤트 문구 |
 | 채널캡션팀 | `caption-instagram` | 인스타 릴스·피드·스토리 캡션 |
 | 채널캡션팀 | `caption-tiktok` | 틱톡 캡션·검색형 자막 |

@@ -41,6 +41,13 @@
 
 서브에이전트는 다른 서브에이전트를 부를 수 없다. **여러 부서를 거치는 업무는 메인 세션(총괄 PD 역할)이** `.claude/skills/`의 워크플로를 따라 순서대로 호출한다.
 
+## 현황판 (원장님이 보는 화면)
+https://claude.ai/artifact/VW1Kj7Etrv2WkHwZ3FANMV — 팀원별 상태, 작업 기록, 원장님 확인할 것.
+메인 세션은 작업할 때마다 `ArtifactData`로 이 현황판의 db를 갱신한다.
+- `agents/<에이전트 id>`: `{status: "working"|"done"|"idle", task, updatedAt}` — 서브에이전트를 부르기 전 working, 끝나면 done. 메인 세션 직접 작업은 id `pd`.
+- `activity/<a날짜-번호>`: `{at, title, agents: [id...], output: 저장 경로, result: "done"|"working"|"check"}` — 요청 1건당 1행.
+- `todos/<t번호>`: `{at, text, from, done}` — 원장님이 확인·제공해야 할 것. 해결되면 `done: true`.
+
 ## 공통 규칙
 1. **사실만 쓴다.** 수강료, 시간표, 합격 실적, 강사 경력 등은 `brand/brand-guide.md`에 있는 내용만 사용한다. 비어 있으면 `[확인필요: ...]`로 남기고 지어내지 않는다.
 2. **과장 금지.** "100% 합격", "무조건 데뷔", "수원 1등" 같은 보장·최상급 표현은 쓰지 않는다 (상세 목록은 브랜드 가이드).

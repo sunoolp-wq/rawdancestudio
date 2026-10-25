@@ -61,6 +61,8 @@ body{{background:#0e0d12;color:#f4f2ee}}
 <div class="r"><div class="tile"><img src="qr-place.png"></div><span>NAVER MAP</span></div>
 </div></body></html>"""
 
+back_director = back.replace('<div class="l"><div><div class="name">로우댄스학원 수원점</div><div class="en">RAW DANCE STUDIO SUWON</div>\n<div class="cls">ADMISSION · AUDITION · K-POP<br>HIPHOP · JAZZ · WAACKING · CHOREOGRAPHY</div></div>', '<div class="l"><div><div class="name">이선우 <small>원장</small></div><div class="en">LEE SUNWOO · DIRECTOR</div>\n<div class="org">로우댄스학원 수원점 <span>RAW DANCE STUDIO SUWON</span></div></div>').replace(".r{{", ".r{{").replace("</style>", ".name small{font-size:24px;font-weight:500;color:#c3bfcc;margin-left:6px;letter-spacing:0}.org{margin-top:22px;font-size:22px;font-weight:500;color:#c3bfcc}.org span{display:block;margin-top:4px;font-family:Montserrat,sans-serif;font-weight:500;font-size:14px;letter-spacing:.24em;color:#8f8a9c}</style>")
+
 def render(name, html):
     src = HERE / f"{name}.html"; src.write_text(html, encoding="utf-8")
     tmp = HERE / f".{name}.render.html"
@@ -76,6 +78,9 @@ def render(name, html):
 f, b = render("front", front), render("back", back)
 imgs = [Image.open(f).convert("RGB"), Image.open(b).convert("RGB")]
 imgs[0].save(HERE / "card-print.pdf", save_all=True, append_images=imgs[1:], resolution=300)
+bd = render("back-director", back_director)
+imgs_d = [imgs[0], Image.open(bd).convert("RGB")]
+imgs_d[0].save(HERE / "card-print-director.pdf", save_all=True, append_images=imgs_d[1:], resolution=300)
 
 # 미리보기: 재단선 표시
 from PIL import ImageDraw

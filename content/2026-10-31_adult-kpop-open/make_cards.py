@@ -19,16 +19,16 @@ body{background:#0e0d12;color:#f4f2ee;font-family:"Noto Sans KR",sans-serif;posi
 """
 
 card1 = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">{FONTS}<style>{BASE}
-.mid{{flex:1;display:flex;flex-direction:column;justify-content:center}}
-.new{{display:inline-flex;align-self:flex-start;align-items:center;gap:14px;font-family:Montserrat,sans-serif;font-weight:600;font-size:22px;letter-spacing:.34em;color:#b9a6ff}}
+.mid{{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}}
+.new{{display:inline-flex;align-items:center;gap:14px;margin-right:-.34em;font-family:Montserrat,sans-serif;font-weight:600;font-size:22px;letter-spacing:.34em;color:#b9a6ff}}
 .new i{{display:block;width:12px;height:12px;border-radius:50%;background:#b9a6ff;box-shadow:0 0 18px #b9a6ff}}
-.t{{margin-top:26px;font-family:Montserrat,sans-serif;font-weight:700;font-style:italic;line-height:.84;letter-spacing:-.04em;margin-left:-10px}}
+.t{{margin-top:26px;font-family:Montserrat,sans-serif;font-weight:700;font-style:italic;line-height:.84;letter-spacing:-.04em;position:relative;left:-14px}}
 .t .a{{display:block;font-size:208px;color:transparent;-webkit-text-stroke:2.5px #b9a6ff}}
 .t .b{{display:block;font-size:262px}}
 .kr{{margin-top:40px;font-size:62px;font-weight:900;letter-spacing:-1.5px}}
 .kr span{{color:#b9a6ff}}
 .when{{margin-top:54px;display:flex;gap:46px;align-items:flex-end}}
-.when div{{display:flex;flex-direction:column;gap:8px}}
+.when div{{display:flex;flex-direction:column;gap:8px;align-items:center}}
 .when small{{font-family:Montserrat,sans-serif;font-weight:600;font-size:17px;letter-spacing:.3em;color:#8f8a9c}}
 .when b{{font-family:Montserrat,sans-serif;font-weight:700;font-size:44px;letter-spacing:-.01em}}
 </style></head><body><div class="g1"></div><div class="g2"></div><div class="p">
@@ -43,15 +43,15 @@ card1 = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">{FONTS}<s
 </div></body></html>"""
 
 card2 = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">{FONTS}<style>{BASE}
-.mid{{flex:1;display:flex;flex-direction:column;justify-content:center}}
+.mid{{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center}}
 .k{{font-family:Montserrat,sans-serif;font-weight:600;font-size:20px;letter-spacing:.34em;color:#b9a6ff}}
 h1{{margin-top:18px;font-size:76px;font-weight:900;letter-spacing:-2px}}
-.rows{{margin-top:48px;border-top:1px solid #2a2832}}
-.r{{display:flex;align-items:baseline;padding:30px 0;border-bottom:1px solid #2a2832}}
-.r small{{width:190px;flex:none;font-family:Montserrat,sans-serif;font-weight:600;font-size:18px;letter-spacing:.3em;color:#8f8a9c}}
+.rows{{margin-top:40px;border-top:1px solid #2a2832}}
+.r{{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 0;border-bottom:1px solid #2a2832}}
+.r small{{font-family:Montserrat,sans-serif;font-weight:600;font-size:18px;letter-spacing:.3em;color:#8f8a9c}}
 .r b{{font-size:44px;font-weight:700;letter-spacing:-.5px}}
 .r b em{{font-style:normal;font-weight:400;color:#c3bfcc;font-size:32px;margin-left:14px}}
-.ask{{margin-top:56px}}
+.ask{{margin-top:44px}}
 .ask .k{{font-size:18px}}
 .ask p{{margin-top:16px;font-size:36px;font-weight:700;line-height:1.5}}
 .ask p span{{color:#c3bfcc;font-weight:400}}

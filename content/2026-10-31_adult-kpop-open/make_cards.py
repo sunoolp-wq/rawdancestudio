@@ -34,9 +34,9 @@ card1 = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">{FONTS}<s
 </style></head><body><div class="g1"></div><div class="g2"></div><div class="p">
 <div class="top"><img src="raw-logo.png"><div class="en">SUWON<br>NEW CLASS</div></div>
 <div class="mid">
-<div class="new"><i></i>NOW OPEN</div>
+<div class="new"><i></i>NOVEMBER ONLY</div>
 <div class="t"><span class="a">ADULT</span><span class="b">K-POP</span></div>
-<div class="kr">성인 K-POP반 <span>오픈</span></div>
+<div class="kr"><span>11월 한정</span> 성인 K-POP반</div>
 <div class="when"><div><small>DAY</small><b>MON · WED</b></div><div><small>TIME</small><b>19:30 – 20:30</b></div><div><small>T.</small><b>YUNI</b></div></div>
 </div>
 <div class="bot"><span class="h">@RAWDANCE_SUWON</span><span class="s">SWIPE →</span></div>
@@ -45,11 +45,11 @@ card1 = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">{FONTS}<s
 card2 = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">{FONTS}<style>{BASE}
 .mid{{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center}}
 .k{{font-family:Montserrat,sans-serif;font-weight:600;font-size:20px;letter-spacing:.34em;color:#b9a6ff}}
-h1{{margin-top:18px;font-size:76px;font-weight:900;letter-spacing:-2px}}
+h1{{margin-top:18px;font-size:64px;font-weight:900;letter-spacing:-2px}}
 .rows{{margin-top:40px;border-top:1px solid #2a2832}}
-.r{{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 0;border-bottom:1px solid #2a2832}}
+.r{{display:flex;flex-direction:column;align-items:center;gap:8px;padding:17px 0;border-bottom:1px solid #2a2832}}
 .r small{{font-family:Montserrat,sans-serif;font-weight:600;font-size:18px;letter-spacing:.3em;color:#8f8a9c}}
-.r b{{font-size:44px;font-weight:700;letter-spacing:-.5px}}
+.r b{{font-size:40px;font-weight:700;letter-spacing:-.5px}}
 .r b em{{font-style:normal;font-weight:400;color:#c3bfcc;font-size:32px;margin-left:14px}}
 .ask{{margin-top:44px}}
 .ask .k{{font-size:18px}}
@@ -60,8 +60,9 @@ h1{{margin-top:18px;font-size:76px;font-weight:900;letter-spacing:-2px}}
 <div class="top"><img src="raw-logo.png"><div class="en">SUWON<br>NEW CLASS</div></div>
 <div class="mid">
 <div class="k">CLASS INFO</div>
-<h1>성인 K-POP반</h1>
+<h1>11월 한정 성인 K-POP반</h1>
 <div class="rows">
+<div class="r"><small>PERIOD</small><b>11월 한 달<em>12월 이후 추후 공지</em></b></div>
 <div class="r"><small>DAY</small><b>월 · 수<em>주 2회</em></b></div>
 <div class="r"><small>TIME</small><b>19:30 ~ 20:30</b></div>
 <div class="r"><small>TEACHER</small><b>YUNI</b></div>

@@ -82,14 +82,15 @@ body{{background:#140f0e;color:#f3ece4;font-family:Montserrat,"Noto Sans KR",san
 <div class="lg">{leg}</div><div class="dhw"></div>{heads}{lines}{cols}{"".join(block(*b) for b in blocks)}
 </body></html>"""
 
-for hall, blocks in [("A", A), ("B", B)]:
-    html = page(hall, blocks)
-    name = f"hall-{hall.lower()}-2026-11"
-    (HERE / f"{name}.html").write_text(html, encoding="utf-8")
-    tmp = HERE / f".{name}.render.html"; tmp.write_text(html.replace(FONTS, ""), encoding="utf-8")
-    out = HERE / f"{name}.png"
-    subprocess.run([CHROME, "--headless", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
-                    "--force-device-scale-factor=1", "--window-size=1080,2200", f"--screenshot={out}", tmp.as_uri()],
-                   check=True, capture_output=True)
-    tmp.unlink()
-    Image.open(out).convert("RGB").crop((0, 0, 1080, 1920)).save(out)
+if __name__ == "__main__":
+    for hall, blocks in [("A", A), ("B", B)]:
+        html = page(hall, blocks)
+        name = f"hall-{hall.lower()}-2026-11"
+        (HERE / f"{name}.html").write_text(html, encoding="utf-8")
+        tmp = HERE / f".{name}.render.html"; tmp.write_text(html.replace(FONTS, ""), encoding="utf-8")
+        out = HERE / f"{name}.png"
+        subprocess.run([CHROME, "--headless", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
+                        "--force-device-scale-factor=1", "--window-size=1080,2200", f"--screenshot={out}", tmp.as_uri()],
+                       check=True, capture_output=True)
+        tmp.unlink()
+        Image.open(out).convert("RGB").crop((0, 0, 1080, 1920)).save(out)

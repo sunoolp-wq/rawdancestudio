@@ -80,11 +80,12 @@ section h3 span{{font-family:"Noto Sans KR";font-size:20px;font-weight:500;color
 <div class="lg"><span><i>A</i>A HALL</span><span><i>B</i>B HALL</span></div></div>
 </div></body></html>"""
 
-(HERE / "timetable-2026-11.html").write_text(html, encoding="utf-8")
-tmp = HERE / ".render.html"; tmp.write_text(html.replace(FONTS, ""), encoding="utf-8")
-out = HERE / "timetable-2026-11.png"
-subprocess.run([CHROME, "--headless", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
-                "--force-device-scale-factor=1", "--window-size=1080,2200", f"--screenshot={out}", tmp.as_uri()],
-               check=True, capture_output=True)
-tmp.unlink()
-Image.open(out).convert("RGB").crop((0, 0, 1080, 1920)).save(out)
+if __name__ == "__main__":
+    (HERE / "timetable-2026-11.html").write_text(html, encoding="utf-8")
+    tmp = HERE / ".render.html"; tmp.write_text(html.replace(FONTS, ""), encoding="utf-8")
+    out = HERE / "timetable-2026-11.png"
+    subprocess.run([CHROME, "--headless", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
+                    "--force-device-scale-factor=1", "--window-size=1080,2200", f"--screenshot={out}", tmp.as_uri()],
+                   check=True, capture_output=True)
+    tmp.unlink()
+    Image.open(out).convert("RGB").crop((0, 0, 1080, 1920)).save(out)

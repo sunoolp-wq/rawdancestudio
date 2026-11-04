@@ -12,9 +12,14 @@ from ultralytics import YOLO
 ap = argparse.ArgumentParser()
 ap.add_argument("--video"); ap.add_argument("--start", type=float, default=0); ap.add_argument("--dur", type=float, default=15)
 ap.add_argument("--out"); ap.add_argument("--pick-x", type=float, default=0.5); ap.add_argument("--pick-t", type=float, default=0.5)
-ap.add_argument("--check"); ap.add_argument("--model", default=os.path.join(os.path.dirname(__file__), "yolo11s.pt"))
+ap.add_argument("--check"); ap.add_argument("--shape", default="auto", choices=["auto", "tall", "wide"]); ap.add_argument("--model", default=os.path.join(os.path.dirname(__file__), "yolo11s.pt"))
 a = ap.parse_args()
 
+# 먼저 쓸 구간만 H.264로 잘라 둔다 (AV1 등 OpenCV가 못 읽는 코덱 대비, 이후 시작 0초 기준)
+seg = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
+subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", str(a.start), "-t", str(a.dur), "-i", a.video,
+                "-c:v", "libx264", "-crf", "16", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", seg], check=True)
+a.video, a.start = seg, 0.0
 cap = cv2.VideoCapture(a.video)
 fps = cap.get(cv2.CAP_PROP_FPS) or 30
 W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)); H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -50,7 +55,7 @@ t0, bx0, id0, im0 = rec[j0]
 px = a.pick_x * SW
 sc0 = [((b[3] - b[1]) / SH) * 1.5 - abs((b[0] + b[2]) / 2 - px) / SW * 3 for b in bx0]
 k = int(np.argmax(sc0)); tid = id0[k]; tb = bx0[k]; th = hist(im0, tb)
-cx = [None] * len(rec); cx[j0] = (tb[0] + tb[2]) / 2; boxes_for_check = {j0: tb}
+cx = [None] * len(rec); cx[j0] = (tb[0] + tb[2]) / 2; boxes_for_check = {j0: tb}; bw_list = [(tb[2] - tb[0]) / sc]
 
 def follow(order):
     global tid, th
@@ -69,11 +74,14 @@ def follow(order):
                 if s > bs: best, bs, bid = b, s, i_
             if bs < -0.6: continue
             b, cur = best, bid
-        cx[j] = (b[0] + b[2]) / 2; last_b = b; boxes_for_check[j] = b
+        cx[j] = (b[0] + b[2]) / 2; last_b = b; boxes_for_check[j] = b; bw_list.append((b[2] - b[0]) / sc)
         h = hist(im, b)
         if h is not None: hcur = 0.9 * hcur + 0.1 * h
 follow(range(j0 + 1, len(rec))); follow(range(j0 - 1, -1, -1))
 
+# 바닥 동작처럼 선생님이 옆으로 넓게 누우면 4:5 넓은 창 + 위아래 흐린 배경 (몸이 잘리지 않게)
+wide = a.shape == "wide" or (a.shape == "auto" and np.percentile(bw_list, 75) > cw * 0.8)
+if wide: cw = int(round(H * 0.8)) // 2 * 2
 ts = np.array([r[0] for r in rec]); xs = np.array([np.nan if v is None else v / sc for v in cx])
 good = ~np.isnan(xs); xs = np.interp(ts, ts[good], xs[good])
 # 2) 카메라맨처럼: 튀는 값 제거 → 앞뒤로 부드럽게 → 속도 제한
@@ -92,9 +100,12 @@ f = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False)
 for t, x in zip(tf, xpos): f.write(f"{t:.4f} crop@c x {x};\n")
 f.close()
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", str(a.start), "-t", str(a.dur), "-i", a.video,
-                "-vf", f"sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0,scale=1080:1920",
+                *(["-filter_complex", f"[0:v]sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0,split[a][b];"
+                   "[b]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=40:2,eq=brightness=-0.18[bg];"
+                   "[a]scale=1080:1350[fg];[bg][fg]overlay=0:150[v]", "-map", "[v]", "-map", "0:a?"] if wide else
+                  ["-vf", f"sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0,scale=1080:1920"]),
                 "-c:v", "libx264", "-crf", "17", "-preset", "medium", "-c:a", "aac", "-b:a", "192k", a.out], check=True)
-os.unlink(f.name)
+os.unlink(f.name); os.unlink(seg)
 
 if a.check:  # 확인용: 8장 (보라 상자 = 선생님, 흰 선 = 자른 창)
     pick = np.linspace(0, len(rec) - 1, 8).astype(int); tiles = []
@@ -107,4 +118,4 @@ if a.check:  # 확인용: 8장 (보라 상자 = 선생님, 흰 선 = 자른 창)
         cv2.putText(im, f"{t:.1f}s", (12, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
         tiles.append(cv2.resize(im, (640, int(640 * SH / SW))))
     cv2.imwrite(a.check, np.vstack([np.hstack(tiles[i:i + 2]) for i in range(0, 8, 2)]))
-print(a.out, f"teacher id {tid}, x {xpos.min()}~{xpos.max()}")
+print(a.out, f"teacher id {tid}, x {xpos.min()}~{xpos.max()}, {'wide 4:5' if wide else 'tall 9:16'}")

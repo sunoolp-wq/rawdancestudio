@@ -33,3 +33,10 @@
 - 처음(--pick-t 초)에 --pick-x 위치(0 왼쪽 ~ 1 오른쪽)에 가장 크게 보이는 사람을 선생님으로 정하고, 번호(ByteTrack)로 끝까지 따라감. 번호를 잃으면 옷 색·위치·크기로 다시 찾음
 - `--check` 사진: 보라 상자 = 선생님으로 잡은 사람, 흰 선 = 잘라 낸 세로 화면 → 원장님께 같이 보내 확인
 - 원장님이 "선생님 옷·위치"를 알려 주면 --pick-x / --pick-t로 맞춘다
+- 바닥 동작 등 선생님이 옆으로 넓으면 `--shape auto`가 4:5 넓은 창 + 흐린 배경으로 바꿈 (`--shape tall|wide`로 고정 가능)
+- AV1 등 OpenCV가 못 읽는 코덱도 처리 (먼저 구간을 H.264로 자름)
+
+## 드라이브 폴더에서 영상 목록 읽기 (공개 링크 폴더)
+    curl -sL "https://drive.google.com/embeddedfolderview?id=<폴더ID>#list"  → file/d/<ID> 와 파일 이름
+    curl -sL -o 영상.mp4 "https://drive.usercontent.google.com/download?id=<ID>&export=download&confirm=t"
+- 원장님 수업영상 폴더 ID: 1u0hgxcHkLTTOnXkaoQn0DSfaay1EcHXa ("링크가 있는 모든 사용자" 공유, 2026-11-04)

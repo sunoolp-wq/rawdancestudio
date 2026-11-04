@@ -20,7 +20,7 @@ def blk(d, s, e, name, tm, sub, key):
     c = C[key]
     new = '<em>NEW</em>' if key == "adult" else ""
     return (f'<div class="b" style="left:{x:.0f}px;top:{y:.0f}px;width:{w:.0f}px;height:{h:.0f}px;'
-            f'background:linear-gradient(180deg,{c}4d,{c}1f);border:1px solid {c}80;border-left:4px solid {c};color:#f4f2ee">'
+            f'background:linear-gradient(180deg,{c}4d,{c}1f);border:1px solid {c}80;color:#f4f2ee">'
             f'{new}<b>{name.replace("<br>", " ")}</b><span>{tm.replace(" ~ ", "–")}</span><small>{sub}</small></div>')
 
 def page(hall, blocks):

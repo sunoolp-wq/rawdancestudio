@@ -56,7 +56,7 @@ function setup(D){
   D.classes.forEach(c=>{
     const el=document.createElement("div"); el.className="c";
     const badge=c.mark==="new"?'<em>NEW</em>':c.mark==="open"?'<em class="o">모집중</em>':c.mark==="popup"?'<em>POP-UP</em>':"";
-    el.innerHTML=`<div class="bar" style="background:${COL[c.key]}"></div><div class="sweep"></div>
+    el.innerHTML=`<div class="sweep"></div>
       <div class="tm"><b>${c.start}</b><small>– ${c.end}</small></div>
       <div class="nm"><b>${c.name}${badge}</b><span>T. ${c.teacher}</span></div>
       <div class="h">${c.hall||"·"}</div>`;

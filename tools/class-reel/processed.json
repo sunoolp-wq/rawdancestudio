@@ -1,4 +1,26 @@
 {
- "1H-3avmC-M5hzOnApXmHtXOndYSTjDRNK": {"file": "베이직 ｜ GAON BASIC ｜ 수원 로우 댄스 학원.mp4", "start": 4, "out": "content/2026-11-05_class-reels/GAON_BASIC.mp4", "at": "2026-11-05"},
- "10hy95MQVcaaO2D2CrZZlDkwNfdMlQ9k-": {"file": "힐코레오 ｜ HEEONE Heelschoreo ｜ 수원 로우 댄스 학원.mp4", "start": 4, "out": "content/2026-11-05_class-reels/HEEONE_HEELSCHOREO.mp4", "at": "2026-11-05"}
+ "1H-3avmC-M5hzOnApXmHtXOndYSTjDRNK": {
+  "file": "베이직 ｜ GAON BASIC ｜ 수원 로우 댄스 학원.mp4",
+  "start": 4,
+  "out": "content/2026-11-05_class-reels/GAON_BASIC.mp4",
+  "at": "2026-11-05"
+ },
+ "10hy95MQVcaaO2D2CrZZlDkwNfdMlQ9k-": {
+  "file": "힐코레오 ｜ HEEONE Heelschoreo ｜ 수원 로우 댄스 학원.mp4",
+  "start": 4,
+  "out": "content/2026-11-05_class-reels/HEEONE_HEELSCHOREO.mp4",
+  "at": "2026-11-05"
+ },
+ "1qU1oYuxLKb9qX0P6a8K6kAsytkdA74rB": {
+  "file": "걸스힙합 ｜ MINKYUNG Girls Hiphop ｜ 수원 로우 댄스 학원.mp4",
+  "start": 10,
+  "out": "content/2026-11-05_class-reels/MINKYUNG_GIRLSHIPHOP.mp4",
+  "at": "2026-11-05"
+ },
+ "1uJfG_kE5RPyGDvwVT7TwM2eASGgYk6WM": {
+  "file": "36.mp4 (YELLS 전문반)",
+  "start": 4,
+  "out": "content/2026-11-05_class-reels/YELLS_PRO.mp4",
+  "at": "2026-11-05"
+ }
 }

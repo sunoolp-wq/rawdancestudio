@@ -10,7 +10,8 @@
 
 ## RAW 스타일 (기본, 2026-11-04 원장님 "너 스타일로")
     node tools/class-reel/make_reel2.js --video 원본.mp4 --start 32 --dur 15 --name KIRY --genre JAZZ \
-         --when "WED 20:50" --whenKr "매주 수 20:50" --hall A --track "Charlotte Lawrence – Slow Motion" --out 결과.mp4
-- 영상 전체 화면(9:16) + 아래 요일·홀 칩, 큰 강사 이름, 보라 외곽선 장르, 곡 이름(움직이는 막대), 진행 바
+         --when "WED 20:50" --whenKr "매주 수 20:50" --hall A --out 결과.mp4
+- 영상 전체 화면(9:16) + 아래 요일·홀 칩, 큰 강사 이름, 보라 외곽선 장르, 진행 바
+- 곡 이름은 영상에 넣지 않는다 (지난 수업 곡이 오늘 곡처럼 보임, 원장님 지시 2026-11-04). `--track`은 쓰지 않는다
 - 끝 2초: 다크·보라 끝 화면 (T. 강사 / 장르 · 요일 시간 / 문의) — 스토리 영상·시간표와 같은 색
 - 위 `make_reel.js`는 원장님 기존 편집 스타일(액자형) 재현본

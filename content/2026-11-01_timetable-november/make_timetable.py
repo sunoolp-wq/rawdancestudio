@@ -11,7 +11,7 @@ FONTS = '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@
 DAYS = {
  "MON": [("16:00","17:00","유아 K-POP","YUNI","A",""),("17:00","18:00","키즈 K-POP","YUNI","A",""),
          ("18:00","19:10","취미 K-POP","YUNI","B",""),("19:30","20:30","성인 K-POP","YUNI","","new"),
-         ("19:40","20:50","HEELS CHOREO","HEEONE","A",""),("20:50","22:00","CHOREO","RAEKU","A","")],
+         ("19:40","20:50","HEELSCHOREO","HEEONE","A",""),("20:50","22:00","CHOREO","RAEKU","A","")],
  "TUE": [("16:00","17:00","유아 K-POP","MINKYUNG","A",""),("17:00","18:00","키즈 K-POP","MINKYUNG","A",""),
          ("18:00","19:10","취미 K-POP","MINKYUNG","B",""),("18:30","19:40","BASIC","GAON","A",""),
          ("19:40","20:50","GIRLISH","ARIN","A","")],

@@ -11,7 +11,7 @@ FONTS = '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@
 C = {"kpop": "#b0476a", "basic": "#8a9a52", "pro": "#e0a93c", "heel": "#c8573c", "girlish": "#d27a78",
      "waack": "#4f9a8c", "hiphop": "#a8714a", "jazz": "#8e3a52", "choreo": "#e0823e", "open": "#e0a93c",
      "adult": "#f0c27a", "aud": "#b0476a"}
-LEG = {"A": [("kpop","K-POP"),("basic","Basic"),("pro","PRO"),("heel","Heels Choreo"),("girlish","Girlish"),
+LEG = {"A": [("kpop","K-POP"),("basic","Basic"),("pro","PRO"),("heel","Heelschoreo"),("girlish","Girlish"),
              ("waack","Waacking"),("hiphop","Hip Hop"),("jazz","Jazz"),("choreo","Choreo"),("open","모집중")],
        "B": [("kpop","K-POP"),("adult","성인 K-POP (NEW)")]}
 DAYS = ["MON","TUE","WED","THU","FRI","SAT"]
@@ -21,7 +21,7 @@ for d, t in [("MON","YUNI"),("TUE","MINKYUNG"),("WED","YUNI"),("THU","MINKYUNG")
     A += [(d,16,17,"유아 K-POP","16:00 ~ 17:00",t,"kpop"),(d,17,18,"키즈 K-POP","17:00 ~ 18:00",t,"kpop")]
 A += [("TUE",18.5,19+40/60,"BASIC","18:30 ~ 19:40","GAON","basic"),("THU",18.5,19+40/60,"BASIC","18:30 ~ 19:40","GAON","basic"),
       ("FRI",18.5,20,"PRO","18:30 ~ 20:00","YELLS","pro"),
-      ("MON",19+40/60,20+50/60,"HEELS<br>CHOREO","19:40 ~ 20:50","HEEONE","heel"),
+      ("MON",19+40/60,20+50/60,"HEELSCHOREO","19:40 ~ 20:50","HEEONE","heel"),
       ("TUE",19+40/60,20+50/60,"GIRLISH","19:40 ~ 20:50","ARIN","girlish"),
       ("WED",19+40/60,20+50/60,"WAACKING","19:40 ~ 20:50","J","waack"),
       ("THU",19+40/60,20+50/60,"HIP HOP","19:40 ~ 20:50","NOFF","hiphop"),

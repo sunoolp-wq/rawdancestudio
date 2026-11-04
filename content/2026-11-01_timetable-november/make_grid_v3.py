@@ -8,7 +8,7 @@ HERE = Path(__file__).parent
 FONTS = '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">'
 C = {"kpop": "#6d4fe0", "basic": "#4656c8", "pro": "#f5be46", "heel": "#9b45c4", "girlish": "#c0559f",
      "waack": "#3a78cc", "hiphop": "#54409e", "jazz": "#7e3aa8", "choreo": "#8577f0", "open": "#f5be46", "adult": "#b9a6ff"}
-NAMES = {"kpop": "K-POP", "basic": "Basic", "pro": "PRO", "heel": "Heels Choreo", "girlish": "Girlish", "waack": "Waacking",
+NAMES = {"kpop": "K-POP", "basic": "Basic", "pro": "PRO", "heel": "Heelschoreo", "girlish": "Girlish", "waack": "Waacking",
          "hiphop": "Hip Hop", "jazz": "Jazz", "choreo": "Choreo", "adult": "성인 K-POP"}
 WD = ["MON", "TUE", "WED", "THU", "FRI"]; KR = {"MON": "월", "TUE": "화", "WED": "수", "THU": "목", "FRI": "금"}
 T0, T1 = 16, 22

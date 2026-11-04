@@ -30,9 +30,14 @@ const out = path.join(outDir, 'story.mp4');
   await p.goto('file://' + path.join(__dirname, 'template.html'));
   await p.evaluate(d => window.setup(d), data);
   await p.evaluate(() => document.fonts.ready);
+  // 음악: music.json {"file": "music/xxx.mp3", "start": 초} 또는 날짜별 {"2026-11-05": {...}} / 없으면 무음
+  let mus = null; const mp = path.join(__dirname, 'music.json');
+  if (fs.existsSync(mp)) { const mj = JSON.parse(fs.readFileSync(mp)); mus = mj[dateStr] || mj.default || null; }
+  const audioIn = mus ? ['-ss', String(mus.start || 0), '-i', path.join(__dirname, mus.file)] : ['-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo'];
+  const af = mus ? ['-af', `afade=t=in:st=0:d=0.4,afade=t=out:st=${SEC - 1.2}:d=1.2,volume=${mus.volume || 1}`] : [];
   const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-i', '-',
-    '-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo', '-shortest',
-    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-movflags', '+faststart', out]);
+    ...audioIn, '-map', '0:v', '-map', '1:a', '-t', String(SEC), ...af,
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', out]);
   for (let f = 0; f < SEC * FPS; f++) {
     await p.evaluate(t => window.render(t), f / FPS);
     const buf = await p.screenshot({ type: 'jpeg', quality: 95 });

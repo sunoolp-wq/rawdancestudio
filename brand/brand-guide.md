@@ -89,7 +89,7 @@
 | 16:00~17:00 | 유아 K-POP (YUNI) | 유아 K-POP (MINKYUNG) | 유아 K-POP (YUNI) | 유아 K-POP (MINKYUNG) | | |
 | 17:00~18:00 | 키즈 K-POP (YUNI) | 키즈 K-POP (MINKYUNG) | 키즈 K-POP (YUNI) | 키즈 K-POP (MINKYUNG) | | |
 | 18:30~19:40 | | BASIC (GAON) | | BASIC (GAON) | PRO 전문반 18:30~20:00 (YELLS) | |
-| 19:40~20:50 | HEEL CHOREO (HEEONE) | GIRLISH (ARIN) | WAACKING (J) | HIP HOP (NOFF) | | |
+| 19:40~20:50 | HEELS CHOREO (HEEONE) | GIRLISH (ARIN) | WAACKING (J) | HIP HOP (NOFF) | | |
 | 20:10~21:20 | | | | | GIRLS HIPHOP (MINKYUNG) | |
 | 20:50~22:00 | CHOREO (RAEKU) | | JAZZ (KIRY) | CHOREO (HWAN.U) | | |
 
@@ -115,6 +115,7 @@
 
 ## 3. 강사진
 - 강사 활동명 표기는 시간표 기준 (HEEONE, HWAN.U 등 대소문자·기호 그대로).
+- **수업명 표기: "힐스코레오" / "HEELS CHOREO" / 해시태그 #힐스코레오** ("힐코레오"라고 쓰지 않는다, 원장님 지시 2026-11-05).
 
 | 강사 | 담당 | 경력 |
 |---|---|---|
@@ -129,7 +130,7 @@
 | NOFF | 힙합(목 19:40) | [확인필요] |
 | HWAN.U | 코레오그래피(목 20:50) | [확인필요] |
 | RAEKU | 코레오그래피(월 20:50) | [확인필요] |
-| HEEONE | 힐코레오(월 19:40) | [확인필요] |
+| HEEONE | 힐스코레오(월 19:40) | [확인필요] |
 
 - 원장님이 승인한 공통 문구: **"대형 기획사 출신 강사진, 입시·오디션 합격생 다수 배출"**
   - 사용 규칙: 수원점이 2026년 6월에 열었으므로 **RAW DANCE 브랜드 전체 기준**으로 쓴다. 예) "RAW DANCE 대형 기획사 출신 강사진". 수원점 단독 실적처럼 읽히게 쓰지 않는다.

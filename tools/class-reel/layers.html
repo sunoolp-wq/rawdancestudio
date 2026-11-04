@@ -1,0 +1,63 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0;padding:0}html,body{background:transparent}
+body{font-family:Montserrat,"Noto Sans KR",sans-serif;color:#f4f2ee}
+.L{position:relative;overflow:hidden}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute">
+ <filter id="crumple" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="5" seed="7" result="n"/>
+  <feDiffuseLighting in="n" lighting-color="#ffffff" surfaceScale="9" result="l"><feDistantLight azimuth="235" elevation="38"/></feDiffuseLighting>
+  <feColorMatrix in="l" type="saturate" values="0"/>
+ </filter>
+ <filter id="foil" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency="0.02 0.05" numOctaves="4" seed="3" result="n"/>
+  <feDiffuseLighting in="n" lighting-color="#ffffff" surfaceScale="5" result="l"><feDistantLight azimuth="200" elevation="45"/></feDiffuseLighting>
+  <feColorMatrix in="l" type="saturate" values="0"/>
+ </filter>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="2"/><feColorMatrix type="saturate" values="0"/></filter>
+</svg>
+<div id="root"></div>
+<script>
+const R=document.getElementById('root');
+window.build=(kind,o)=>{
+ R.innerHTML=''; const W=1080,H=1920;
+ const box=o.box; // {x,y,w,h}
+ if(kind==='bg'){
+  R.innerHTML=`<div class="L" style="width:${W}px;height:${H}px;background:#111015">
+   <svg width="${W}" height="${H}" style="position:absolute;inset:0;opacity:.30;mix-blend-mode:screen"><rect width="100%" height="100%" filter="url(#crumple)"/></svg>
+   <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 40%,rgba(20,19,24,0) 0,rgba(10,9,13,.75) 100%)"></div>
+   <div style="position:absolute;left:84px;top:118px;width:912px;height:${box.y+box.h+46-118}px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10)"></div>
+   <div style="position:absolute;left:0;right:0;top:${box.y-372}px;text-align:center;font-family:Anton;line-height:.84;letter-spacing:.01em">
+     <div style="font-size:170px;color:transparent;-webkit-text-stroke:2px rgba(244,242,238,.55);height:84px;overflow:hidden">${o.name}</div>
+     <div style="font-size:170px;color:transparent;-webkit-text-stroke:2px rgba(244,242,238,.8);height:90px;overflow:hidden">${o.name}</div>
+     <div style="font-size:210px;color:#f4f2ee">${o.name}</div>
+   </div>
+   <svg width="${W}" height="${H}" style="position:absolute;inset:0;opacity:.07"><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+  </div>`;
+ }
+ if(kind==='fg'){
+  R.innerHTML=`<div class="L" style="width:${W}px;height:${H}px">
+   <div style="position:absolute;left:${box.x-12}px;top:${box.y-12}px;width:${box.w+24}px;height:${box.h+24}px;border:2.5px solid rgba(244,242,238,.9)"></div>
+   <div style="position:absolute;left:${box.x+box.w-70}px;top:${box.y+box.h*0.34}px;width:180px;height:460px;transform:rotate(7deg);background:#1b1a20;border:1px solid rgba(255,255,255,.18);box-shadow:0 12px 30px rgba(0,0,0,.5);overflow:hidden">
+     <svg width="180" height="460" style="position:absolute;inset:0;opacity:.35;mix-blend-mode:screen"><rect width="100%" height="100%" filter="url(#foil)"/></svg>
+     <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(90deg);white-space:nowrap;font-family:Anton;font-size:78px;letter-spacing:.02em;color:#f4f2ee">${o.when}</div>
+   </div>
+   <svg width="${W}" height="${H}" style="position:absolute;inset:0" fill="none" stroke="#b9a6ff" stroke-width="3">
+     <g transform="translate(${box.x-40},${box.y+150})"><ellipse rx="62" ry="22" transform="rotate(-30)"/><ellipse rx="62" ry="22" transform="rotate(40)"/><circle r="5" fill="#b9a6ff" stroke="none"/></g>
+     <path transform="translate(150,${H-300}) scale(1.4)" d="M0,-40 C4,-8 8,-4 40,0 C8,4 4,8 0,40 C-4,8 -8,4 -40,0 C-8,-4 -4,-8 0,-40Z"/>
+     <g transform="translate(${W-170},${H-190})" stroke="rgba(244,242,238,.6)" stroke-width="2"><circle r="56"/><ellipse rx="56" ry="20"/><ellipse rx="20" ry="56"/></g>
+   </svg>
+  </div>`;
+ }
+ if(kind==='tape'){ // 긴 테이프 한 줄 (텍스트 반복 주기 P)
+  const P=o.P, len=o.len; let t=''; for(let x=0;x<len;x+=P) t+=`<span style="position:absolute;top:0;height:120px;line-height:130px;left:${x}px;width:${P}px;text-align:center">${o.genre}</span>`;
+  R.innerHTML=`<div class="L" style="width:${len}px;height:120px;background:linear-gradient(180deg,#d9d8de,#a9a8b0 45%,#e9e8ee 60%,#b3b2ba);">
+   <svg width="${len}" height="120" style="position:absolute;inset:0;opacity:.6;mix-blend-mode:multiply"><rect width="100%" height="100%" filter="url(#foil)"/></svg>
+   <div style="position:absolute;inset:0;font-family:Anton;font-size:74px;color:#18171c;letter-spacing:.03em">${t}</div></div>`;
+ }
+ if(kind==='end'){
+  R.innerHTML=`<div class="L" style="width:${W}px;height:${H}px;background:#0e0d12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px">
+   <img src="raw-logo.png" style="width:300px"><div style="font-family:Montserrat;font-weight:600;font-size:26px;letter-spacing:.42em;color:#c3bfcc;margin-right:-.42em">@RAWDANCE_SUWON</div></div>`;
+ }
+};
+</script></body></html>

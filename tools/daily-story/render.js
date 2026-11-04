@@ -1,5 +1,5 @@
 // 사용: node render.js 2026-11-05 [초=15] → content/2026-11-05_daily-story/story.mp4
-const { chromium } = require('/opt/node-tools/node_modules/playwright');
+const { launch } = require('../pw.js');
 const { spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
 const dateStr = process.argv[2]; const SEC = +(process.argv[3] || 15); const FPS = 30;
@@ -25,7 +25,7 @@ const data = { dow: DOW, md: `${String(M).padStart(2,'0')}.${String(Dd).padStart
 const outDir = path.join(__dirname, '../../content', `${dateStr}_daily-story`); fs.mkdirSync(outDir, { recursive: true });
 const out = path.join(outDir, 'story.mp4');
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await launch();
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   await p.goto('file://' + path.join(__dirname, 'template.html'));
   await p.evaluate(d => window.setup(d), data);

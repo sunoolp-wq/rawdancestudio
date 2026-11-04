@@ -1,6 +1,6 @@
 // 수업 영상 → 15초 릴스/스토리 (원장님 편집 스타일: 액자 + 강사 이름 + 요일·시간 스티커 + 장르 테이프 + 끝 로고)
 // 사용: node make_reel.js --video 원본.mp4 --start 32 --dur 15 --name KIRY --genre JAZZ --when "WED 20:50" --out 결과.mp4
-const { chromium } = require('/opt/node-tools/node_modules/playwright');
+const { launch } = require('../pw.js');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), os = require('os');
 const A = {}; process.argv.slice(2).forEach((v, i, a) => { if (v.startsWith('--')) A[v.slice(2)] = a[i + 1]; });
@@ -9,7 +9,7 @@ const box = { x: 183, y: 450, w: 714, h: 990 };
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'reel-'));
 const P = 420, ANG = 10 * Math.PI / 180;
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  const b = await launch();
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   await p.goto('file://' + path.join(__dirname, 'layers.html'));
   const shot = async (kind, o, file, w, h) => {

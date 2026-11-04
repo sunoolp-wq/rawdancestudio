@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0;padding:0}html,body{width:1080px;height:1920px;background:transparent;overflow:hidden}
+body{font-family:Montserrat,"Noto Sans KR",sans-serif;color:#f4f2ee;position:relative}
+#tg{position:absolute;left:0;right:0;top:0;height:360px;background:linear-gradient(180deg,rgba(8,7,12,.62),rgba(8,7,12,0))}
+#bg{position:absolute;left:0;right:0;bottom:0;height:900px;background:linear-gradient(180deg,rgba(8,7,12,0),rgba(8,7,12,.55) 45%,rgba(8,7,12,.9))}
+.top{position:absolute;left:64px;right:64px;top:84px;display:flex;justify-content:space-between;align-items:center}
+.top img{height:42px}
+.top span{font-weight:600;font-size:19px;letter-spacing:.36em;color:rgba(244,242,238,.85);margin-right:-.36em}
+#blk{position:absolute;left:64px;right:64px;bottom:190px}
+#chips{display:flex;gap:12px}
+.ch{font-weight:700;font-size:24px;letter-spacing:.14em;padding:10px 18px;border-radius:999px}
+.ch.a{background:#b9a6ff;color:#0e0d12}.ch.b{border:2px solid rgba(244,242,238,.6);color:#f4f2ee}
+#name{margin-top:22px;font-weight:800;font-style:italic;font-size:200px;line-height:.86;letter-spacing:-.05em;white-space:nowrap}
+#genre{margin-top:6px;font-weight:800;font-style:italic;font-size:118px;line-height:.9;letter-spacing:-.03em;color:transparent;-webkit-text-stroke:2.5px #b9a6ff;white-space:nowrap}
+#trk{margin-top:30px;display:flex;align-items:center;gap:18px;font-weight:600;font-size:26px;color:rgba(244,242,238,.9)}
+#eq{display:flex;align-items:flex-end;gap:5px;height:30px}#eq i{display:block;width:5px;border-radius:3px;background:#b9a6ff}
+#prog{position:absolute;left:64px;right:64px;bottom:120px;height:3px;background:rgba(244,242,238,.18);border-radius:2px;overflow:hidden}
+#prog i{display:block;height:100%;width:0;background:#b9a6ff}
+#end{position:absolute;inset:0;background:#0e0d12;opacity:0}
+#end .g1{position:absolute;width:1400px;height:1400px;border-radius:50%;right:-760px;top:-760px;background:radial-gradient(circle,rgba(124,92,255,.42),rgba(124,92,255,0) 62%)}
+#end .g2{position:absolute;width:1300px;height:1300px;border-radius:50%;left:-700px;bottom:-760px;background:radial-gradient(circle,rgba(124,92,255,.26),rgba(124,92,255,0) 62%)}
+#end .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#end img{width:220px}
+#end .k{margin-top:70px;font-weight:600;font-size:24px;letter-spacing:.4em;color:#b9a6ff;margin-right:-.4em}
+#end .n{margin-top:18px;font-weight:800;font-style:italic;font-size:150px;line-height:.9;letter-spacing:-.04em}
+#end .w{margin-top:26px;font-family:"Noto Sans KR";font-weight:700;font-size:40px}
+#end .w span{color:#b9a6ff}
+#end .ct{margin-top:90px;font-family:"Noto Sans KR";font-size:28px;line-height:1.7;color:#c3bfcc}
+#end .ct b{color:#f4f2ee}
+</style></head><body>
+<div id="ov"><div id="tg"></div><div id="bg"></div>
+<div class="top"><img src="raw-logo.png"><span>SUWON · WEEKLY CLASS</span></div>
+<div id="blk"><div id="chips"></div><div id="name"></div><div id="genre"></div><div id="trk"><div id="eq"></div><span id="trkt"></span></div></div>
+<div id="prog"><i></i></div></div>
+<div id="end"><div class="g1"></div><div class="g2"></div><div class="c"><img src="raw-logo.png"><div class="k">WEEKLY CLASS</div><div class="n" id="en"></div><div class="w" id="ew"></div>
+<div class="ct"><b>체험·문의</b> 인스타 DM · 카카오톡 '로우댄스수원점학원'<br>@rawdance_suwon · 031-225-6600</div></div></div>
+<script>
+const $=id=>document.getElementById(id);const ease=x=>1-Math.pow(1-Math.min(Math.max(x,0),1),3);
+let O,bars=[];
+window.setup=o=>{O=o;
+ $("chips").innerHTML=`<span class="ch a">${o.when}</span>`+(o.hall?`<span class="ch b">${o.hall} HALL</span>`:"");
+ $("name").textContent=o.name;$("genre").textContent=o.genre;
+ if(o.track){$("trkt").textContent=o.track;for(let i=0;i<5;i++){const b=document.createElement("i");$("eq").appendChild(b);bars.push(b);}}else $("trk").style.display="none";
+ $("en").textContent="T. "+o.name;$("ew").innerHTML=`${o.genre} <span>·</span> ${o.whenKr}`;
+ // 이름이 길면 줄이기
+ const nm=$("name");let fs=200;while(nm.scrollWidth>952&&fs>110){fs-=6;nm.style.fontSize=fs+"px";}
+};
+window.render=t=>{const D=O.dur;
+ const c=ease((t-.15)/.4);$("chips").style.opacity=c;$("chips").style.transform=`translateY(${(1-c)*20}px)`;
+ const n=ease((t-.3)/.6);$("name").style.opacity=n;$("name").style.transform=`translateX(${(1-n)*-140}px) skewX(${(1-n)*-10}deg)`;
+ const g=ease((t-.55)/.6);$("genre").style.opacity=g;$("genre").style.transform=`translateX(${(1-g)*120}px)`;
+ const r=ease((t-.9)/.5);$("trk").style.opacity=r;
+ bars.forEach((b,i)=>{b.style.height=(30+70*Math.abs(Math.sin(t*5+i*1.3)))+"%"});
+ $("prog").querySelector("i").style.width=(Math.min(t/D,1)*100)+"%";
+ const out=ease((t-(D-.6))/.5);$("ov").style.opacity=1-out*0; // 영상 위 글자는 유지, 끝 화면이 덮음
+ const e=ease((t-(D-.35))/.45);$("end").style.opacity=e;
+ const ec=$("end").querySelector(".c");ec.style.transform=`translateY(${(1-ease((t-D)/.6))*30}px)`;
+};
+</script></body></html>

@@ -1,0 +1,91 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}html,body{width:1080px;height:1920px}
+body{background:#0e0d12;color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif;position:relative;overflow:hidden}
+.g{position:absolute;border-radius:50%;pointer-events:none}
+#g1{width:1400px;height:1400px;background:radial-gradient(circle,rgba(124,92,255,.42),rgba(124,92,255,0) 62%)}
+#g2{width:1300px;height:1300px;background:radial-gradient(circle,rgba(124,92,255,.26),rgba(124,92,255,0) 62%)}
+.top{position:absolute;left:76px;right:76px;top:96px;display:flex;justify-content:space-between;align-items:flex-start}
+.top img{height:48px}
+.top .r{text-align:right;font-weight:500;font-size:20px;letter-spacing:.38em;line-height:1.75;color:#c3bfcc;margin-right:-.38em}
+#rule{position:absolute;left:76px;top:200px;height:1px;background:#2f2c38;width:928px;transform-origin:left}
+.hero{position:absolute;left:70px;top:250px}
+#kick{font-weight:600;font-size:26px;letter-spacing:.42em;color:#b9a6ff;display:flex;align-items:center;gap:16px}
+#kick i{display:block;width:14px;height:14px;border-radius:50%;background:#b9a6ff;box-shadow:0 0 20px #b9a6ff}
+#day{margin-top:14px;font-weight:800;font-style:italic;font-size:250px;line-height:.86;letter-spacing:-.05em}
+#date{font-weight:800;font-style:italic;font-size:150px;line-height:.9;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:3px #b9a6ff;margin-left:6px}
+#kr{position:absolute;right:76px;top:470px;text-align:right;font-family:"Noto Sans KR";font-size:30px;font-weight:500;color:#c3bfcc;line-height:1.5}
+#kr b{display:block;font-family:Montserrat;font-size:22px;font-weight:600;letter-spacing:.3em;color:#8f8a9c;margin-right:-.3em}
+#list{position:absolute;left:76px;right:76px;top:700px;display:flex;flex-direction:column;gap:18px}
+.c{position:relative;display:grid;grid-template-columns:190px 1fr auto;align-items:center;column-gap:22px;padding:24px 28px 24px 30px;border-radius:22px;background:rgba(255,255,255,.035);border:1px solid #2a2832;overflow:hidden}
+.c .bar{position:absolute;left:0;top:0;bottom:0;width:7px}
+.c .tm b{display:block;font-weight:700;font-size:46px;line-height:1;letter-spacing:-.01em}
+.c .tm small{display:block;margin-top:6px;font-size:22px;font-weight:500;color:#8f8a9c}
+.c .nm{min-width:0}
+.c .nm b{display:flex;align-items:center;gap:14px;font-family:"Noto Sans KR",Montserrat;font-weight:900;font-size:42px;line-height:1.15;white-space:nowrap}
+.c .nm b em{font-style:normal;font-family:Montserrat;font-size:17px;font-weight:800;letter-spacing:.12em;padding:5px 11px;border-radius:7px;background:#b9a6ff;color:#0e0d12}
+.c .nm b em.o{font-family:"Noto Sans KR";letter-spacing:0;background:rgba(245,190,70,.16);color:#f5be46}
+.c .nm span{display:block;margin-top:6px;font-size:22px;font-weight:600;letter-spacing:.12em;color:#c3bfcc}
+.c .h{width:60px;height:60px;border-radius:50%;border:2px solid #4a4655;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;color:#c3bfcc}
+.c .sweep{position:absolute;top:0;bottom:0;width:240px;background:linear-gradient(90deg,rgba(185,166,255,0),rgba(185,166,255,.16),rgba(185,166,255,0))}
+#eq{position:absolute;left:76px;bottom:232px;display:flex;align-items:flex-end;gap:9px;height:56px}
+#eq i{display:block;width:8px;border-radius:4px;background:#b9a6ff}
+#cta{position:absolute;left:76px;right:76px;bottom:120px;display:flex;justify-content:space-between;align-items:flex-end}
+#cta .l{font-family:"Noto Sans KR";font-size:28px;line-height:1.55;color:#c3bfcc}
+#cta .l b{color:#f4f2ee;font-weight:700}
+#cta .r{font-weight:600;font-size:20px;letter-spacing:.24em;color:#8f8a9c;text-align:right;line-height:1.7;margin-right:-.24em}
+</style></head><body>
+<div class="g" id="g1"></div><div class="g" id="g2"></div>
+<div class="top"><img id="logo" src="raw-logo.png"><div class="r" id="tr">SUWON<br>TODAY'S CLASS</div></div>
+<div id="rule"></div>
+<div class="hero"><div id="kick"><i></i>TODAY'S CLASS INFO</div><div id="day"></div><div id="date"></div></div>
+<div id="kr"></div>
+<div id="list"></div>
+<div id="eq"></div>
+<div id="cta"><div class="l"><b>체험·문의</b> 인스타 DM<br>카카오톡 '로우댄스수원점학원'</div><div class="r">@RAWDANCE_SUWON<br>031-225-6600</div></div>
+<script>
+const COL={kpop:"#6d4fe0",basic:"#4656c8",pro:"#f5be46",heel:"#9b45c4",girlish:"#c0559f",waack:"#3a78cc",hiphop:"#54409e",jazz:"#7e3aa8",choreo:"#8577f0",adult:"#b9a6ff"};
+const $=id=>document.getElementById(id);
+const ease=x=>1-Math.pow(1-Math.min(Math.max(x,0),1),3);
+const back=x=>{x=Math.min(Math.max(x,0),1);const c=1.6;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+let cards=[],bars=[];
+function setup(D){
+  $("day").textContent=D.dow; $("date").textContent=D.md;
+  $("kr").innerHTML=`<b>${D.year}</b>${D.krday} · 오늘의 수업 ${D.classes.length}개`;
+  const L=$("list");
+  D.classes.forEach(c=>{
+    const el=document.createElement("div"); el.className="c";
+    const badge=c.mark==="new"?'<em>NEW</em>':c.mark==="open"?'<em class="o">모집중</em>':c.mark==="popup"?'<em>POP-UP</em>':"";
+    el.innerHTML=`<div class="bar" style="background:${COL[c.key]}"></div><div class="sweep"></div>
+      <div class="tm"><b>${c.start}</b><small>– ${c.end}</small></div>
+      <div class="nm"><b>${c.name}${badge}</b><span>T. ${c.teacher}</span></div>
+      <div class="h">${c.hall||"·"}</div>`;
+    L.appendChild(el); cards.push(el);
+  });
+  // 카드가 많으면 줄이기
+  const n=D.classes.length; if(n>6){const s=6/n; L.style.transform=`scale(${Math.max(s,.78)})`;L.style.transformOrigin="top left";L.style.width=(928/Math.max(s,.78))+"px";L.style.right="auto";}
+  for(let i=0;i<14;i++){const b=document.createElement("i");$("eq").appendChild(b);bars.push(b);}
+}
+function render(t){
+  // 배경 빛 천천히 이동
+  $("g1").style.left=(380+Math.sin(t*.35)*60)+"px"; $("g1").style.top=(-720+Math.cos(t*.3)*50)+"px";
+  $("g2").style.left=(-700+Math.cos(t*.28)*60)+"px"; $("g2").style.top=(1100+Math.sin(t*.32)*50)+"px";
+  const a=ease(t/.6); $("logo").style.opacity=a; $("tr").style.opacity=a;
+  $("rule").style.transform=`scaleX(${ease((t-.1)/.8)})`;
+  const k=ease((t-.3)/.5); $("kick").style.opacity=k; $("kick").style.transform=`translateX(${(1-k)*-40}px)`;
+  const d=ease((t-.45)/.7); $("day").style.opacity=d; $("day").style.transform=`translateX(${(1-d)*-160}px) skewX(${(1-d)*-12}deg)`;
+  const m=ease((t-.7)/.7); $("date").style.opacity=m; $("date").style.transform=`translateX(${(1-m)*160}px)`;
+  const r=ease((t-1.0)/.6); $("kr").style.opacity=r; $("kr").style.transform=`translateY(${(1-r)*20}px)`;
+  cards.forEach((el,i)=>{
+    const s=1.4+i*.28, p=back((t-s)/.6), o=ease((t-s)/.4);
+    el.style.opacity=o; el.style.transform=`translateX(${(1-p)*520}px)`;
+    const sw=el.querySelector(".sweep"); const sp=(t-(s+.45))/.7; sw.style.left=(-260+sp*1200)+"px"; sw.style.opacity=(sp>0&&sp<1)?1:0;
+    const em=el.querySelector("em:not(.o)"); if(em){const pu=1+Math.max(0,Math.sin((t-s)*4))*.08*(t>s+.6?1:0); em.style.transform=`scale(${pu})`;}
+  });
+  const e=ease((t-1.6)/.6);
+  bars.forEach((b,i)=>{const h=0.25+0.75*Math.abs(Math.sin(t*3.1+i*.9)*Math.cos(t*1.7+i*.4)); b.style.height=(h*100*e)+"%"; b.style.opacity=.45+.55*h;});
+  const c=ease((t-(1.4+cards.length*.28+.4))/.6); $("cta").style.opacity=c; $("cta").style.transform=`translateY(${(1-c)*24}px)`;
+  // 끝 0.5초 페이드아웃 없음 (스토리 반복 재생 자연스럽게)
+}
+window.setup=setup; window.render=render;
+</script></body></html>

@@ -1,0 +1,270 @@
+{
+ "month": "2026-11",
+ "note": "11월 시간표 (오디션반 11월 휴강, 성인 K-POP 신설)",
+ "days": {
+  "MON": [
+   {
+    "start": "16:00",
+    "end": "17:00",
+    "name": "유아 K-POP",
+    "teacher": "YUNI",
+    "hall": "A",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "17:00",
+    "end": "18:00",
+    "name": "키즈 K-POP",
+    "teacher": "YUNI",
+    "hall": "A",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "18:00",
+    "end": "19:10",
+    "name": "취미 K-POP",
+    "teacher": "YUNI",
+    "hall": "B",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "19:30",
+    "end": "20:30",
+    "name": "성인 K-POP",
+    "teacher": "YUNI",
+    "hall": "B",
+    "mark": "new",
+    "key": "adult"
+   },
+   {
+    "start": "19:40",
+    "end": "20:50",
+    "name": "HEEL CHOREO",
+    "teacher": "HEEONE",
+    "hall": "A",
+    "mark": "",
+    "key": "heel"
+   },
+   {
+    "start": "20:50",
+    "end": "22:00",
+    "name": "CHOREO",
+    "teacher": "RAEKU",
+    "hall": "A",
+    "mark": "",
+    "key": "choreo"
+   }
+  ],
+  "TUE": [
+   {
+    "start": "16:00",
+    "end": "17:00",
+    "name": "유아 K-POP",
+    "teacher": "MINKYUNG",
+    "hall": "A",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "17:00",
+    "end": "18:00",
+    "name": "키즈 K-POP",
+    "teacher": "MINKYUNG",
+    "hall": "A",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "18:00",
+    "end": "19:10",
+    "name": "취미 K-POP",
+    "teacher": "MINKYUNG",
+    "hall": "B",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "18:30",
+    "end": "19:40",
+    "name": "BASIC",
+    "teacher": "GAON",
+    "hall": "A",
+    "mark": "",
+    "key": "basic"
+   },
+   {
+    "start": "19:40",
+    "end": "20:50",
+    "name": "GIRLISH",
+    "teacher": "ARIN",
+    "hall": "A",
+    "mark": "",
+    "key": "girlish"
+   }
+  ],
+  "WED": [
+   {
+    "start": "16:00",
+    "end": "17:00",
+    "name": "유아 K-POP",
+    "teacher": "YUNI",
+    "hall": "A",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "17:00",
+    "end": "18:00",
+    "name": "키즈 K-POP",
+    "teacher": "YUNI",
+    "hall": "A",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "18:00",
+    "end": "19:10",
+    "name": "취미 K-POP",
+    "teacher": "YUNI",
+    "hall": "B",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "19:30",
+    "end": "20:30",
+    "name": "성인 K-POP",
+    "teacher": "YUNI",
+    "hall": "B",
+    "mark": "new",
+    "key": "adult"
+   },
+   {
+    "start": "19:40",
+    "end": "20:50",
+    "name": "WAACKING",
+    "teacher": "J",
+    "hall": "A",
+    "mark": "",
+    "key": "waack"
+   },
+   {
+    "start": "20:50",
+    "end": "22:00",
+    "name": "JAZZ",
+    "teacher": "KIRY",
+    "hall": "A",
+    "mark": "",
+    "key": "jazz"
+   }
+  ],
+  "THU": [
+   {
+    "start": "16:00",
+    "end": "17:00",
+    "name": "유아 K-POP",
+    "teacher": "MINKYUNG",
+    "hall": "A",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "17:00",
+    "end": "18:00",
+    "name": "키즈 K-POP",
+    "teacher": "MINKYUNG",
+    "hall": "A",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "18:00",
+    "end": "19:10",
+    "name": "취미 K-POP",
+    "teacher": "MINKYUNG",
+    "hall": "B",
+    "mark": "",
+    "key": "kpop"
+   },
+   {
+    "start": "18:30",
+    "end": "19:40",
+    "name": "BASIC",
+    "teacher": "GAON",
+    "hall": "A",
+    "mark": "",
+    "key": "basic"
+   },
+   {
+    "start": "19:40",
+    "end": "20:50",
+    "name": "HIP HOP",
+    "teacher": "NOFF",
+    "hall": "A",
+    "mark": "",
+    "key": "hiphop"
+   },
+   {
+    "start": "20:50",
+    "end": "22:00",
+    "name": "CHOREO",
+    "teacher": "HWAN.U",
+    "hall": "A",
+    "mark": "",
+    "key": "choreo"
+   }
+  ],
+  "FRI": [
+   {
+    "start": "18:30",
+    "end": "20:00",
+    "name": "PRO 전문반",
+    "teacher": "YELLS",
+    "hall": "A",
+    "mark": "",
+    "key": "pro"
+   },
+   {
+    "start": "20:10",
+    "end": "21:20",
+    "name": "GIRLS HIPHOP",
+    "teacher": "MINKYUNG",
+    "hall": "A",
+    "mark": "",
+    "key": "girlish"
+   }
+  ],
+  "SAT": [
+   {
+    "start": "13:00",
+    "end": "14:00",
+    "name": "유아 K-POP",
+    "teacher": "REGINA",
+    "hall": "A",
+    "mark": "open",
+    "key": "kpop"
+   },
+   {
+    "start": "14:00",
+    "end": "15:00",
+    "name": "키즈 K-POP",
+    "teacher": "REGINA",
+    "hall": "A",
+    "mark": "open",
+    "key": "kpop"
+   },
+   {
+    "start": "15:00",
+    "end": "16:10",
+    "name": "취미 K-POP",
+    "teacher": "REGINA",
+    "hall": "A",
+    "mark": "open",
+    "key": "kpop"
+   }
+  ]
+ }
+}

@@ -1,0 +1,4 @@
+{
+ "2026-11-05": {"replace": [{"start": "20:50", "name": "CHOREO", "set": {"teacher": "HWANY", "mark": "popup"}}]},
+ "2026-11-03": {"replace": [{"start": "18:30", "name": "BASIC", "set": {"teacher": "SOYUL", "mark": "popup"}}]}
+}

@@ -24,3 +24,12 @@
 - 세로 원본이면 그냥 9:16으로만 맞춤
 - 단체 수업에서 학생을 잠깐 따라갈 수 있다 → 결과를 확인하고 이상하면 구간을 바꾼다
 - 가로 원본은 4K일수록 선명 (1080p 가로를 세로로 자르면 화질이 떨어짐)
+
+## (권장) YOLO로 선생님 따라가기 — `follow_yolo.py` (2026-11-04, HOG 방식보다 정확)
+    python3 -m venv .venv && .venv/bin/pip install ultralytics lap      # 처음 한 번 (torch 포함, 용량 큼)
+    .venv/bin/python tools/class-reel/follow_yolo.py --video 원본.mp4 --start 5 --dur 15 --out 세로.mp4 \
+        --pick-x 0.5 --check 확인.jpg
+- 모델: `tools/class-reel/yolo11s.pt` (없으면 github에서 자동 다운로드)
+- 처음(--pick-t 초)에 --pick-x 위치(0 왼쪽 ~ 1 오른쪽)에 가장 크게 보이는 사람을 선생님으로 정하고, 번호(ByteTrack)로 끝까지 따라감. 번호를 잃으면 옷 색·위치·크기로 다시 찾음
+- `--check` 사진: 보라 상자 = 선생님으로 잡은 사람, 흰 선 = 잘라 낸 세로 화면 → 원장님께 같이 보내 확인
+- 원장님이 "선생님 옷·위치"를 알려 주면 --pick-x / --pick-t로 맞춘다

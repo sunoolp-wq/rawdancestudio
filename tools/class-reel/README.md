@@ -59,6 +59,7 @@
     python3 tools/class-reel/make_lut.py tools/class-reel/luts/RAW_studio.cube      # 값 바꿀 때만
     ffmpeg -i 세로.mp4 -vf "lut3d=tools/class-reel/luts/RAW_studio.cube:interp=tetrahedral,setsar=1" -c:a copy 결과.mp4
 - 1차(원장님 보정본을 그대로 학습한 LUT)는 버림: 보라 조명 영상으로만 배워서 빨간 조명·신발이 하늘색이 됨
-- 2차 RAW_studio.cube 원칙: 색상(빨강·보라·파랑)은 그대로 / 뿌연 검정 걷기(블랙 0.04→0, 화이트 0.80까지 늘림, 부드러운 S커브) / 채도 1.25 / 피부톤 살리기(보라·분홍으로 찍힌 피부만 살구색 쪽으로 조금, 살짝 밝게)
+- 3차 RAW_studio.cube (원장님: 뒷벽 얼룩 안 보이게, 사람 너무 빨갛지 않게): 색상 그대로 / 뿌연 검정 걷기 + 부드러운 S커브 / **무채색 어두운 곳(검은 벽·바닥)만 추가로 눌러 얼룩 줄임**(벽 밝기 40→9, 얼룩 차이 절반 이하, 파란 벽·조명·피부는 제외) / 채도 1.12 / 붉게 뜬 피부 채도 살짝 낮춤 / 보라빛 피부는 살구색 쪽으로 약하게
+- 1·2차 교훈: 전체 밝기로 누르면 파란 벽·사람까지 꺼짐 → '무채색+어두움' 조건으로만
 - 같은 .cube를 프리미어 Lumetri → Creative → Look 에 넣어도 같은 색
 - 순서: follow_yolo(트래킹) → lut3d(보정) → add_title(자막)

@@ -42,7 +42,8 @@
 - 원장님 수업영상 폴더 ID: 1u0hgxcHkLTTOnXkaoQn0DSfaay1EcHXa ("링크가 있는 모든 사용자" 공유, 2026-11-04)
 
 ## 원장님 스타일 제목만 얹기 (TRACKPAD mogrt 느낌, 2026-11-05)
-    node tools/class-reel/add_title.js --video 세로.mp4 --title "KIDZ K-POP" --name MINKYUNG [--track "곡"] --out 결과.mp4
+    node tools/class-reel/add_title.js --video 세로.mp4 --title "KIDZ K-POP" --name MINKYUNG [--track "곡"] [--trkdy 29] --out 결과.mp4
+- 원장님 자막 순서: 1줄 곡명(작게) / 2줄 강사(크게) / 3줄 장르  예) Dip - Jalen Santoy / NOFF / HIPHOP. 곡명 줄 높이는 원본마다 조금 다름(--trkdy, NOFF 원본은 29)
 - 5초 (원장님 TRACKPAD 원본 분석, 2026-11-05): 글자마다 무작위 순서로 탁탁 켜짐(일부 회색으로 한 번 깜빡) → 자간이 쫀쫀하게 모였다가 천천히 벌어짐 → 4.3초부터 무작위로 사라락 꺼짐. 나머지 영상은 그대로
 - 원장님 mogrt(TRACKPAD): After Effects 템플릿, 2줄(Line1 Arvo-Bold 120 / Line2 Montserrat-Regular 33, 자간 25), 1920x1080, 5초
 - 곡명은 기본으로 넣지 않음 (--track 쓰면 맨 위 작은 줄)

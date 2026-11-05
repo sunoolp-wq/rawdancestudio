@@ -9,7 +9,7 @@ const T = 5.0;
   const [fn, fd] = fr.split('/').map(Number); const FPS = fn / (fd || 1);
   const b = await launch(); const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   await p.goto('file://' + path.join(__dirname, 'title.html'));
-  await p.evaluate(o => window.setup(o), { title: A.title, name: A.name, track: A.track, y: A.y ? +A.y : undefined });
+  await p.evaluate(o => window.setup(o), { title: A.title, name: A.name, track: A.track, y: A.y ? +A.y : undefined, trkdy: A.trkdy ? +A.trkdy : 0 });
   await p.evaluate(() => document.fonts.ready);
   const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-i', A.video, '-f', 'image2pipe', '-framerate', fr, '-c:v', 'png', '-i', '-',
     '-filter_complex', `[0:v]scale=1080:1920,setsar=1[v];[1:v]format=rgba[o];[v][o]overlay=0:0:eof_action=pass,format=yuv420p,setsar=1[vout]`,

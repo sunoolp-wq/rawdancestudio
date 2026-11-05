@@ -42,7 +42,7 @@ window.setup=o=>{O=o;const y=o.y||862, k=o.offset||0; // y: 큰 줄 글자 윗�
   const tw=()=>{const sp=t.querySelectorAll("span");return sp[sp.length-1].getBoundingClientRect().right-sp[0].getBoundingClientRect().left;};
   while(tw()>1010&&fs>80){fs-=4;t.style.fontSize=fs+"px";}
   const capTop=v=>v; // 글꼴 윗여백 보정
-  $("t").style.top=(y-4-0.2*fs)+"px"; $("n").style.top=(y+134-0.2*58)+"px"; $("trk").style.top=(y-86-0.27*38)+"px";
+  $("t").style.top=(y-4-0.2*fs)+"px"; $("n").style.top=(y+134-0.2*58)+"px"; $("trk").style.top=(y-86-0.27*38+(o.trkdy||0))+"px";
 };
 window.render=(s)=>{
   LINES.forEach(({el,chars,cfg})=>{

@@ -9,8 +9,8 @@ ap.add_argument("--black", type=float, default=0.04)     # 뿌연 검정 걷기
 ap.add_argument("--wall", type=float, default=1.0)      # 무채색 어두운 곳(검은 벽) 정리 강도
 ap.add_argument("--white", type=float, default=0.80)
 ap.add_argument("--sat", type=float, default=1.12)
-ap.add_argument("--skin-amt", type=float, default=0.35)  # 보라빛 피부를 살구색 쪽으로 (약하게)
-ap.add_argument("--skin-tame", type=float, default=0.18) # 붉게 뜬 피부 채도 줄이기
+ap.add_argument("--skin-amt", type=float, default=0.55)  # 보라빛·잿빛 피부를 살구색 쪽으로
+ap.add_argument("--skin-tame", type=float, default=0.08) # 붉게 뜬 피부 채도 줄이기 (약하게)
 a = ap.parse_args()
 
 def pchip(xs, ys, x):  # 단조 곡선 (넘침 없이 부드럽게)
@@ -25,10 +25,10 @@ def pchip(xs, ys, x):  # 단조 곡선 (넘침 없이 부드럽게)
 
 # 기본 밝기 곡선 (부드러운 S커브)
 CX = [0, 0.10, 0.25, 0.50, 0.75, 1.0]
-CY = [0, 0.075, 0.215, 0.48, 0.77, 1.0]
+CY = [0, 0.08, 0.235, 0.52, 0.79, 1.0]   # 중간 톤 살짝 밝게 (사람이 칙칙하지 않게)
 # 검은 벽용 추가 곡선: 무채색이고 어두운 곳만 더 눌러서 발자국·얼룩 차이를 없앰 (색 있는 파란 벽·조명·피부는 제외)
-WX = [0, 0.06, 0.12, 0.18, 0.26, 0.34, 0.44, 1.0]
-WY = [0, 0.014, 0.034, 0.075, 0.165, 0.27, 0.40, 1.0]
+WX = [0, 0.05, 0.10, 0.15, 0.20, 0.26, 1.0]
+WY = [0, 0.016, 0.040, 0.085, 0.165, 0.26, 1.0]   # 0.26 위(사람 피부·옷 밝은 쪽)는 건드리지 않음
 
 def grade(rgb):
     Y0 = 0.2126 * rgb[:, 0] + 0.7152 * rgb[:, 1] + 0.0722 * rgb[:, 2]
@@ -36,7 +36,7 @@ def grade(rgb):
     Y1 = pchip(CX, CY, L)
     # 무채색 정도 (원본 채도 낮을수록 1)
     mx, mn = rgb.max(1), rgb.min(1); S0 = (mx - mn) / np.maximum(mx, 1e-4)
-    neutral = np.clip(1 - (S0 - 0.18) / 0.17, 0, 1) * a.wall
+    neutral = np.clip(1 - (S0 - 0.18) / 0.17, 0, 1) * np.clip(1 - (Y1 - 0.22) / 0.08, 0, 1) * a.wall
     Y1 = Y1 + (pchip(WX, WY, Y1) - Y1) * neutral
     x = rgb * (Y1 / np.maximum(Y0, 1e-4))[:, None]          # 밝기만 바꾸고 색 비율 유지
     x = np.clip(np.nan_to_num(x), 0, None); over = x.max(1, keepdims=True); x = np.where(over > 1, x / np.maximum(over, 1e-6), x)
@@ -45,10 +45,10 @@ def grade(rgb):
     hsv = np.array([colorsys.rgb_to_hsv(*q) for q in x]); H, S, V = hsv[:, 0] * 360, hsv[:, 1], hsv[:, 2]
     wv = np.clip((V - 0.12) / 0.12, 0, 1) * np.clip(1 - (V - 0.92) / 0.08, 0, 1)
     # (1) 보라·분홍빛 피부(250~360도, 채도 낮음~중간) → 살구색 쪽으로 약하게
-    d = (H - 310 + 180) % 360 - 180; wp = np.clip(1 - (np.abs(d) - 45) / 25, 0, 1)
-    ws = np.clip((S - 0.04) / 0.06, 0, 1) * np.clip(1 - (S - 0.40) / 0.15, 0, 1)
+    d = (H - 330 + 180) % 360 - 180; wp = np.clip(1 - (np.abs(d) - 75) / 25, 0, 1)   # 255~45도: 보라·분홍·살구
+    ws = np.clip((S - 0.03) / 0.05, 0, 1) * np.clip(1 - (S - 0.40) / 0.15, 0, 1)
     w = wp * ws * wv * a.skin_amt
-    dh = (20 - H + 180) % 360 - 180; H = (H + dh * 0.45 * w) % 360; S = S + (np.maximum(S, 0.18) - S) * w * 0.6
+    dh = (20 - H + 180) % 360 - 180; H = (H + dh * 0.45 * w) % 360; S = S + (np.maximum(S, 0.24) - S) * w * 0.7; V = np.clip(V * (1 + 0.05 * w), 0, 1)
     # (2) 붉게 뜬 피부(0~35도, 채도 0.30~0.75) → 채도 살짝 낮추고 약간 노랗게 (진한 빨간 조명·신발은 채도가 더 높아 제외)
     d2 = (H - 15 + 180) % 360 - 180; wr = np.clip(1 - (np.abs(d2) - 20) / 15, 0, 1)
     wsr = np.clip((S - 0.28) / 0.08, 0, 1) * np.clip(1 - (S - 0.72) / 0.10, 0, 1)

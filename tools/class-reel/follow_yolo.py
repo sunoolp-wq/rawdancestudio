@@ -12,7 +12,7 @@ from ultralytics import YOLO
 ap = argparse.ArgumentParser()
 ap.add_argument("--video"); ap.add_argument("--start", type=float, default=0); ap.add_argument("--dur", type=float, default=15)
 ap.add_argument("--out"); ap.add_argument("--pick-x", type=float, default=0.5); ap.add_argument("--pick-t", type=float, default=0.5)
-ap.add_argument("--check"); ap.add_argument("--shape", default="auto", choices=["auto", "tall", "wide"]); ap.add_argument("--model", default=os.path.join(os.path.dirname(__file__), "yolo11s.pt"))
+ap.add_argument("--check"); ap.add_argument("--lut"); ap.add_argument("--denoise", type=float, default=1.0); ap.add_argument("--shape", default="auto", choices=["auto", "tall", "wide"]); ap.add_argument("--model", default=os.path.join(os.path.dirname(__file__), "yolo11s.pt"))
 a = ap.parse_args()
 
 # 먼저 쓸 구간만 H.264로 잘라 둔다 (AV1 등 OpenCV가 못 읽는 코덱 대비, 이후 시작 0초 기준)
@@ -96,6 +96,11 @@ maxv = W * 0.5 / fps
 for j in range(1, len(cxf)): cxf[j] = cxf[j - 1] + np.clip(cxf[j] - cxf[j - 1], -maxv, maxv)
 xpos = (np.clip(cxf - cw / 2, 0, W - cw)).astype(int) // 2 * 2
 
+# 색 보정은 4K 원본에서 16비트로(계단·노이즈 덜 생김) → 축소 → 가벼운 노이즈 제거
+GRADE = f",format=gbrp16le,lut3d={a.lut}:interp=tetrahedral,format=yuv420p10le" if a.lut else ""
+# 어두운 바닥·벽 얼룩(노이즈)은 자르기 전 원본에서 시간축으로 먼저 걸러야 깨끗함 (자른 뒤 거르면 화면 이동 때 번짐)
+PRE = f"hqdn3d={2*a.denoise}:{1.5*a.denoise}:{9*a.denoise}:{7*a.denoise}," if (a.lut and a.denoise > 0) else ""
+DN = f",hqdn3d={1.5*a.denoise}:{1.2*a.denoise}:{5*a.denoise}:{4*a.denoise}" if a.denoise > 0 else ""
 f = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False)
 for t, x in zip(tf, xpos): f.write(f"{t:.4f} crop@c x {x};\n")
 f.close()
@@ -103,8 +108,8 @@ subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", str(a.start), "-t", str(a.
                 *(["-filter_complex", f"[0:v]sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0,split[a][b];"
                    "[b]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=40:2,eq=brightness=-0.18[bg];"
                    "[a]scale=1080:1350,setsar=1[fg];[bg][fg]overlay=0:150,setsar=1[v]", "-map", "[v]", "-map", "0:a?"] if wide else
-                  ["-vf", f"sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0,scale=1080:1920,setsar=1"]),
-                "-c:v", "libx264", "-crf", "17", "-preset", "medium", "-c:a", "aac", "-b:a", "192k", a.out], check=True)
+                  ["-vf", f"{PRE}sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0{GRADE},scale=1080:1920:flags=lanczos,setsar=1{DN}"]),
+                "-c:v", "libx264", "-crf", "17", "-preset", "medium", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", a.out], check=True)
 os.unlink(f.name); os.unlink(seg)
 
 if a.check:  # 확인용: 8장 (보라 상자 = 선생님, 흰 선 = 자른 창)

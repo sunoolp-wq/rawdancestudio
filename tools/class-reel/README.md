@@ -55,9 +55,10 @@
 - 2026-11-05 2차: 원장님 검은 바탕 5초 원본(24fps)을 프레임별로 재서 맞춤 — 큰 줄 0.04~0.42초 무작위 켜짐(직전 1프레임 엉뚱한 회색 글자), 자간: 켜지는 동안 0.25~0.50초 천천히 벌어짐(+0.028em) → 0.56초에 1프레임 만에 싹 모임(살짝 더 좁게) → 2프레임 동안 자리 잡음 (프레임별 폭 원본과 ±3px), 이름·곡명 0.55~0.585초 한 번에 켜짐(자간 고정), 퇴장: 이름·곡명 4.55~4.72초 → 큰 줄 4.59~4.96초, 무작위 순서로 거의 1프레임에 1글자씩 고르게(뭉쳐 꺼지면 렉 걸린 느낌), 대시가 마지막, 회색 깜빡은 드물게. 글꼴 GoGo Poster 2020(Italic 큰 줄/Regular 이름), 곡명 Montserrat 500. 크기·위치 원본과 ±1% (`TRACKPAD_compare.mp4` 왼쪽 원본/오른쪽 재현)
 - GoGo Poster 2020 글꼴은 원장님 제공 파일 → 각 작업 환경 ~/.local/share/fonts 에 설치 필요 (저장소에 올리지 않음, 원장님 판단)
 
-## 색감 보정 LUT (원장님 프리미어 보정 따라 하기, 2026-11-05)
-    ffmpeg -i 세로.mp4 -vf "lut3d=tools/class-reel/luts/RAW_1105_hiphop.cube:interp=tetrahedral,setsar=1" -c:a copy 결과.mp4
-- 원장님 원본(C2209)과 보정본(1105 힙합 인스타)을 시간 맞춰 20장면 짝지어 색 변환을 계산해 33x33x33 LUT로 만듦 (오차: 보정 전 17 → 4.7, 0~255 기준). 비네팅 없음(화면 전체 같은 보정)
-- 느낌: 검정 더 깊게, 전체 밝기 약 40% 낮춤, 그림자에 푸른 보라, 대비 업
-- 같은 .cube 파일을 프리미어 Lumetri → Creative → Look 에 넣어도 같은 색
+## 색감 보정 LUT (2026-11-05, 원장님 피드백 반영 2차)
+    python3 tools/class-reel/make_lut.py tools/class-reel/luts/RAW_studio.cube      # 값 바꿀 때만
+    ffmpeg -i 세로.mp4 -vf "lut3d=tools/class-reel/luts/RAW_studio.cube:interp=tetrahedral,setsar=1" -c:a copy 결과.mp4
+- 1차(원장님 보정본을 그대로 학습한 LUT)는 버림: 보라 조명 영상으로만 배워서 빨간 조명·신발이 하늘색이 됨
+- 2차 RAW_studio.cube 원칙: 색상(빨강·보라·파랑)은 그대로 / 뿌연 검정 걷기(블랙 0.04→0, 화이트 0.80까지 늘림, 부드러운 S커브) / 채도 1.25 / 피부톤 살리기(보라·분홍으로 찍힌 피부만 살구색 쪽으로 조금, 살짝 밝게)
+- 같은 .cube를 프리미어 Lumetri → Creative → Look 에 넣어도 같은 색
 - 순서: follow_yolo(트래킹) → lut3d(보정) → add_title(자막)

@@ -2,7 +2,7 @@
 // node add_title.js --video 세로.mp4 --title "KIDZ K-POP" --name MINKYUNG [--track "곡"] [--y 820] --out 결과.mp4
 const { launch } = require('../pw.js'); const { spawn } = require('child_process'); const path = require('path');
 const A = {}; process.argv.slice(2).forEach((v, i, a) => { if (v.startsWith('--')) A[v.slice(2)] = a[i + 1]; });
-const FPS = 30, T = 3.2;
+const FPS = 30, T = 5.0;
 (async () => {
   const b = await launch(); const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   await p.goto('file://' + path.join(__dirname, 'title.html'));

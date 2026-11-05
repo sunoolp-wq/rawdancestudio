@@ -43,6 +43,6 @@
 
 ## 원장님 스타일 제목만 얹기 (TRACKPAD mogrt 느낌, 2026-11-05)
     node tools/class-reel/add_title.js --video 세로.mp4 --title "KIDZ K-POP" --name MINKYUNG [--track "곡"] --out 결과.mp4
-- 첫 0.3~3초: 큰 수업명(기울인 굵은 글씨) + 아래 강사 이름(글자 간격이 벌어지며 등장) → 사라짐. 나머지 영상은 그대로
+- 5초 (원장님 TRACKPAD 원본 분석, 2026-11-05): 글자마다 무작위 순서로 탁탁 켜짐(일부 회색으로 한 번 깜빡) → 자간이 쫀쫀하게 모였다가 천천히 벌어짐 → 4.3초부터 무작위로 사라락 꺼짐. 나머지 영상은 그대로
 - 원장님 mogrt(TRACKPAD): After Effects 템플릿, 2줄(Line1 Arvo-Bold 120 / Line2 Montserrat-Regular 33, 자간 25), 1920x1080, 5초
 - 곡명은 기본으로 넣지 않음 (--track 쓰면 맨 위 작은 줄)

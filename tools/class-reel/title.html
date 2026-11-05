@@ -1,23 +1,44 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
 *{box-sizing:border-box;margin:0;padding:0}html,body{width:1080px;height:1920px;background:transparent;overflow:hidden}
 body{font-family:Montserrat,"Noto Sans KR",sans-serif;color:#fff}
-#w{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;align-items:center;text-align:center;text-shadow:0 2px 18px rgba(0,0,0,.35)}
-#trk{font-weight:500;font-size:30px;letter-spacing:.18em;white-space:nowrap}
-#t{margin-top:6px;font-weight:800;font-style:italic;font-size:156px;line-height:1;letter-spacing:-.02em;white-space:nowrap}
-#n{margin-top:12px;font-weight:700;font-size:44px;white-space:nowrap}
-</style></head><body><div id="w"><div id="trk"></div><div id="t"></div><div id="n"></div></div>
+#w{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;align-items:center;text-align:center;text-shadow:0 2px 16px rgba(0,0,0,.28)}
+.ln{white-space:nowrap;display:flex;justify-content:center}
+.ln span{display:inline-block;white-space:pre}
+#trk{font-weight:500;font-size:30px}
+#t{margin-top:4px;font-weight:900;font-style:italic;font-size:160px;line-height:1}
+#n{margin-top:6px;font-weight:800;font-size:46px}
+</style></head><body><div id="w"><div class="ln" id="trk"></div><div class="ln" id="t"></div><div class="ln" id="n"></div></div>
 <script>
-const $=id=>document.getElementById(id);const ease=x=>1-Math.pow(1-Math.min(Math.max(x,0),1),3);
-let O;window.setup=o=>{O=o;$("trk").textContent=o.track||"";if(!o.track)$("trk").style.display="none";
- $("t").textContent=o.title;$("n").textContent=o.name;$("w").style.top=(o.y||820)+"px";
- const t=$("t");let fs=156;while(t.scrollWidth>1000&&fs>70){fs-=4;t.style.fontSize=fs+"px";}};
-window.render=s=>{ // TRACKPAD 느낌: 글자 간격이 벌어지며 나타났다가 사라짐
- const a=O.in||0.3,b=O.out||2.6;
- const i=ease((s-a)/.55), o=1-ease((s-b)/.4), op=Math.min(i,o);
- $("w").style.opacity=op;
- $("t").style.letterSpacing=(-0.02+0.03*i)+"em";
- $("n").style.letterSpacing=(0.25+0.35*ease((s-a-.1)/.9))+"em"; $("n").style.marginRight=-(0.25+0.35*ease((s-a-.1)/.9))+"em";
- $("trk").style.letterSpacing=(0.1+0.12*ease((s-a)/.9))+"em";
- $("w").style.transform=`translateY(${(1-i)*14}px)`;
+// TRACKPAD 재현: 글자마다 무작위 순서로 '탁탁' 켜짐(가끔 회색으로 한 번 깜빡) → 자간이 쫀쫀하게 모였다가 천천히 벌어짐 → 무작위로 사라락 꺼짐
+const $=id=>document.getElementById(id);
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+const easeOut=x=>1-Math.pow(1-Math.min(Math.max(x,0),1),3);
+let O,L=[];
+function fill(el,txt,base,inA,inSpan,outA,outSpan){
+  el.innerHTML="";const chars=[...txt];
+  const spans=chars.map(c=>{const s=document.createElement("span");s.textContent=c;el.appendChild(s);
+    return {s,on:inA+rnd()*inSpan,off:outA+rnd()*outSpan,flick:rnd()<.35}});
+  L.push({el,spans,base});
+}
+window.setup=o=>{O=o;const A=o.in??0.15, B=o.out??4.25;
+  if(o.track) fill($("trk"),o.track,{ls:.22,amp:.05},A+.25,.5,B,.45); else $("trk").style.display="none";
+  fill($("t"),o.title,{ls:.0,amp:.045},A,.42,B+.05,.4);
+  fill($("n"),o.name,{ls:.28,amp:.08},A+.2,.45,B,.42);
+  $("w").style.top=(o.y||800)+"px";
+  const t=$("t");let fs=160;while(t.scrollWidth>1010&&fs>70){fs-=4;t.style.fontSize=fs+"px";}
+};
+window.render=s=>{const A=O.in??0.15;
+  // 자간: 처음 조금 벌어져 있다가(0→0.9초) 쫀쫀하게 모이고, 이후 천천히 다시 벌어짐
+  const gather=easeOut((s-A)/0.9), drift=Math.max(0,s-A-0.9)/3.4;
+  L.forEach(({el,spans,base})=>{
+    const ls=base.ls+base.amp*(1-gather)+base.amp*0.55*drift;
+    el.style.letterSpacing=ls+"em";el.style.marginRight=(-ls)+"em";
+    spans.forEach(c=>{
+      let op=0,col="#fff";
+      if(s>=c.on&&s<c.off){op=1; if(c.flick&&s<c.on+0.09){col="#9a9aa0"} }
+      if(c.flick&&s>=c.on+0.09&&s<c.on+0.13) op=0; // 한 번 깜빡
+      c.s.style.opacity=op;c.s.style.color=col;
+    });
+  });
 };
 </script></body></html>

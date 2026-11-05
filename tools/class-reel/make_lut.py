@@ -9,8 +9,8 @@ ap.add_argument("--black", type=float, default=0.04)     # 뿌연 검정 걷기
 ap.add_argument("--wall", type=float, default=1.0)      # 무채색 어두운 곳(검은 벽) 정리 강도
 ap.add_argument("--white", type=float, default=0.80)
 ap.add_argument("--sat", type=float, default=1.12)
-ap.add_argument("--skin-amt", type=float, default=0.55)  # 보라빛·잿빛 피부를 살구색 쪽으로
-ap.add_argument("--skin-tame", type=float, default=0.08) # 붉게 뜬 피부 채도 줄이기 (약하게)
+ap.add_argument("--skin-amt", type=float, default=1.0)  # 보라빛·잿빛 피부를 살구색 쪽으로
+ap.add_argument("--skin-tame", type=float, default=0.0) # 붉게 뜬 피부 채도 줄이기 (약하게)
 a = ap.parse_args()
 
 def pchip(xs, ys, x):  # 단조 곡선 (넘침 없이 부드럽게)
@@ -44,11 +44,14 @@ def grade(rgb):
     x = np.clip(Y + (x - Y) * a.sat, 0, 1)
     hsv = np.array([colorsys.rgb_to_hsv(*q) for q in x]); H, S, V = hsv[:, 0] * 360, hsv[:, 1], hsv[:, 2]
     wv = np.clip((V - 0.12) / 0.12, 0, 1) * np.clip(1 - (V - 0.92) / 0.08, 0, 1)
-    # (1) 보라·분홍빛 피부(250~360도, 채도 낮음~중간) → 살구색 쪽으로 약하게
-    d = (H - 330 + 180) % 360 - 180; wp = np.clip(1 - (np.abs(d) - 75) / 25, 0, 1)   # 255~45도: 보라·분홍·살구
-    ws = np.clip((S - 0.03) / 0.05, 0, 1) * np.clip(1 - (S - 0.40) / 0.15, 0, 1)
-    w = wp * ws * wv * a.skin_amt
-    dh = (20 - H + 180) % 360 - 180; H = (H + dh * 0.45 * w) % 360; S = S + (np.maximum(S, 0.24) - S) * w * 0.7; V = np.clip(V * (1 + 0.05 * w), 0, 1)
+    # (1) 보라 조명 아래 피부(연보라·분홍, 색상 240~45도, 채도 0.08~0.45, 밝음) → 살구색(22도) 쪽으로 확실히, 채도 채우기
+    #     바닥·벽은 같은 보라빛이라도 어두워서(밝기 0.4 아래) 제외, 흰 옷은 채도가 아주 낮아서 제외
+    d = (H - 327 + 180) % 360 - 180; wp = np.clip(1 - (np.abs(d) - 76) / 10, 0, 1)   # 251~43도 (파란빛 흰옷 230~245도는 제외)
+    ws = np.clip((S - 0.07) / 0.06, 0, 1) * np.clip(1 - (S - 0.45) / 0.12, 0, 1)
+    wb = np.clip((V - 0.38) / 0.12, 0, 1) * np.clip(1 - (V - 0.70) / 0.10, 0, 1)   # 아주 밝은 흰옷·간판 빛 제외
+    w = np.clip(wp * ws * wb * a.skin_amt, 0, 1)
+    dh = (22 - H + 180) % 360 - 180; H = (H + dh * 0.75 * w) % 360
+    S = S + (np.maximum(S, 0.34) - S) * w * 0.85; V = np.clip(V * (1 + 0.04 * w), 0, 1)
     # (2) 붉게 뜬 피부(0~35도, 채도 0.30~0.75) → 채도 살짝 낮추고 약간 노랗게 (진한 빨간 조명·신발은 채도가 더 높아 제외)
     d2 = (H - 15 + 180) % 360 - 180; wr = np.clip(1 - (np.abs(d2) - 20) / 15, 0, 1)
     wsr = np.clip((S - 0.28) / 0.08, 0, 1) * np.clip(1 - (S - 0.72) / 0.10, 0, 1)

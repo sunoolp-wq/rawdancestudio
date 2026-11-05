@@ -40,3 +40,9 @@
     curl -sL "https://drive.google.com/embeddedfolderview?id=<폴더ID>#list"  → file/d/<ID> 와 파일 이름
     curl -sL -o 영상.mp4 "https://drive.usercontent.google.com/download?id=<ID>&export=download&confirm=t"
 - 원장님 수업영상 폴더 ID: 1u0hgxcHkLTTOnXkaoQn0DSfaay1EcHXa ("링크가 있는 모든 사용자" 공유, 2026-11-04)
+
+## 원장님 스타일 제목만 얹기 (TRACKPAD mogrt 느낌, 2026-11-05)
+    node tools/class-reel/add_title.js --video 세로.mp4 --title "KIDZ K-POP" --name MINKYUNG [--track "곡"] --out 결과.mp4
+- 첫 0.3~3초: 큰 수업명(기울인 굵은 글씨) + 아래 강사 이름(글자 간격이 벌어지며 등장) → 사라짐. 나머지 영상은 그대로
+- 원장님 mogrt(TRACKPAD): After Effects 템플릿, 2줄(Line1 Arvo-Bold 120 / Line2 Montserrat-Regular 33, 자간 25), 1920x1080, 5초
+- 곡명은 기본으로 넣지 않음 (--track 쓰면 맨 위 작은 줄)

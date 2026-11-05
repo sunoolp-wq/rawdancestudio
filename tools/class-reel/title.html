@@ -23,16 +23,20 @@ function mk(el,txt,cfg){el.innerHTML="";
   const chars=[...txt].map(c=>{const s=document.createElement("span");s.textContent=c;const g=document.createElement("i");s.appendChild(g);el.appendChild(s);
     const blank=c===" ";
     return {s,g,c,blank,on:cfg.in0+rnd()*(cfg.in1-cfg.in0),off:cfg.out0+rnd()*(cfg.out1-cfg.out0),
-      gin:rnd()<cfg.pg,gout:rnd()<cfg.pg*0.9,gch:AZ[Math.floor(rnd()*26)],gch2:AZ[Math.floor(rnd()*26)],gv:0.25+rnd()*0.6,gv2:0.2+rnd()*0.6}});
+      gin:rnd()<cfg.pg,gout:rnd()<(cfg.pgo??cfg.pg*0.9),gch:AZ[Math.floor(rnd()*26)],gch2:AZ[Math.floor(rnd()*26)],gv:0.25+rnd()*0.6,gv2:0.2+rnd()*0.6}});
   // 대시·짧은 기호는 먼저 켜지고 늦게 꺼지는 경향
   chars.forEach(c=>{if(c.c==='-'){c.on=cfg.in0;c.off=cfg.out1;}});
+  // 퇴장: 무작위 순서지만 거의 1프레임에 1글자씩 고르게 꺼짐 (원본 측정. 뭉쳐서 꺼지면 렉 걸린 느낌)
+  const vis=chars.filter(c=>!c.blank&&c.c!=='-'); const ord=vis.map((c,i)=>[rnd(),c]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+  const last=chars.some(c=>c.c==='-')?cfg.out1-(cfg.out1-cfg.out0)/Math.max(ord.length,1):cfg.out1;
+  ord.forEach((c,i)=>{c.off=cfg.out0+(last-cfg.out0)*(ord.length>1?i/(ord.length-1):0)+(rnd()-.5)*0.012;});
   LINES.push({el,chars,cfg});
 }
 window.setup=o=>{O=o;const y=o.y||862, k=o.offset||0; // y: 큰 줄 글자 윗선
-  mk($("t"),o.title,{in0:0.04,in1:0.42,out0:4.42,out1:4.92,pg:0.4,
+  mk($("t"),o.title,{in0:0.04,in1:0.42,out0:4.585,out1:4.96,pg:0.4,pgo:0.12,
     keys:[[0,0.015,"lin"],[0.25,0.015,"out"],[0.50,0.043,"step"],[0.563,0.043,"step"],[0.5631,0.007,"lin"],[0.667,0.013,"lin"]]});
-  mk($("n"),o.name,{in0:0.55,in1:0.585,out0:4.33,out1:4.62,pg:0.0,ls1:0.168});
-  if(o.track) mk($("trk"),o.track,{in0:0.55,in1:0.585,out0:4.33,out1:4.6,pg:0.08,ls1:0.16}); else $("trk").style.display="none";
+  mk($("n"),o.name,{in0:0.55,in1:0.585,out0:4.545,out1:4.72,pg:0.0,pgo:0,ls1:0.168});
+  if(o.track) mk($("trk"),o.track,{in0:0.55,in1:0.585,out0:4.545,out1:4.72,pg:0.08,pgo:0.05,ls1:0.16}); else $("trk").style.display="none";
   // 세로 배치 (원본 비율: 곡명 윗선 776 / 큰 줄 862 / 이름 996, 1080x1920 기준)
   const t=$("t"); let fs=150; t.style.letterSpacing="0em";
   const tw=()=>{const sp=t.querySelectorAll("span");return sp[sp.length-1].getBoundingClientRect().right-sp[0].getBoundingClientRect().left;};

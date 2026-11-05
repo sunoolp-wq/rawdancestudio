@@ -51,4 +51,5 @@
 - mogrt 안 AE 프로젝트(Title_Templates v3.aep)에서 확인: 텍스트 애니메이터 4개 + Range Selector, **Randomize Order**(글자 순서 무작위), **Opacity**, **Tracking Amount**(자간), **Text Position 3D**(글자마다 위치 이동), Selector Smoothness
 - 즉 원본은 글자마다 무작위 순서로 켜지는 것 + 자간 애니메이션 + **글자별 위치 이동**이 겹친 것. 지금 버전엔 위치 이동이 없음
 - 원장님 실제 사용 글꼴: **GoGo Poster 2020** (Line1). 파일이 있어야 똑같이 나옴
-- 다음 할 일: 원장님 5초 영상(24fps)을 한 장씩 재서 글자별 켜지는 시점·위치 변화·자간 값을 맞추기
+- 2026-11-05 2차: 원장님 검은 바탕 5초 원본(24fps)을 프레임별로 재서 맞춤 — 큰 줄 0.04~0.42초 무작위 켜짐(직전 1프레임 엉뚱한 회색 글자), 자간 모임 0.46~0.70초, 이름 0.54~0.63초, 퇴장 4.33~4.92초. 글꼴 GoGo Poster 2020(Italic 큰 줄/Regular 이름), 곡명 Montserrat 500. 크기·위치 원본과 ±1% (`TRACKPAD_compare.mp4` 왼쪽 원본/오른쪽 재현)
+- GoGo Poster 2020 글꼴은 원장님 제공 파일 → 각 작업 환경 ~/.local/share/fonts 에 설치 필요 (저장소에 올리지 않음, 원장님 판단)

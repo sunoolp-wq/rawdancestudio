@@ -1,43 +1,56 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
 *{box-sizing:border-box;margin:0;padding:0}html,body{width:1080px;height:1920px;background:transparent;overflow:hidden}
-body{font-family:Montserrat,"Noto Sans KR",sans-serif;color:#fff}
-#w{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;align-items:center;text-align:center;text-shadow:0 2px 16px rgba(0,0,0,.28)}
-.ln{white-space:nowrap;display:flex;justify-content:center}
-.ln span{display:inline-block;white-space:pre}
-#trk{font-weight:500;font-size:30px}
-#t{margin-top:4px;font-weight:900;font-style:italic;font-size:160px;line-height:1}
-#n{margin-top:6px;font-weight:800;font-size:46px}
-</style></head><body><div id="w"><div class="ln" id="trk"></div><div class="ln" id="t"></div><div class="ln" id="n"></div></div>
+body{color:#fff}
+.ln{position:absolute;left:0;right:0;display:flex;justify-content:center;white-space:nowrap}
+.ln span{display:inline-block;white-space:pre;position:relative}
+.ln span i{position:absolute;left:0;top:0;font-style:inherit}
+#trk{font-family:Montserrat,sans-serif;font-weight:500;font-size:38px}
+#t{font-family:"GoGo Poster 2020",Montserrat,sans-serif;font-style:italic;font-size:150px;line-height:1}
+#n{font-family:"GoGo Poster 2020",Montserrat,sans-serif;font-size:58px;line-height:1}
+</style></head><body><div class="ln" id="trk"></div><div class="ln" id="t"></div><div class="ln" id="n"></div>
 <script>
-// TRACKPAD 재현: 글자마다 무작위 순서로 '탁탁' 켜짐(가끔 회색으로 한 번 깜빡) → 자간이 쫀쫀하게 모였다가 천천히 벌어짐 → 무작위로 사라락 꺼짐
+/* 원장님 TRACKPAD 원본(24fps) 프레임 측정값으로 재현 (2026-11-05)
+   - 큰 줄: 0.04~0.42초 사이 글자마다 무작위로 켜짐. 켜지기 직전 1프레임은 '엉뚱한 회색 글자'(약 40%)
+   - 큰 줄 자간: 다 켜진 직후(+0.023em) → 0.46~0.70초에 쫀쫀하게 모임(-0.006em)
+   - 이름: 0.54~0.63초 빠르게 켜짐(자간 0.15→0.126em) / 곡명: 0.50~0.72초
+   - 퇴장: 4.33~4.92초 글자마다 무작위로 꺼짐. 꺼지기 직전 1프레임 회색 글자(약 35%), 이름·곡명이 먼저 사라짐 */
 const $=id=>document.getElementById(id);
-let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
-const easeOut=x=>1-Math.pow(1-Math.min(Math.max(x,0),1),3);
-let O,L=[];
-function fill(el,txt,base,inA,inSpan,outA,outSpan){
-  el.innerHTML="";const chars=[...txt];
-  const spans=chars.map(c=>{const s=document.createElement("span");s.textContent=c;el.appendChild(s);
-    return {s,on:inA+rnd()*inSpan,off:outA+rnd()*outSpan,flick:rnd()<.35}});
-  L.push({el,spans,base});
+let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+const ease=x=>{x=Math.min(Math.max(x,0),1);return 1-Math.pow(1-x,3)};
+const AZ="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let O,LINES=[];
+function mk(el,txt,cfg){el.innerHTML="";
+  const chars=[...txt].map(c=>{const s=document.createElement("span");s.textContent=c;const g=document.createElement("i");s.appendChild(g);el.appendChild(s);
+    const blank=c===" ";
+    return {s,g,c,blank,on:cfg.in0+rnd()*(cfg.in1-cfg.in0),off:cfg.out0+rnd()*(cfg.out1-cfg.out0),
+      gin:rnd()<cfg.pg,gout:rnd()<cfg.pg*0.9,gch:AZ[Math.floor(rnd()*26)],gch2:AZ[Math.floor(rnd()*26)],gv:0.25+rnd()*0.6,gv2:0.2+rnd()*0.6}});
+  // 대시·짧은 기호는 먼저 켜지고 늦게 꺼지는 경향
+  chars.forEach(c=>{if(c.c==='-'){c.on=cfg.in0;c.off=cfg.out1;}});
+  LINES.push({el,chars,cfg});
 }
-window.setup=o=>{O=o;const A=o.in??0.15, B=o.out??4.25;
-  if(o.track) fill($("trk"),o.track,{ls:.22,amp:.05},A+.25,.5,B,.45); else $("trk").style.display="none";
-  fill($("t"),o.title,{ls:.0,amp:.045},A,.42,B+.05,.4);
-  fill($("n"),o.name,{ls:.28,amp:.08},A+.2,.45,B,.42);
-  $("w").style.top=(o.y||800)+"px";
-  const t=$("t");let fs=160;while(t.scrollWidth>1010&&fs>70){fs-=4;t.style.fontSize=fs+"px";}
+window.setup=o=>{O=o;const y=o.y||862, k=o.offset||0; // y: 큰 줄 글자 윗선
+  mk($("t"),o.title,{in0:0.04,in1:0.42,out0:4.42,out1:4.92,pg:0.4,ls0:0.043,ls1:0.013,t0:0.46,t1:0.70});
+  mk($("n"),o.name,{in0:0.54,in1:0.63,out0:4.33,out1:4.62,pg:0.0,ls0:0.19,ls1:0.168,t0:0.6,t1:0.85});
+  if(o.track) mk($("trk"),o.track,{in0:0.50,in1:0.72,out0:4.33,out1:4.6,pg:0.08,ls0:0.18,ls1:0.16,t0:0.6,t1:0.9}); else $("trk").style.display="none";
+  // 세로 배치 (원본 비율: 곡명 윗선 776 / 큰 줄 862 / 이름 996, 1080x1920 기준)
+  const t=$("t"); let fs=150; t.style.letterSpacing="0em";
+  const tw=()=>{const sp=t.querySelectorAll("span");return sp[sp.length-1].getBoundingClientRect().right-sp[0].getBoundingClientRect().left;};
+  while(tw()>1010&&fs>80){fs-=4;t.style.fontSize=fs+"px";}
+  const capTop=v=>v; // 글꼴 윗여백 보정
+  $("t").style.top=(y-4-0.2*fs)+"px"; $("n").style.top=(y+134-0.2*58)+"px"; $("trk").style.top=(y-86-0.27*38)+"px";
 };
-window.render=s=>{const A=O.in??0.15;
-  // 자간: 처음 조금 벌어져 있다가(0→0.9초) 쫀쫀하게 모이고, 이후 천천히 다시 벌어짐
-  const gather=easeOut((s-A)/0.9), drift=Math.max(0,s-A-0.9)/3.4;
-  L.forEach(({el,spans,base})=>{
-    const ls=base.ls+base.amp*(1-gather)+base.amp*0.55*drift;
-    el.style.letterSpacing=ls+"em";el.style.marginRight=(-ls)+"em";
-    spans.forEach(c=>{
-      let op=0,col="#fff";
-      if(s>=c.on&&s<c.off){op=1; if(c.flick&&s<c.on+0.09){col="#9a9aa0"} }
-      if(c.flick&&s>=c.on+0.09&&s<c.on+0.13) op=0; // 한 번 깜빡
-      c.s.style.opacity=op;c.s.style.color=col;
+window.render=(s)=>{
+  LINES.forEach(({el,chars,cfg})=>{
+    const ls=cfg.ls0+(cfg.ls1-cfg.ls0)*ease((s-cfg.t0)/(cfg.t1-cfg.t0));
+    el.style.letterSpacing=ls+"em"; el.style.paddingLeft=ls+"em";
+    const F=1/24;
+    chars.forEach(c=>{
+      let show=false,ghost=null,gv=1;
+      if(s>=c.on && s<c.off) show=true;
+      if(c.gin && s>=c.on-F && s<c.on){ghost=c.gch;gv=c.gv;}
+      if(c.gout && s>=c.off && s<c.off+F){ghost=c.gch2;gv=c.gv2;}
+      c.s.style.color=show?"#fff":"transparent";
+      c.g.textContent=ghost&&!c.blank?ghost:""; c.g.style.color=`rgba(255,255,255,${gv})`;
     });
   });
 };

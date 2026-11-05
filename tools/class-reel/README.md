@@ -63,3 +63,9 @@
 - 1·2차 교훈: 전체 밝기로 누르면 파란 벽·사람까지 꺼짐 → '무채색+어두움' 조건으로만
 - 같은 .cube를 프리미어 Lumetri → Creative → Look 에 넣어도 같은 색
 - 순서: follow_yolo(트래킹) → lut3d(보정) → add_title(자막)
+
+## 한 번에: 원본 → 노이즈 제거·색 보정·트래킹 → 안무 시작에 맞춰 자막 (2026-11-05)
+    .venv/bin/python tools/class-reel/follow_yolo.py --video 원본.MP4 --start 0 --dur <길이> --lut $PWD/tools/class-reel/luts/RAW_studio.cube --out 보정.mp4
+    node tools/class-reel/add_title.js --video 보정.mp4 --title NOFF --name HIPHOP --track "Dip - Jalen Santoy" --trkdy 29 --end 8.6 --out 완성.mp4
+- `--end` = 안무 시작 시각(초): 자막이 그 순간 사라지도록 약 5초 전부터 시작 (`--at`으로 시작 시각 직접 지정도 가능)
+- 안무 시작 찾기: 음악이 잠깐 비는 구간(브레이크) 뒤 첫 박 + 쌤 첫 동작을 같이 확인 (C2208: 7.5~8.5초 음악 빔 → 8.6초 첫 박·첫 스텝)

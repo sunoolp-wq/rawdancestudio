@@ -102,8 +102,8 @@ f.close()
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", str(a.start), "-t", str(a.dur), "-i", a.video,
                 *(["-filter_complex", f"[0:v]sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0,split[a][b];"
                    "[b]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=40:2,eq=brightness=-0.18[bg];"
-                   "[a]scale=1080:1350[fg];[bg][fg]overlay=0:150[v]", "-map", "[v]", "-map", "0:a?"] if wide else
-                  ["-vf", f"sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0,scale=1080:1920"]),
+                   "[a]scale=1080:1350,setsar=1[fg];[bg][fg]overlay=0:150,setsar=1[v]", "-map", "[v]", "-map", "0:a?"] if wide else
+                  ["-vf", f"sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0,scale=1080:1920,setsar=1"]),
                 "-c:v", "libx264", "-crf", "17", "-preset", "medium", "-c:a", "aac", "-b:a", "192k", a.out], check=True)
 os.unlink(f.name); os.unlink(seg)
 

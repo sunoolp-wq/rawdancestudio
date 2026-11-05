@@ -11,7 +11,7 @@ const START = +(A.start || 0), DUR = +(A.dur || 15), END = 2.0, FPS = 30, TOT = 
   await p.evaluate(o => window.setup(o), { name: A.name, genre: A.genre, when: A.when, whenKr: A.whenKr || A.when, hall: A.hall, track: A.track, dur: DUR });
   await p.evaluate(() => document.fonts.ready);
   const graph = [
-    `[0:v]trim=start=${START}:duration=${DUR},setpts=PTS-STARTPTS,fps=${FPS},scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,tpad=stop_mode=clone:stop_duration=${END}[v]`,
+    `[0:v]trim=start=${START}:duration=${DUR},setpts=PTS-STARTPTS,fps=${FPS},scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,tpad=stop_mode=clone:stop_duration=${END}[v]`,
     `[1:v]format=rgba[o]`, `[v][o]overlay=0:0:format=auto,format=yuv420p[vout]`,
     `[0:a]atrim=start=${START}:duration=${DUR},asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.3,afade=t=out:st=${DUR - 1.2}:d=1.2,apad=pad_dur=${END}[aout]`].join(';');
   const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-i', A.video, '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-',

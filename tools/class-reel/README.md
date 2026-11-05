@@ -46,3 +46,9 @@
 - 5초 (원장님 TRACKPAD 원본 분석, 2026-11-05): 글자마다 무작위 순서로 탁탁 켜짐(일부 회색으로 한 번 깜빡) → 자간이 쫀쫀하게 모였다가 천천히 벌어짐 → 4.3초부터 무작위로 사라락 꺼짐. 나머지 영상은 그대로
 - 원장님 mogrt(TRACKPAD): After Effects 템플릿, 2줄(Line1 Arvo-Bold 120 / Line2 Montserrat-Regular 33, 자간 25), 1920x1080, 5초
 - 곡명은 기본으로 넣지 않음 (--track 쓰면 맨 위 작은 줄)
+
+### TRACKPAD 원본 분석 메모 (2026-11-05, 아직 원본만큼 안 됨 → 연구 중)
+- mogrt 안 AE 프로젝트(Title_Templates v3.aep)에서 확인: 텍스트 애니메이터 4개 + Range Selector, **Randomize Order**(글자 순서 무작위), **Opacity**, **Tracking Amount**(자간), **Text Position 3D**(글자마다 위치 이동), Selector Smoothness
+- 즉 원본은 글자마다 무작위 순서로 켜지는 것 + 자간 애니메이션 + **글자별 위치 이동**이 겹친 것. 지금 버전엔 위치 이동이 없음
+- 원장님 실제 사용 글꼴: **GoGo Poster 2020** (Line1). 파일이 있어야 똑같이 나옴
+- 다음 할 일: 원장님 5초 영상(24fps)을 한 장씩 재서 글자별 켜지는 시점·위치 변화·자간 값을 맞추기

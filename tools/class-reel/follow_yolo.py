@@ -12,7 +12,7 @@ from ultralytics import YOLO
 ap = argparse.ArgumentParser()
 ap.add_argument("--video"); ap.add_argument("--start", type=float, default=0); ap.add_argument("--dur", type=float, default=15)
 ap.add_argument("--out"); ap.add_argument("--pick-x", type=float, default=0.5); ap.add_argument("--pick-t", type=float, default=0.5)
-ap.add_argument("--check"); ap.add_argument("--lut"); ap.add_argument("--denoise", type=float, default=1.0); ap.add_argument("--shape", default="auto", choices=["auto", "tall", "wide"]); ap.add_argument("--model", default=os.path.join(os.path.dirname(__file__), "yolo11s.pt"))
+ap.add_argument("--check"); ap.add_argument("--lut"); ap.add_argument("--crf", default="17"); ap.add_argument("--denoise", type=float, default=1.0); ap.add_argument("--shape", default="auto", choices=["auto", "tall", "wide"]); ap.add_argument("--model", default=os.path.join(os.path.dirname(__file__), "yolo11s.pt"))
 a = ap.parse_args()
 
 # 먼저 쓸 구간만 H.264로 잘라 둔다 (AV1 등 OpenCV가 못 읽는 코덱 대비, 이후 시작 0초 기준)
@@ -109,7 +109,7 @@ subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", str(a.start), "-t", str(a.
                    "[b]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=40:2,eq=brightness=-0.18[bg];"
                    "[a]scale=1080:1350,setsar=1[fg];[bg][fg]overlay=0:150,setsar=1[v]", "-map", "[v]", "-map", "0:a?"] if wide else
                   ["-vf", f"{PRE}sendcmd=f={f.name},crop@c=w={cw}:h={H}:x={xpos[0]}:y=0{GRADE},scale=1080:1920:flags=lanczos,setsar=1{DN}"]),
-                "-c:v", "libx264", "-crf", "17", "-preset", "medium", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", a.out], check=True)
+                "-c:v", "libx264", "-crf", str(a.crf), "-preset", "slow", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "320k", a.out], check=True)
 os.unlink(f.name); os.unlink(seg)
 
 if a.check:  # 확인용: 8장 (보라 상자 = 선생님, 흰 선 = 자른 창)

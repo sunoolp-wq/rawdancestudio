@@ -16,7 +16,7 @@ const START = +(A.start || 0), DUR = +(A.dur || 15), END = 2.0, FPS = 30, TOT = 
     `[0:a]atrim=start=${START}:duration=${DUR},asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.3,afade=t=out:st=${DUR - 1.2}:d=1.2,apad=pad_dur=${END}[aout]`].join(';');
   const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-i', A.video, '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-',
     '-filter_complex', graph, '-map', '[vout]', '-map', '[aout]', '-t', String(TOT),
-    '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', A.out], { stdio: ['pipe', 'inherit', 'inherit'] });
+    '-c:v', 'libx264', '-crf', '14', '-preset', 'slow', '-c:a', 'aac', '-b:a', '320k', '-movflags', '+faststart', A.out], { stdio: ['pipe', 'inherit', 'inherit'] });
   for (let f = 0; f < TOT * FPS; f++) {
     await p.evaluate(t => window.render(t), f / FPS);
     const buf = await p.screenshot({ type: 'png', omitBackground: true });

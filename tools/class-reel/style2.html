@@ -29,10 +29,10 @@ body{font-family:Montserrat,"Noto Sans KR",sans-serif;color:#f4f2ee;position:rel
 #end .ct b{color:#f4f2ee}
 </style></head><body>
 <div id="ov"><div id="tg"></div><div id="bg"></div>
-<div class="top"><img src="raw-logo.png"><span>SUWON · WEEKLY CLASS</span></div>
+<div class="top"><img src="raw-logo.png"><span id="tk">SUWON · WEEKLY CLASS</span></div>
 <div id="blk"><div id="chips"></div><div id="name"></div><div id="genre"></div><div id="trk"><div id="eq"></div><span id="trkt"></span></div></div>
 <div id="prog"><i></i></div></div>
-<div id="end"><div class="g1"></div><div class="g2"></div><div class="c"><img src="raw-logo.png"><div class="k">WEEKLY CLASS</div><div class="n" id="en"></div><div class="w" id="ew"></div>
+<div id="end"><div class="g1"></div><div class="g2"></div><div class="c"><img src="raw-logo.png"><div class="k" id="ek">WEEKLY CLASS</div><div class="n" id="en"></div><div class="w" id="ew"></div>
 <div class="ct"><b>체험·문의</b> 인스타 DM · 카카오톡 '로우댄스수원점학원'<br>@rawdance_suwon · 031-225-6600</div></div></div>
 <script>
 const $=id=>document.getElementById(id);const ease=x=>1-Math.pow(1-Math.min(Math.max(x,0),1),3);
@@ -41,7 +41,7 @@ window.setup=o=>{O=o;
  $("chips").innerHTML=`<span class="ch a">${o.when}</span>`+(o.hall?`<span class="ch b">${o.hall} HALL</span>`:"");
  $("name").textContent=o.name;$("genre").textContent=o.genre;
  if(o.track){$("trkt").textContent=o.track;for(let i=0;i<5;i++){const b=document.createElement("i");$("eq").appendChild(b);bars.push(b);}}else $("trk").style.display="none";
- $("en").textContent="T. "+o.name;$("ew").innerHTML=`${o.genre} <span>·</span> ${o.whenKr}`;
+ if(o.kicker){$("ek").textContent=o.kicker;$("tk").textContent="SUWON · "+o.kicker;}$("en").textContent="T. "+o.name;$("ew").innerHTML=`${o.genre} <span>·</span> ${o.whenKr}`;
  // 이름이 길면 줄이기
  const nm=$("name");let fs=200;while(nm.scrollWidth>952&&fs>110){fs-=6;nm.style.fontSize=fs+"px";}
 };

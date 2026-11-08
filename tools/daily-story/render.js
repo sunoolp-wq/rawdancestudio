@@ -30,6 +30,9 @@ const out = path.join(outDir, 'story.mp4');
   await p.goto('file://' + path.join(__dirname, 'template.html'));
   await p.evaluate(d => window.setup(d), data);
   await p.evaluate(() => document.fonts.ready);
+  // 글꼴이 없으면 명조체로 나옴(2026-11-07 사고) → 만들지 않고 멈춘다. 해결: bash tools/fonts/install.sh
+  const miss = require('child_process').execSync('fc-list : family').toString();
+  for (const f of ['Noto Sans KR', 'Montserrat']) if (!miss.includes(f)) { console.error(`글꼴 없음: ${f} → bash tools/fonts/install.sh 먼저`); process.exit(1); }
   // 음악: music.json {"file": "music/xxx.mp3", "start": 초} 또는 날짜별 {"2026-11-05": {...}} / 없으면 무음
   let mus = null; const mp = path.join(__dirname, 'music.json');
   if (fs.existsSync(mp)) { const mj = JSON.parse(fs.readFileSync(mp)); mus = mj[dateStr] || mj.default || null; }

@@ -234,7 +234,7 @@ function render(anim) {
   const w = L.filter(s => s.rank === 1), nx = L.find(s => s.rank > 1);
   document.getElementById('port').innerHTML = w.length ? `<b style="font-family:'Noto Sans KR';font-style:normal;font-size:${w.length > 1 ? 30 : 44}px">${w.map(s => esc(s.name)).join(' · ')}</b>` : '';
   document.getElementById('portn').innerHTML = '시즌 1등에게 개인 포트폴리오 영상 촬영' + (w.length > 1 ? '<br>지금 완전 동점이에요!' : nx ? '<br>' + lead(w[0], nx) + ` · ${md(C.E)} 마감` : '');
-  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 · 연습은 수업 시간 제외 · 수업 출석은 장르·고정수업 시간에만 (K-POP 제외)<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
+  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 · 연습은 수업 시간 제외<br>수업 출석은 장르·고정수업 시간에만<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
     <div class="lg"><span><b class="f-ok"></b>출석</span><span><b class="f-sh"></b>보호권</span><span><b class="f-miss"></b>결석</span><span><b class="f-up"></b>예정</span></div>`;
 }
 

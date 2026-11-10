@@ -6,7 +6,7 @@ let h = fs.readFileSync(path.join(__dirname, 'Board.html'), 'utf8');
 h = h.replace(/<!doctype html>\s*<html[^>]*>\s*<head>/i, '').replace(/<meta charset="utf-8">/, '').replace(/<meta name="viewport"[^>]*>/, '')
   .replace('<title>RAW SEASON</title>', '<title>RAW SEASON 체험판</title>').replace(/<\/head>\s*<body>/i, '').replace(/<\/body>\s*<\/html>\s*$/i, '');
 h = h.replace('html,body{width:100%;height:100%;background:#0e0d12;overflow:hidden}', ':root{color-scheme:dark;padding:0!important}html,body{width:100%;height:100%;background:#0e0d12;overflow:hidden}');
-const banner = `<div id="demo" style="position:absolute;left:40px;top:6px;z-index:5;font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#0e0d12;background:#f5be46;border-radius:6px;padding:3px 10px;font-weight:700">체험판 · 예시 학생 · 비밀번호 모두 1234 · 누를 때마다 시계가 35분씩 흘러요 · 새로고침하면 처음으로</div>`;
+const banner = `<div id="demo" style="position:absolute;left:40px;top:6px;z-index:5;font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#0e0d12;background:#f5be46;border-radius:6px;padding:3px 10px;font-weight:700">체험판 · 예시 학생 · 비밀번호 모두 1234 · 금 18:42부터 · 연습 끝은 35분, 나머지는 2분씩 흘러요 · 새로고침하면 처음으로</div>`;
 h = h.replace('<div class="g" id="g1"></div>', banner + '<div class="g" id="g1"></div>');
 const mock = `<script>
 (() => {
@@ -18,13 +18,21 @@ const mock = `<script>
     get: cb => cb(JSON.parse(JSON.stringify(Object.assign({}, S, { now })))),
     checkIn: (name, pin, kind, note, cb) => setTimeout(() => {
       if (pin !== '1234') return cb({ ok: false, msg: '비밀번호가 달라요' });
-      tick(35); const today = now.slice(0, 10), y = new Date(today + 'T00:00:00'); y.setDate(y.getDate() - 1);
+      tick(kind === '연습 끝' ? 35 : 2); const today = now.slice(0, 10), y = new Date(today + 'T00:00:00'); y.setDate(y.getDate() - 1);
       const yest = y.getFullYear() + '-' + pad(y.getMonth() + 1) + '-' + pad(y.getDate());
       const mine = S.log.slice(1).filter(r => r[1] === name && r[0].slice(0, 10) === today).map(r => ({ t: r[0], k: r[2] }));
       const lastT = k => { const a = mine.filter(x => x.k === k); return a.length ? a[a.length - 1].t : ''; };
       const open = (a, b) => lastT(a) > lastT(b);
       const no = msg => cb({ ok: false, msg });
-      if (kind === '수업 출석') { const c = mine.filter(x => x.k === '수업 출석'); if (c.length >= 3) return no('수업 출석은 하루 3번까지예요'); if (c.length && (P(now) - P(c[c.length - 1].t)) / 6e4 < 60) return no('방금 수업 출석했어요. 다음 수업 때 눌러요'); }
+      if (kind === '수업 출석') {
+        const DY = ['일', '월', '화', '수', '목', '금', '토'], hm = v => { const m = /(\\d{1,2}):(\\d{2})/.exec(v); return +m[1] * 60 + +m[2]; };
+        const t = new Date(now.replace(' ', 'T')), mins = t.getHours() * 60 + t.getMinutes();
+        const open = S.tt.slice(1).filter(r => r[0] === DY[t.getDay()]).map(r => ({ s: hm(r[1]), label: r[1] + ' ' + r[3] })).filter(c => mins >= c.s - 20 && mins <= c.s + 15);
+        if (!open.length) return no('지금은 수업 출석 시간이 아니에요');
+        const c = open.find(x => x.label === note) || (open.length === 1 ? open[0] : null); if (!c) return no('어느 수업인지 골라 주세요'); note = c.label;
+        const mineC = S.log.slice(1).filter(r => r[1] === name && r[0].slice(0, 10) === today && r[2] === '수업 출석');
+        if (mineC.some(r => r[3] === note)) return no(note + ' 출석은 이미 했어요'); if (mineC.length >= 3) return no('수업 출석은 하루 3번까지예요');
+      }
       if (kind === '운동 완료' || kind === '연습일지') { if (note !== today && note !== yest) return no('오늘이나 어제만 고를 수 있어요');
         if (S.log.some(r => r[1] === name && r[2] === kind && String(r[3] || '').slice(0, 10) === note)) return no((note === today ? '오늘' : '어제') + ' ' + kind + '는 이미 체크했어요'); }
       if (kind === '연습 시작' && open('연습 시작', '연습 끝')) return no('이미 연습 중이에요. 끝나면 [연습 끝]');
@@ -33,6 +41,7 @@ const mock = `<script>
       let msg = '';
       if (kind === '연습 끝') { const min = Math.round((P(now) - P(lastT('연습 시작'))) / 6e4); msg = note === '월말평가 준비' ? '월말평가 준비 ' + min + '분 기록 (점수 없음)' : '개인연습 ' + min + '분' + (min >= 30 ? ' 🔥 인정!' : ' (30분부터 인정)'); }
       if (kind === '운동 완료' || kind === '연습일지') msg = (note === today ? '오늘' : '어제') + ' ' + kind + ' ✓ · 단톡방에 인증 올려 주세요';
+      if (kind === '수업 출석') msg = note;
       cb({ ok: true, name, kind, time: now.slice(11, 16), msg });
     }, 250)
   };

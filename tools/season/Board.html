@@ -147,7 +147,7 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
   <div id="ov"><div class="box" id="box"></div></div>
 </div>
 <script>
-const KINDS = [['수업 출석', 'CLASS', 'main'], ['연습 시작', 'PRACTICE IN', ''], ['연습 끝', 'PRACTICE OUT', ''], ['운동 완료', '학원·집 · 단톡 인증', ''], ['연습일지', '수업정리 · 단톡 인증', '']];
+const KINDS = [['수업 출석', 'CLASS · 수업 시간에만', 'main'], ['연습 시작', 'PRACTICE IN', ''], ['연습 끝', 'PRACTICE OUT', ''], ['운동 완료', '학원·집 · 단톡 인증', ''], ['연습일지', '수업정리 · 단톡 인증', '']];
 const DAILY = ['운동 완료', '연습일지'];
 let DATA = null, C = null;
 
@@ -176,9 +176,13 @@ function compute(raw) {
   const list = raw.stu.slice(1).filter(r => String(r[0]).trim()).map(r => {
     const name = String(r[0]).trim(), mine = log.filter(x => x.n === name);
     const shields = String(r[2] || '').match(/\d{4}-\d{2}-\d{2}/g) || []; const sh = shields.slice(0, SH);
+    // 수업 출석 note = 'HH:MM 수업명'. 전문반(PRO) 수업 = 20P + 금요일 도장. note 없는 옛 기록·직접 입력은 그날 첫 출석을 고정수업으로 침
+    const isPro = x => /전문반|PRO/.test(x.note) || (!x.note && D(x.d).getDay() === FW);
     const byDay = {}; mine.filter(x => x.k === '수업 출석').forEach(x => (byDay[x.d] = byDay[x.d] || []).push(x));
-    const cls = new Set(Object.keys(byDay)); let clsPts = 0;
-    Object.entries(byDay).forEach(([d, a]) => a.slice(0, 3).forEach((x, i) => clsPts += i === 0 && D(d).getDay() === FW ? PF : PC));
+    const proDays = new Set(); let clsPts = 0;
+    Object.entries(byDay).forEach(([d, a]) => { const seen = new Set(); a.filter(x => !seen.has(x.note || x.t) && seen.add(x.note || x.t)).slice(0, 3).forEach((x, i) => {
+      const pro = isPro(x) && (x.note || i === 0); if (pro) proDays.add(d); clsPts += pro ? PF : PC; }); });
+    const cls = proDays;
     const ex = new Set(mine.filter(x => x.k === '운동 완료').map(x => x.note.slice(0, 10) || x.d));
     const jr = new Set(mine.filter(x => x.k === '연습일지').map(x => x.note.slice(0, 10) || x.d));
     const prac = new Set(); let open = null;
@@ -230,7 +234,7 @@ function render(anim) {
   const w = L.filter(s => s.rank === 1), nx = L.find(s => s.rank > 1);
   document.getElementById('port').innerHTML = w.length ? `<b style="font-family:'Noto Sans KR';font-style:normal;font-size:${w.length > 1 ? 30 : 44}px">${w.map(s => esc(s.name)).join(' · ')}</b>` : '';
   document.getElementById('portn').innerHTML = '시즌 1등에게 개인 포트폴리오 영상 촬영' + (w.length > 1 ? '<br>지금 완전 동점이에요!' : nx ? '<br>' + lead(w[0], nx) + ` · ${md(C.E)} 마감` : '');
-  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 (점수 없음)<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
+  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 · 수업 출석은 수업 시간에만<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
     <div class="lg"><span><b class="f-ok"></b>출석</span><span><b class="f-sh"></b>보호권</span><span><b class="f-miss"></b>결석</span><span><b class="f-up"></b>예정</span></div>`;
 }
 
@@ -244,13 +248,34 @@ function openUser(n) {
   box().innerHTML = `<h2>${esc(n)}</h2><p>무엇을 체크할까요?</p><div class="acts">${KINDS.map(([k, e, c]) => `<button class="${c}" data-k="${k}">${k}<small>${e}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
   box().querySelectorAll('[data-k]').forEach(b => b.onclick = () => pick(b.dataset.k)); document.getElementById('cx').onclick = close;
 }
-// 연습 끝 → 종류, 운동·일지 → 오늘/어제
+// 지금 출석 가능한 수업 (Code.gs classesAt_와 같은 계산). 시각 = 서버 시각 + 받아 온 뒤 흐른 시간
+const DAYS_ = ['일', '월', '화', '수', '목', '금', '토'];
+const hm = v => { const m = /(\d{1,2}):(\d{2})/.exec(String(v)); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+const hhmm = n => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
+function classesNow() {
+  const cfgv = k => { const r = DATA.cfg.find(r => String(r[0]).trim().startsWith(k)); return r && r[1] !== '' ? +r[1] : null; };
+  const bf = cfgv('출석: 시작 몇 분 전부터') ?? 20, af = cfgv('출석: 시작 후 몇 분까지') ?? 15;
+  const t = new Date(Date.parse(DATA.now.replace(' ', 'T')) + (Date.now() - fetchedAt)), mins = t.getHours() * 60 + t.getMinutes();
+  const list = (DATA.tt || []).slice(1).filter(r => String(r[0]).trim().charAt(0) === DAYS_[t.getDay()] && hm(r[1]) != null)
+    .map(r => ({ start: hm(r[1]), label: hhmm(hm(r[1])) + ' ' + String(r[3]).trim(), teacher: String(r[4] || '').trim() }));
+  const next = list.filter(c => c.start - bf > mins).sort((a, b) => a.start - b.start)[0];
+  return { bf, af, open: list.filter(c => mins >= c.start - bf && mins <= c.start + af), next: next ? Object.assign(next, { from: hhmm(next.start - bf) }) : null };
+}
+// 수업 출석 → 수업 고르기, 연습 끝 → 종류, 운동·일지 → 오늘/어제
 let note = '';
 function pick(k) {
   note = ''; idle();
   const y = new Date(D(C.today)); y.setDate(y.getDate() - 1); const yest = ymd(y);
   const opts = k === '연습 끝' ? [['개인연습', '개인연습', `${C.MIN}분 이상 ${C.PP}P`], ['월말평가 준비', '월말평가 준비', '기록만 (점수 없음)']]
     : DAILY.includes(k) ? [[C.today, '오늘', md(C.today)], [yest, '어제', md(yest)]] : null;
+  if (k === '수업 출석') {
+    const w = classesNow();
+    if (!w.open.length) { box().innerHTML = `<div class="res">⏰</div><h2>지금은 수업 출석 시간이 아니에요</h2><p style="font-size:17px;margin-top:10px">${w.next ? `다음 수업 <b style="color:#f4f2ee">${esc(w.next.label)}</b> · ${esc(w.next.from)}부터 출석` : '오늘 남은 수업이 없어요'}<br>수업 시작 ${w.bf}분 전 ~ 시작 ${w.af}분 후에 눌러요</p><button class="x" id="cx">닫기</button>`;
+      document.getElementById('cx').onclick = close; return; }
+    if (w.open.length === 1) { note = w.open[0].label; return askPin(k); }
+    box().innerHTML = `<h2>${esc(sel)}</h2><p>어느 수업이에요?</p><div class="acts">${w.open.map(c => `<button data-v="${esc(c.label)}">${esc(c.label.slice(6))}<small>${esc(c.label.slice(0, 5))} · ${esc(c.teacher)}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
+    box().querySelectorAll('[data-v]').forEach(b => b.onclick = () => { note = b.dataset.v; askPin(k); }); document.getElementById('cx').onclick = close; return;
+  }
   if (!opts) return askPin(k);
   box().innerHTML = `<h2>${esc(sel)}</h2><p>${esc(k)}</p><div class="acts">${opts.map(([v, l, sub]) => `<button data-v="${v}">${l}<small>${sub}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
   box().querySelectorAll('[data-v]').forEach(b => b.onclick = () => { note = b.dataset.v; askPin(k); }); document.getElementById('cx').onclick = close;
@@ -327,8 +352,8 @@ const API = window.google && google.script && google.script.run ? {
   get: cb => google.script.run.withSuccessHandler(s => cb(JSON.parse(s))).getData(),
   checkIn: (n, p, k, note, cb) => google.script.run.withSuccessHandler(cb).withFailureHandler(e => cb({ ok: false, msg: '연결 오류, 다시 눌러 주세요' })).checkIn(n, p, k, note)
 } : window.MOCK;
-let first = true;
-function load() { if (API) API.get(d => { DATA = d; render(first); first = false; }); }
+let first = true, fetchedAt = Date.now();
+function load() { if (API) API.get(d => { DATA = d; fetchedAt = Date.now(); render(first); first = false; }); }
 load(); setInterval(load, 60000);
 </script>
 </body></html>

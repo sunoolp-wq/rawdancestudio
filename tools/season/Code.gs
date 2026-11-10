@@ -29,6 +29,18 @@ const DAYS_ = ['일', '월', '화', '수', '목', '금', '토'];
 // 출석 포인트 제외 수업: [설정] '출석 제외 수업'에 쉼표로 (기본 K-POP → 유아·키즈·취미·성인 K-POP 제외, 원장님 2026-11-10)
 const skip_ = (name, skip) => String(skip || '').split(',').map(x => x.trim()).filter(Boolean).some(x => String(name).indexOf(x) >= 0);
 const hm_ = v => { const m = /(\d{1,2}):(\d{2})/.exec(String(v)); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+// 그날 수업 시간 [{s, e, label}] (분). 연습은 수업 시간에 시작 못 하고, 연습 시간에서 수업 시간은 뺌 (원장님 2026-11-10)
+function classesOn_(tt, dateS, skip) {
+  const day = DAYS_[new Date(dateS + 'T00:00:00').getDay()];
+  return tt.slice(1).filter(r => String(r[0]).trim().charAt(0) === day && hm_(r[1]) != null && hm_(r[2]) != null && !skip_(r[3], skip))
+    .map(r => ({ s: hm_(r[1]), e: hm_(r[2]), label: `${String(r[1]).trim()}~${String(r[2]).trim()} ${String(r[3]).trim()}` }));
+}
+// 연습 분 = 시작~끝에서 수업 시간과 겹치는 분을 뺀 것 (같은 날)
+function pracMin_(tt, startS, endS, skip) {
+  const m = x => (+x.slice(11, 13)) * 60 + (+x.slice(14, 16)), a = m(startS), b = m(endS);
+  const over = classesOn_(tt, startS.slice(0, 10), skip).reduce((t, c) => t + Math.max(0, Math.min(b, c.e) - Math.max(a, c.s)), 0);
+  return { total: b - a, over, min: b - a - over };
+}
 // 지금 출석할 수 있는 수업 (시작 before분 전 ~ 시작 after분 후) + 오늘 다음 수업. 태블릿 화면(Board.html)에도 같은 계산이 있음
 function classesAt_(tt, nowS, before, after, skip) {
   const day = DAYS_[new Date(nowS.slice(0, 10) + 'T00:00:00').getDay()], mins = (+nowS.slice(11, 13)) * 60 + (+nowS.slice(14, 16));
@@ -84,14 +96,20 @@ function checkIn(name, pin, kind, note) {
       const dup = read_(TAB.log).slice(1).some(r => String(r[1]).trim() === name && String(r[2]).trim() === kind && String(r[3]).slice(0, 10) === note);
       if (dup) return { ok: false, msg: `${note === today ? '오늘' : '어제'} ${kind}는 이미 체크했어요` };
     }
+    const skipS = g('출석 제외 수업') === '' ? 'K-POP' : g('출석 제외 수업');
     if (kind === '연습 시작' && openS('연습 시작', '연습 끝')) return { ok: false, msg: '이미 연습 중이에요. 끝나면 [연습 끝]' };
+    if (kind === '연습 시작') {
+      const mm = (+nowS.slice(11, 13)) * 60 + (+nowS.slice(14, 16)), c = classesOn_(read_(TAB.tt), today, skipS).find(c => mm >= c.s && mm < c.e);
+      if (c) return { ok: false, msg: `수업 시간에는 연습을 시작할 수 없어요 · ${c.label}` };
+    }
     if (kind === '연습 끝' && !openS('연습 시작', '연습 끝')) return { ok: false, msg: '[연습 시작]을 먼저 눌러야 해요' };
     if (kind === '연습 끝' && PRAC_TYPES.indexOf(note) < 0) return { ok: false, msg: '개인연습인지 월말평가 준비인지 골라 주세요' };
     SpreadsheetApp.getActive().getSheetByName(TAB.log).appendRow([nowS, name, kind, note || '']);
     let msg = '';
     if (kind === '연습 끝') {
-      const min = Math.round((P_(nowS) - P_(lastT('연습 시작'))) / 60000), need = +g('연습 인정 최소 분') || 0;
-      msg = note === '월말평가 준비' ? `월말평가 준비 ${min}분 기록 (점수 없음)` : `개인연습 ${min}분` + (min >= need ? ' 🔥 인정!' : ` (${need}분부터 인정)`);
+      const pm = pracMin_(read_(TAB.tt), lastT('연습 시작'), nowS, skipS), min = pm.min, need = +g('연습 인정 최소 분') || 0;
+      const ex = pm.over ? ` (수업 시간 ${pm.over}분 제외)` : '';
+      msg = note === '월말평가 준비' ? `월말평가 준비 ${min}분 기록${ex} · 점수 없음` : `개인연습 ${min}분${ex}` + (min >= need ? ' 🔥 인정!' : ` · ${need}분부터 인정`);
     }
     if (DAILY.indexOf(kind) >= 0) msg = `${note === today ? '오늘' : '어제'} ${kind} ✓ · 단톡방에 인증 올려 주세요`;
     if (kind === '수업 출석') msg = note;

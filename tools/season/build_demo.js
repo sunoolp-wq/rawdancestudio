@@ -35,11 +35,14 @@ const mock = `<script>
       }
       if (kind === '운동 완료' || kind === '연습일지') { if (note !== today && note !== yest) return no('오늘이나 어제만 고를 수 있어요');
         if (S.log.some(r => r[1] === name && r[2] === kind && String(r[3] || '').slice(0, 10) === note)) return no((note === today ? '오늘' : '어제') + ' ' + kind + '는 이미 체크했어요'); }
+      const HM = v => { const m = /(\\d{1,2}):(\\d{2})/.exec(v); return +m[1] * 60 + +m[2]; }, MM = x => +x.slice(11, 13) * 60 + +x.slice(14, 16);
+      const DY2 = ['일', '월', '화', '수', '목', '금', '토'], dayCls = d => S.tt.slice(1).filter(r => r[0] === DY2[new Date(d + 'T00:00:00').getDay()]).map(r => ({ s: HM(r[1]), e: HM(r[2]), label: r[1] + '~' + r[2] + ' ' + r[3] }));
       if (kind === '연습 시작' && open('연습 시작', '연습 끝')) return no('이미 연습 중이에요. 끝나면 [연습 끝]');
+      if (kind === '연습 시작') { const c = dayCls(today).find(c => MM(now) >= c.s && MM(now) < c.e); if (c) return no('수업 시간에는 연습을 시작할 수 없어요 · ' + c.label); }
       if (kind === '연습 끝' && !open('연습 시작', '연습 끝')) return no('[연습 시작]을 먼저 눌러야 해요');
       S.log.push([now, name, kind, note || '']);
       let msg = '';
-      if (kind === '연습 끝') { const min = Math.round((P(now) - P(lastT('연습 시작'))) / 6e4); msg = note === '월말평가 준비' ? '월말평가 준비 ' + min + '분 기록 (점수 없음)' : '개인연습 ' + min + '분' + (min >= 30 ? ' 🔥 인정!' : ' (30분부터 인정)'); }
+      if (kind === '연습 끝') { const st = lastT('연습 시작'), A = MM(st), B = MM(now), ov = dayCls(today).reduce((t, c) => t + Math.max(0, Math.min(B, c.e) - Math.max(A, c.s)), 0), min = B - A - ov; msg = note === '월말평가 준비' ? '월말평가 준비 ' + min + '분 기록 (점수 없음)' : '개인연습 ' + min + '분' + (min >= 30 ? ' 🔥 인정!' : ' (30분부터 인정)'); }
       if (kind === '운동 완료' || kind === '연습일지') msg = (note === today ? '오늘' : '어제') + ' ' + kind + ' ✓ · 단톡방에 인증 올려 주세요';
       if (kind === '수업 출석') msg = note;
       cb({ ok: true, name, kind, time: now.slice(11, 16), msg });

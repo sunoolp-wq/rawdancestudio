@@ -1,0 +1,255 @@
+
+<title>RAW SEASON 체험판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;0,900;1,800;1,900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{color-scheme:dark;padding:0!important}html,body{width:100%;height:100%;background:#0e0d12;overflow:hidden}
+body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
+#stage{position:absolute;left:0;top:0;width:1280px;height:800px;transform-origin:0 0;overflow:hidden;background:#0e0d12}
+.g{position:absolute;border-radius:50%;pointer-events:none}
+#g1{width:1100px;height:1100px;right:-420px;top:-600px;background:radial-gradient(circle,rgba(124,92,255,.38),rgba(124,92,255,0) 62%)}
+#g2{width:900px;height:900px;left:-420px;bottom:-600px;background:radial-gradient(circle,rgba(124,92,255,.22),rgba(124,92,255,0) 62%)}
+.hd{position:absolute;left:40px;right:40px;top:28px;display:flex;align-items:flex-end;justify-content:space-between}
+.hd .l{display:flex;align-items:flex-end;gap:20px}
+.hd img{height:34px;margin-bottom:6px}
+#sn{font-weight:900;font-style:italic;font-size:54px;line-height:.86;letter-spacing:-.03em}
+#sn span{color:transparent;-webkit-text-stroke:2px #b9a6ff}
+#sn small{font-style:normal;font-size:15px;letter-spacing:.3em;color:#b9a6ff;margin-left:14px;vertical-align:8px;font-weight:800}
+.hd .r{text-align:right}
+#nx{font-weight:900;font-style:italic;font-size:34px;line-height:.9;color:#b9a6ff}
+#per{margin-top:7px;font-weight:600;font-size:13px;letter-spacing:.24em;color:#8f8a9c;margin-right:-.24em}
+.rule{position:absolute;left:40px;right:40px;top:104px;height:1px;background:#2f2c38}
+/* 순위 */
+#list{position:absolute;left:40px;top:120px;width:842px}
+.cap{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:13px;letter-spacing:.32em;color:#b9a6ff;margin-bottom:9px}
+.cap i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#b9a6ff;box-shadow:0 0 14px #b9a6ff;margin-right:10px;vertical-align:1px}
+.cap em{font-style:normal;letter-spacing:.06em;color:#6f6a7c;font-family:"Noto Sans KR";font-weight:500;font-size:13px}
+.row{display:grid;grid-template-columns:52px 150px 118px 1fr 62px 84px;align-items:center;height:52px;padding:0 16px;margin-bottom:5px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:transform .08s}
+.row:active{transform:scale(.985);background:rgba(185,166,255,.16)}
+.row.top{background:linear-gradient(90deg,rgba(185,166,255,.17),rgba(185,166,255,.03));border-color:rgba(185,166,255,.3)}
+.rk{font-weight:900;font-style:italic;font-size:24px;color:#6f6a7c}.row.top .rk{color:#f4f2ee}
+.nm{font-family:"Noto Sans KR";font-weight:900;font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{justify-self:start;font-family:"Noto Sans KR";font-weight:700;font-size:13px;padding:5px 10px;border-radius:20px;white-space:nowrap}
+.p-on{background:rgba(245,190,70,.14);color:#f5be46}.p-off{background:rgba(255,255,255,.06);color:#8f8a9c}.p-sh{background:rgba(127,209,255,.13);color:#7fd1ff}.p-wait{background:rgba(185,166,255,.13);color:#b9a6ff}
+.fr{display:flex;gap:6px;align-items:center}
+.fr b{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+.f-ok{background:#f5be46;color:#0e0d12}.f-sh{background:#7fd1ff;color:#0e0d12}.f-miss{background:rgba(255,90,90,.16);color:#ff7a7a;border:1.5px solid rgba(255,90,90,.5)}
+.f-up{border:1.5px solid #34303f}.f-today{border:2px dashed #b9a6ff;animation:bl 1.4s ease-in-out infinite}
+@keyframes bl{50%{opacity:.35}}
+.st{font-weight:900;font-size:20px;color:#f5be46;text-align:right}.st.off{color:#4a4655}
+.pt{font-weight:900;font-size:22px;text-align:right}.pt small{font-weight:600;font-size:11px;color:#8f8a9c;margin-left:3px}
+/* 오른쪽 */
+#side{position:absolute;left:906px;right:40px;top:120px}
+.card{border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);padding:16px 18px;margin-bottom:12px}
+.now{display:flex;justify-content:space-between;align-items:center;height:34px;font-family:"Noto Sans KR";font-weight:900;font-size:18px}
+.now span{font-family:Montserrat;font-weight:700;font-size:14px;color:#8f8a9c}
+.now i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#5ce08a;box-shadow:0 0 10px #5ce08a;margin-right:9px;vertical-align:2px;animation:bl 1.6s infinite}
+.empty{font-family:"Noto Sans KR";font-size:14px;color:#6f6a7c;padding:6px 0}
+#port{display:flex;align-items:baseline;gap:8px}
+#port b{font-weight:900;font-style:italic;font-size:52px;line-height:1;color:#f5be46}
+#port span{font-weight:800;font-size:20px;color:#8f8a9c}
+#portn{margin-top:8px;font-family:"Noto Sans KR";font-size:13px;line-height:1.6;color:#8f8a9c}
+.rl{font-family:"Noto Sans KR";font-size:12.5px;line-height:1.7;color:#8f8a9c}.rl b{color:#f4f2ee}
+.lg{display:flex;gap:12px;margin-top:6px;font-family:"Noto Sans KR";font-size:12px;color:#8f8a9c;align-items:center}
+.lg b{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+#hint{position:absolute;left:0;right:0;bottom:0;height:50px;background:#b9a6ff;color:#0e0d12;display:flex;align-items:center;justify-content:center;gap:14px;font-family:"Noto Sans KR";font-weight:900;font-size:19px}
+#hint small{font-family:Montserrat;font-weight:700;font-size:12px;letter-spacing:.2em;opacity:.6}
+/* 출석 창 */
+#ov{position:absolute;inset:0;background:rgba(8,7,12,.82);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9}
+#ov.on{display:flex}
+.box{width:560px;border-radius:24px;background:#16141c;border:1px solid rgba(185,166,255,.25);padding:30px 34px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.box h2{font-family:"Noto Sans KR";font-weight:900;font-size:34px}
+.box p{margin-top:6px;font-family:"Noto Sans KR";font-size:15px;color:#8f8a9c}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.acts button.main{grid-column:1 / -1}
+.acts button,.pad button,.x{font-family:"Noto Sans KR";font-weight:900;border:0;border-radius:16px;cursor:pointer}
+.acts button{height:84px;font-size:22px;background:rgba(255,255,255,.06);color:#f4f2ee;border:1px solid rgba(255,255,255,.1)}
+.acts button:active,.pad button:active{transform:scale(.96)}
+.acts button.main{background:#b9a6ff;color:#0e0d12;border:0}
+.acts button small{display:block;font-family:Montserrat;font-weight:600;font-size:12px;letter-spacing:.1em;opacity:.6;margin-top:3px}
+.dots{display:flex;gap:16px;justify-content:center;margin:20px 0 16px}
+.dots i{width:18px;height:18px;border-radius:50%;border:2px solid #6f6a7c}.dots i.f{background:#b9a6ff;border-color:#b9a6ff}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:330px;margin:0 auto}
+.pad button{height:62px;font-family:Montserrat;font-size:26px;background:rgba(255,255,255,.06);color:#f4f2ee}
+.x{margin-top:18px;height:46px;width:160px;font-size:16px;background:transparent;color:#8f8a9c;border:1px solid #34303f!important}
+.res{font-size:76px;line-height:1}
+.res+h2{margin-top:12px}
+.shake{animation:sk .35s}@keyframes sk{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.fade{animation:fd .5s ease both}@keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+<div id="stage">
+  <div id="demo" style="position:absolute;left:40px;top:6px;z-index:5;font-family:'Noto Sans KR',sans-serif;font-size:12px;color:#0e0d12;background:#f5be46;border-radius:6px;padding:3px 10px;font-weight:700">체험판 · 예시 학생 · 비밀번호 모두 1234 · 누를 때마다 시계가 35분씩 흘러요 · 새로고침하면 처음으로</div><div class="g" id="g1"></div><div class="g" id="g2"></div>
+  <div class="hd">
+    <div class="l"><img src="data:image/png;base64,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" alt="RAW"><div id="sn"></div></div>
+    <div class="r"><div id="nx"></div><div id="per"></div></div>
+  </div>
+  <div class="rule"></div>
+  <div id="list"><div class="cap"><span><i></i>SEASON RANKING</span><em>금요일 고정수업 도장 · 🔥 연속 · 점수</em></div><div id="rows"></div></div>
+  <div id="side">
+    <div class="card"><div class="cap"><span><i></i>NOW 연습 중</span></div><div id="now"></div></div>
+    <div class="card"><div class="cap"><span><i></i>포폴 영상 자격</span></div><div id="port"></div><div id="portn"></div></div>
+    <div class="card rl" id="rules"></div>
+  </div>
+  <div id="hint">👆 내 이름을 눌러서 출석·연습·운동·일지 체크 <small>TAP YOUR NAME</small></div>
+  <div id="ov"><div class="box" id="box"></div></div>
+</div>
+<script>
+(() => {
+  const S = {"stu":[["이름","비밀번호","보호권"],["김서윤","",""],["이하은","",""],["박지우","",""],["최민서","",""],["정예린","","2026-11-20"],["강다은","",""],["조수아","",""],["윤채원","",""],["장하린","",""],["임지아","",""]],"log":[["시각","이름","종류"],["2026-11-13 18:20:00","김서윤","수업 출석"],["2026-11-13 16:50:00","김서윤","연습 시작"],["2026-11-13 17:40:00","김서윤","연습 끝","월말평가 준비"],["2026-11-13 22:30:00","김서윤","연습일지","2026-11-13"],["2026-11-16 22:10:00","김서윤","운동 완료","2026-11-16"],["2026-11-16 22:30:00","김서윤","연습일지","2026-11-16"],["2026-11-17 17:10:00","김서윤","수업 출석"],["2026-11-17 22:10:00","김서윤","운동 완료","2026-11-17"],["2026-11-17 22:30:00","김서윤","연습일지","2026-11-17"],["2026-11-18 22:10:00","김서윤","운동 완료","2026-11-18"],["2026-11-18 22:30:00","김서윤","연습일지","2026-11-18"],["2026-11-19 17:10:00","김서윤","수업 출석"],["2026-11-20 18:20:00","김서윤","수업 출석"],["2026-11-20 16:50:00","김서윤","연습 시작"],["2026-11-20 17:40:00","김서윤","연습 끝","개인연습"],["2026-11-20 22:10:00","김서윤","운동 완료","2026-11-20"],["2026-11-20 22:30:00","김서윤","연습일지","2026-11-20"],["2026-11-23 22:10:00","김서윤","운동 완료","2026-11-23"],["2026-11-23 22:30:00","김서윤","연습일지","2026-11-23"],["2026-11-24 22:10:00","김서윤","운동 완료","2026-11-24"],["2026-11-25 16:50:00","김서윤","연습 시작"],["2026-11-25 17:00:00","김서윤","연습 끝","월말평가 준비"],["2026-11-26 16:50:00","김서윤","연습 시작"],["2026-11-26 17:40:00","김서윤","연습 끝","개인연습"],["2026-11-27 18:20:00","김서윤","수업 출석"],["2026-11-27 22:10:00","김서윤","운동 완료","2026-11-27"],["2026-11-27 22:30:00","김서윤","연습일지","2026-11-27"],["2026-11-30 16:50:00","김서윤","연습 시작"],["2026-11-30 17:00:00","김서윤","연습 끝","개인연습"],["2026-11-30 22:10:00","김서윤","운동 완료","2026-11-30"],["2026-12-01 17:10:00","김서윤","수업 출석"],["2026-12-02 22:30:00","김서윤","연습일지","2026-12-02"],["2026-12-03 22:10:00","김서윤","운동 완료","2026-12-03"],["2026-12-04 22:10:00","김서윤","운동 완료","2026-12-04"],["2026-12-04 22:30:00","김서윤","연습일지","2026-12-04"],["2026-11-13 18:21:00","이하은","수업 출석"],["2026-11-13 22:10:00","이하은","운동 완료","2026-11-13"],["2026-11-13 22:30:00","이하은","연습일지","2026-11-13"],["2026-11-16 16:51:00","이하은","연습 시작"],["2026-11-16 17:41:00","이하은","연습 끝","월말평가 준비"],["2026-11-16 22:10:00","이하은","운동 완료","2026-11-16"],["2026-11-16 22:30:00","이하은","연습일지","2026-11-16"],["2026-11-17 22:30:00","이하은","연습일지","2026-11-17"],["2026-11-19 17:11:00","이하은","수업 출석"],["2026-11-20 18:21:00","이하은","수업 출석"],["2026-11-20 22:10:00","이하은","운동 완료","2026-11-20"],["2026-11-23 22:10:00","이하은","운동 완료","2026-11-23"],["2026-11-23 22:30:00","이하은","연습일지","2026-11-23"],["2026-11-24 22:10:00","이하은","운동 완료","2026-11-24"],["2026-11-25 17:11:00","이하은","수업 출석"],["2026-11-25 22:10:00","이하은","운동 완료","2026-11-25"],["2026-11-26 17:11:00","이하은","수업 출석"],["2026-11-26 16:51:00","이하은","연습 시작"],["2026-11-26 17:41:00","이하은","연습 끝","개인연습"],["2026-11-26 22:10:00","이하은","운동 완료","2026-11-26"],["2026-11-27 18:21:00","이하은","수업 출석"],["2026-11-27 22:10:00","이하은","운동 완료","2026-11-27"],["2026-11-27 22:30:00","이하은","연습일지","2026-11-27"],["2026-11-30 17:11:00","이하은","수업 출석"],["2026-11-30 16:51:00","이하은","연습 시작"],["2026-11-30 17:41:00","이하은","연습 끝","개인연습"],["2026-11-30 22:30:00","이하은","연습일지","2026-11-30"],["2026-12-01 22:10:00","이하은","운동 완료","2026-12-01"],["2026-12-02 17:11:00","이하은","수업 출석"],["2026-12-02 22:10:00","이하은","운동 완료","2026-12-02"],["2026-12-02 22:30:00","이하은","연습일지","2026-12-02"],["2026-12-03 17:11:00","이하은","수업 출석"],["2026-12-03 22:30:00","이하은","연습일지","2026-12-03"],["2026-12-04 16:51:00","이하은","연습 시작"],["2026-12-04 17:41:00","이하은","연습 끝","개인연습"],["2026-12-04 22:10:00","이하은","운동 완료","2026-12-04"],["2026-11-13 18:22:00","박지우","수업 출석"],["2026-11-13 22:30:00","박지우","연습일지","2026-11-13"],["2026-11-16 16:52:00","박지우","연습 시작"],["2026-11-16 17:42:00","박지우","연습 끝","개인연습"],["2026-11-16 22:10:00","박지우","운동 완료","2026-11-16"],["2026-11-16 22:30:00","박지우","연습일지","2026-11-16"],["2026-11-17 22:10:00","박지우","운동 완료","2026-11-17"],["2026-11-17 22:30:00","박지우","연습일지","2026-11-17"],["2026-11-18 22:30:00","박지우","연습일지","2026-11-18"],["2026-11-19 17:12:00","박지우","수업 출석"],["2026-11-19 16:52:00","박지우","연습 시작"],["2026-11-19 17:42:00","박지우","연습 끝","개인연습"],["2026-11-20 18:22:00","박지우","수업 출석"],["2026-11-20 22:10:00","박지우","운동 완료","2026-11-20"],["2026-11-23 17:12:00","박지우","수업 출석"],["2026-11-23 22:30:00","박지우","연습일지","2026-11-23"],["2026-11-24 22:30:00","박지우","연습일지","2026-11-24"],["2026-11-25 22:30:00","박지우","연습일지","2026-11-25"],["2026-11-26 17:12:00","박지우","수업 출석"],["2026-11-26 16:52:00","박지우","연습 시작"],["2026-11-26 17:42:00","박지우","연습 끝","개인연습"],["2026-11-27 18:22:00","박지우","수업 출석"],["2026-11-30 17:12:00","박지우","수업 출석"],["2026-11-30 16:52:00","박지우","연습 시작"],["2026-11-30 17:42:00","박지우","연습 끝","개인연습"],["2026-11-30 22:30:00","박지우","연습일지","2026-11-30"],["2026-12-02 17:12:00","박지우","수업 출석"],["2026-12-02 16:52:00","박지우","연습 시작"],["2026-12-02 17:02:00","박지우","연습 끝","개인연습"],["2026-12-02 22:10:00","박지우","운동 완료","2026-12-02"],["2026-12-03 17:12:00","박지우","수업 출석"],["2026-12-03 22:30:00","박지우","연습일지","2026-12-03"],["2026-11-13 18:23:00","최민서","수업 출석"],["2026-11-13 16:53:00","최민서","연습 시작"],["2026-11-13 17:43:00","최민서","연습 끝","개인연습"],["2026-11-13 22:30:00","최민서","연습일지","2026-11-13"],["2026-11-16 22:10:00","최민서","운동 완료","2026-11-16"],["2026-11-16 22:30:00","최민서","연습일지","2026-11-16"],["2026-11-17 16:53:00","최민서","연습 시작"],["2026-11-17 17:43:00","최민서","연습 끝","개인연습"],["2026-11-18 22:30:00","최민서","연습일지","2026-11-18"],["2026-11-20 18:23:00","최민서","수업 출석"],["2026-11-20 16:53:00","최민서","연습 시작"],["2026-11-20 17:03:00","최민서","연습 끝","월말평가 준비"],["2026-11-20 22:10:00","최민서","운동 완료","2026-11-20"],["2026-11-23 22:30:00","최민서","연습일지","2026-11-23"],["2026-11-24 17:13:00","최민서","수업 출석"],["2026-11-24 22:10:00","최민서","운동 완료","2026-11-24"],["2026-11-25 22:10:00","최민서","운동 완료","2026-11-25"],["2026-11-25 22:30:00","최민서","연습일지","2026-11-25"],["2026-11-26 17:13:00","최민서","수업 출석"],["2026-11-26 22:10:00","최민서","운동 완료","2026-11-26"],["2026-11-26 22:30:00","최민서","연습일지","2026-11-26"],["2026-11-27 18:23:00","최민서","수업 출석"],["2026-11-27 16:53:00","최민서","연습 시작"],["2026-11-27 17:03:00","최민서","연습 끝","개인연습"],["2026-11-27 22:10:00","최민서","운동 완료","2026-11-27"],["2026-11-30 17:13:00","최민서","수업 출석"],["2026-11-30 22:10:00","최민서","운동 완료","2026-11-30"],["2026-11-30 22:30:00","최민서","연습일지","2026-11-30"],["2026-12-01 22:10:00","최민서","운동 완료","2026-12-01"],["2026-12-02 22:10:00","최민서","운동 완료","2026-12-02"],["2026-12-02 22:30:00","최민서","연습일지","2026-12-02"],["2026-12-03 17:13:00","최민서","수업 출석"],["2026-12-03 16:53:00","최민서","연습 시작"],["2026-12-03 17:03:00","최민서","연습 끝","개인연습"],["2026-12-03 22:10:00","최민서","운동 완료","2026-12-03"],["2026-12-04 16:53:00","최민서","연습 시작"],["2026-12-04 17:43:00","최민서","연습 끝","개인연습"],["2026-12-04 22:10:00","최민서","운동 완료","2026-12-04"],["2026-11-13 18:24:00","정예린","수업 출석"],["2026-11-13 22:30:00","정예린","연습일지","2026-11-13"],["2026-11-20 16:54:00","정예린","연습 시작"],["2026-11-20 17:44:00","정예린","연습 끝","개인연습"],["2026-11-24 17:14:00","정예린","수업 출석"],["2026-11-24 16:54:00","정예린","연습 시작"],["2026-11-24 17:44:00","정예린","연습 끝","개인연습"],["2026-11-26 17:14:00","정예린","수업 출석"],["2026-11-26 22:30:00","정예린","연습일지","2026-11-26"],["2026-11-27 16:54:00","정예린","연습 시작"],["2026-11-27 17:04:00","정예린","연습 끝","월말평가 준비"],["2026-11-30 22:10:00","정예린","운동 완료","2026-11-30"],["2026-12-01 16:54:00","정예린","연습 시작"],["2026-12-01 17:44:00","정예린","연습 끝","개인연습"],["2026-12-01 22:10:00","정예린","운동 완료","2026-12-01"],["2026-12-04 22:10:00","정예린","운동 완료","2026-12-04"],["2026-12-04 22:30:00","정예린","연습일지","2026-12-04"],["2026-11-13 16:55:00","강다은","연습 시작"],["2026-11-13 17:45:00","강다은","연습 끝","월말평가 준비"],["2026-11-16 16:55:00","강다은","연습 시작"],["2026-11-16 17:45:00","강다은","연습 끝","월말평가 준비"],["2026-11-16 22:30:00","강다은","연습일지","2026-11-16"],["2026-11-18 16:55:00","강다은","연습 시작"],["2026-11-18 17:05:00","강다은","연습 끝","개인연습"],["2026-11-18 22:10:00","강다은","운동 완료","2026-11-18"],["2026-11-18 22:30:00","강다은","연습일지","2026-11-18"],["2026-11-19 16:55:00","강다은","연습 시작"],["2026-11-19 17:45:00","강다은","연습 끝","개인연습"],["2026-11-20 18:25:00","강다은","수업 출석"],["2026-11-20 16:55:00","강다은","연습 시작"],["2026-11-20 17:05:00","강다은","연습 끝","월말평가 준비"],["2026-11-23 22:10:00","강다은","운동 완료","2026-11-23"],["2026-11-24 17:15:00","강다은","수업 출석"],["2026-11-24 22:10:00","강다은","운동 완료","2026-11-24"],["2026-11-25 16:55:00","강다은","연습 시작"],["2026-11-25 17:05:00","강다은","연습 끝","월말평가 준비"],["2026-11-26 17:15:00","강다은","수업 출석"],["2026-11-26 16:55:00","강다은","연습 시작"],["2026-11-26 17:45:00","강다은","연습 끝","개인연습"],["2026-11-27 18:25:00","강다은","수업 출석"],["2026-11-27 22:30:00","강다은","연습일지","2026-11-27"],["2026-11-30 16:55:00","강다은","연습 시작"],["2026-11-30 17:45:00","강다은","연습 끝","개인연습"],["2026-12-01 17:15:00","강다은","수업 출석"],["2026-12-01 16:55:00","강다은","연습 시작"],["2026-12-01 17:45:00","강다은","연습 끝","개인연습"],["2026-12-02 22:30:00","강다은","연습일지","2026-12-02"],["2026-12-03 16:55:00","강다은","연습 시작"],["2026-12-03 17:45:00","강다은","연습 끝","개인연습"],["2026-12-03 22:10:00","강다은","운동 완료","2026-12-03"],["2026-12-03 22:30:00","강다은","연습일지","2026-12-03"],["2026-11-13 18:26:00","조수아","수업 출석"],["2026-11-13 22:10:00","조수아","운동 완료","2026-11-13"],["2026-11-16 22:10:00","조수아","운동 완료","2026-11-16"],["2026-11-16 22:30:00","조수아","연습일지","2026-11-16"],["2026-11-17 22:10:00","조수아","운동 완료","2026-11-17"],["2026-11-19 22:10:00","조수아","운동 완료","2026-11-19"],["2026-11-20 18:26:00","조수아","수업 출석"],["2026-11-20 22:10:00","조수아","운동 완료","2026-11-20"],["2026-11-20 22:30:00","조수아","연습일지","2026-11-20"],["2026-11-23 17:16:00","조수아","수업 출석"],["2026-11-23 16:56:00","조수아","연습 시작"],["2026-11-23 17:46:00","조수아","연습 끝","월말평가 준비"],["2026-11-24 22:30:00","조수아","연습일지","2026-11-24"],["2026-11-25 17:16:00","조수아","수업 출석"],["2026-11-25 16:56:00","조수아","연습 시작"],["2026-11-25 17:46:00","조수아","연습 끝","개인연습"],["2026-11-25 22:30:00","조수아","연습일지","2026-11-25"],["2026-11-26 16:56:00","조수아","연습 시작"],["2026-11-26 17:46:00","조수아","연습 끝","개인연습"],["2026-11-26 22:10:00","조수아","운동 완료","2026-11-26"],["2026-11-26 22:30:00","조수아","연습일지","2026-11-26"],["2026-11-27 18:26:00","조수아","수업 출석"],["2026-11-27 16:56:00","조수아","연습 시작"],["2026-11-27 17:46:00","조수아","연습 끝","개인연습"],["2026-11-27 22:10:00","조수아","운동 완료","2026-11-27"],["2026-11-30 16:56:00","조수아","연습 시작"],["2026-11-30 17:46:00","조수아","연습 끝","개인연습"],["2026-11-30 22:10:00","조수아","운동 완료","2026-11-30"],["2026-11-30 22:30:00","조수아","연습일지","2026-11-30"],["2026-12-01 16:56:00","조수아","연습 시작"],["2026-12-01 17:06:00","조수아","연습 끝","월말평가 준비"],["2026-12-02 17:16:00","조수아","수업 출석"],["2026-12-02 16:56:00","조수아","연습 시작"],["2026-12-02 17:46:00","조수아","연습 끝","개인연습"],["2026-12-02 22:30:00","조수아","연습일지","2026-12-02"],["2026-12-03 17:16:00","조수아","수업 출석"],["2026-12-03 22:30:00","조수아","연습일지","2026-12-03"],["2026-11-16 17:17:00","윤채원","수업 출석"],["2026-11-16 22:30:00","윤채원","연습일지","2026-11-16"],["2026-11-17 22:10:00","윤채원","운동 완료","2026-11-17"],["2026-11-19 22:30:00","윤채원","연습일지","2026-11-19"],["2026-11-20 16:57:00","윤채원","연습 시작"],["2026-11-20 17:47:00","윤채원","연습 끝","개인연습"],["2026-11-23 22:10:00","윤채원","운동 완료","2026-11-23"],["2026-11-25 16:57:00","윤채원","연습 시작"],["2026-11-25 17:47:00","윤채원","연습 끝","개인연습"],["2026-11-26 17:17:00","윤채원","수업 출석"],["2026-11-26 16:57:00","윤채원","연습 시작"],["2026-11-26 17:47:00","윤채원","연습 끝","개인연습"],["2026-11-30 22:30:00","윤채원","연습일지","2026-11-30"],["2026-12-01 22:30:00","윤채원","연습일지","2026-12-01"],["2026-12-02 22:30:00","윤채원","연습일지","2026-12-02"],["2026-11-13 18:28:00","장하린","수업 출석"],["2026-11-13 16:58:00","장하린","연습 시작"],["2026-11-13 17:48:00","장하린","연습 끝","월말평가 준비"],["2026-11-13 22:10:00","장하린","운동 완료","2026-11-13"],["2026-11-17 22:10:00","장하린","운동 완료","2026-11-17"],["2026-11-18 16:58:00","장하린","연습 시작"],["2026-11-18 17:48:00","장하린","연습 끝","개인연습"],["2026-11-20 16:58:00","장하린","연습 시작"],["2026-11-20 17:48:00","장하린","연습 끝","개인연습"],["2026-11-20 22:10:00","장하린","운동 완료","2026-11-20"],["2026-11-23 22:10:00","장하린","운동 완료","2026-11-23"],["2026-11-24 16:58:00","장하린","연습 시작"],["2026-11-24 17:48:00","장하린","연습 끝","월말평가 준비"],["2026-11-25 22:10:00","장하린","운동 완료","2026-11-25"],["2026-11-26 16:58:00","장하린","연습 시작"],["2026-11-26 17:48:00","장하린","연습 끝","개인연습"],["2026-11-27 16:58:00","장하린","연습 시작"],["2026-11-27 17:48:00","장하린","연습 끝","개인연습"],["2026-11-30 17:18:00","장하린","수업 출석"],["2026-11-30 22:10:00","장하린","운동 완료","2026-11-30"],["2026-11-30 22:30:00","장하린","연습일지","2026-11-30"],["2026-12-01 22:30:00","장하린","연습일지","2026-12-01"],["2026-12-02 17:18:00","장하린","수업 출석"],["2026-12-02 22:10:00","장하린","운동 완료","2026-12-02"],["2026-12-02 22:30:00","장하린","연습일지","2026-12-02"],["2026-12-03 22:10:00","장하린","운동 완료","2026-12-03"],["2026-12-03 22:30:00","장하린","연습일지","2026-12-03"],["2026-12-04 22:10:00","장하린","운동 완료","2026-12-04"],["2026-12-04 22:30:00","장하린","연습일지","2026-12-04"],["2026-11-13 18:29:00","임지아","수업 출석"],["2026-11-16 17:19:00","임지아","수업 출석"],["2026-11-16 16:59:00","임지아","연습 시작"],["2026-11-16 17:49:00","임지아","연습 끝","개인연습"],["2026-11-16 22:30:00","임지아","연습일지","2026-11-16"],["2026-11-17 16:59:00","임지아","연습 시작"],["2026-11-17 17:09:00","임지아","연습 끝","개인연습"],["2026-11-17 22:10:00","임지아","운동 완료","2026-11-17"],["2026-11-17 22:30:00","임지아","연습일지","2026-11-17"],["2026-11-18 17:19:00","임지아","수업 출석"],["2026-11-18 22:30:00","임지아","연습일지","2026-11-18"],["2026-11-19 17:19:00","임지아","수업 출석"],["2026-11-20 18:29:00","임지아","수업 출석"],["2026-11-20 22:30:00","임지아","연습일지","2026-11-20"],["2026-11-23 17:19:00","임지아","수업 출석"],["2026-11-23 22:30:00","임지아","연습일지","2026-11-23"],["2026-11-24 17:19:00","임지아","수업 출석"],["2026-11-24 16:59:00","임지아","연습 시작"],["2026-11-24 17:49:00","임지아","연습 끝","개인연습"],["2026-11-24 22:10:00","임지아","운동 완료","2026-11-24"],["2026-11-24 22:30:00","임지아","연습일지","2026-11-24"],["2026-11-26 17:19:00","임지아","수업 출석"],["2026-11-26 16:59:00","임지아","연습 시작"],["2026-11-26 17:49:00","임지아","연습 끝","개인연습"],["2026-11-26 22:10:00","임지아","운동 완료","2026-11-26"],["2026-11-26 22:30:00","임지아","연습일지","2026-11-26"],["2026-11-27 18:29:00","임지아","수업 출석"],["2026-11-27 16:59:00","임지아","연습 시작"],["2026-11-27 17:49:00","임지아","연습 끝","월말평가 준비"],["2026-11-30 17:19:00","임지아","수업 출석"],["2026-11-30 22:30:00","임지아","연습일지","2026-11-30"],["2026-12-01 17:19:00","임지아","수업 출석"],["2026-12-01 22:10:00","임지아","운동 완료","2026-12-01"],["2026-12-01 22:30:00","임지아","연습일지","2026-12-01"],["2026-12-02 17:19:00","임지아","수업 출석"],["2026-12-02 22:30:00","임지아","연습일지","2026-12-02"],["2026-12-03 16:59:00","임지아","연습 시작"],["2026-12-03 17:49:00","임지아","연습 끝","개인연습"],["2026-12-03 22:10:00","임지아","운동 완료","2026-12-03"],["2026-12-04 18:00:00","김서윤","연습 시작"],["2026-12-04 18:01:00","박지우","연습 시작"],["2026-12-04 18:02:00","임지아","연습 시작"],["2026-12-04 18:25:00","이하은","수업 출석"],["2026-12-04 18:25:00","최민서","수업 출석"]],"cfg":[["항목","값"],["시즌 이름","RAW SEASON 1"],["시즌 시작","2026-11-13"],["시즌 끝","2026-12-25"],["수업 점수 (수업마다, 하루 3회까지)",10],["전문반 고정수업 점수",20],["운동 루틴 점수 (하루 1회)",10],["연습일지 점수 (하루 1회)",10],["개인연습 점수 (하루 1회)",10],["연습 인정 최소 분",30],["보호권 (시즌당)",1],["고정수업 요일 (0=일 … 5=금)",5],["고정수업 시간","18:30"]],"now":"2026-12-04 18:42:00"};
+  let now = S.now; const pad = n => String(n).padStart(2, '0');
+  const tick = m => { const d = new Date(now.replace(' ', 'T')); d.setMinutes(d.getMinutes() + m); now = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':00'; };
+  const P = x => Date.parse(x.replace(' ', 'T'));
+  window.MOCK = {
+    get: cb => cb(JSON.parse(JSON.stringify(Object.assign({}, S, { now })))),
+    checkIn: (name, pin, kind, note, cb) => setTimeout(() => {
+      if (pin !== '1234') return cb({ ok: false, msg: '비밀번호가 달라요' });
+      tick(35); const today = now.slice(0, 10), y = new Date(today + 'T00:00:00'); y.setDate(y.getDate() - 1);
+      const yest = y.getFullYear() + '-' + pad(y.getMonth() + 1) + '-' + pad(y.getDate());
+      const mine = S.log.slice(1).filter(r => r[1] === name && r[0].slice(0, 10) === today).map(r => ({ t: r[0], k: r[2] }));
+      const lastT = k => { const a = mine.filter(x => x.k === k); return a.length ? a[a.length - 1].t : ''; };
+      const open = (a, b) => lastT(a) > lastT(b);
+      const no = msg => cb({ ok: false, msg });
+      if (kind === '수업 출석') { const c = mine.filter(x => x.k === '수업 출석'); if (c.length >= 3) return no('수업 출석은 하루 3번까지예요'); if (c.length && (P(now) - P(c[c.length - 1].t)) / 6e4 < 60) return no('방금 수업 출석했어요. 다음 수업 때 눌러요'); }
+      if (kind === '운동 완료' || kind === '연습일지') { if (note !== today && note !== yest) return no('오늘이나 어제만 고를 수 있어요');
+        if (S.log.some(r => r[1] === name && r[2] === kind && String(r[3] || '').slice(0, 10) === note)) return no((note === today ? '오늘' : '어제') + ' ' + kind + '는 이미 체크했어요'); }
+      if (kind === '연습 시작' && open('연습 시작', '연습 끝')) return no('이미 연습 중이에요. 끝나면 [연습 끝]');
+      if (kind === '연습 끝' && !open('연습 시작', '연습 끝')) return no('[연습 시작]을 먼저 눌러야 해요');
+      S.log.push([now, name, kind, note || '']);
+      let msg = '';
+      if (kind === '연습 끝') { const min = Math.round((P(now) - P(lastT('연습 시작'))) / 6e4); msg = note === '월말평가 준비' ? '월말평가 준비 ' + min + '분 기록 (점수 없음)' : '개인연습 ' + min + '분' + (min >= 30 ? ' 🔥 인정!' : ' (30분부터 인정)'); }
+      if (kind === '운동 완료' || kind === '연습일지') msg = (note === today ? '오늘' : '어제') + ' ' + kind + ' ✓ · 단톡방에 인증 올려 주세요';
+      cb({ ok: true, name, kind, time: now.slice(11, 16), msg });
+    }, 250)
+  };
+})();
+</script>
+<script>
+const KINDS = [['수업 출석', 'CLASS', 'main'], ['연습 시작', 'PRACTICE IN', ''], ['연습 끝', 'PRACTICE OUT', ''], ['운동 완료', '학원·집 · 단톡 인증', ''], ['연습일지', '수업정리 · 단톡 인증', '']];
+const DAILY = ['운동 완료', '연습일지'];
+let DATA = null, C = null;
+
+function fit() { const s = Math.min(innerWidth / 1280, innerHeight / 800), st = document.getElementById('stage');
+  st.style.transform = `scale(${s})`; st.style.left = (innerWidth - 1280 * s) / 2 + 'px'; st.style.top = (innerHeight - 800 * s) / 2 + 'px'; }
+addEventListener('resize', fit); fit();
+// 화면 꺼짐 방지
+let wl = null; const wake = async () => { try { if ('wakeLock' in navigator && !wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => wl = null); } } catch (e) {} };
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); }); addEventListener('pointerdown', wake);
+
+const D = s => new Date(s.slice(0, 10) + 'T00:00:00');
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const md = s => +s.slice(5, 7) + '/' + +s.slice(8, 10);
+
+function compute(raw) {
+  const cfg = {}; raw.cfg.slice(1).forEach(r => { if (r[0] !== '') cfg[String(r[0]).trim()] = r[1]; });
+  const g = (k, d) => { const e = Object.entries(cfg).find(([n]) => n.startsWith(k)); return e && e[1] !== '' ? e[1] : d; };
+  const S = String(g('시즌 시작', '')).slice(0, 10), E = String(g('시즌 끝', '')).slice(0, 10);
+  const PC = +g('수업 점수', 10), PF = +g('전문반 고정수업 점수', 20), PE = +g('운동 루틴 점수', 10), PJ = +g('연습일지 점수', 10), PP = +g('개인연습 점수', 10), MIN = +g('연습 인정 최소 분', 30);
+  const SH = +g('보호권', 1), FW = +g('고정수업 요일', 5), FT = String(g('고정수업 시간', '18:30'));
+  const now = raw.now, today = now.slice(0, 10);
+  const fris = []; for (let d = D(S); ymd(d) <= E; d.setDate(d.getDate() + 1)) if (d.getDay() === FW) fris.push(ymd(d));
+  const log = raw.log.slice(1).filter(r => r[0] && String(r[0]).slice(0, 10) >= S && String(r[0]).slice(0, 10) <= E)
+    .map(r => ({ t: String(r[0]), d: String(r[0]).slice(0, 10), n: String(r[1]).trim(), k: String(r[2]).trim(), note: String(r[3] || '').trim() })).sort((a, b) => a.t < b.t ? -1 : 1);
+  const list = raw.stu.slice(1).filter(r => String(r[0]).trim()).map(r => {
+    const name = String(r[0]).trim(), mine = log.filter(x => x.n === name);
+    const shields = String(r[2] || '').match(/\d{4}-\d{2}-\d{2}/g) || []; const sh = shields.slice(0, SH);
+    const byDay = {}; mine.filter(x => x.k === '수업 출석').forEach(x => (byDay[x.d] = byDay[x.d] || []).push(x));
+    const cls = new Set(Object.keys(byDay)); let clsPts = 0;
+    Object.entries(byDay).forEach(([d, a]) => a.slice(0, 3).forEach((x, i) => clsPts += i === 0 && D(d).getDay() === FW ? PF : PC));
+    const ex = new Set(mine.filter(x => x.k === '운동 완료').map(x => x.note.slice(0, 10) || x.d));
+    const jr = new Set(mine.filter(x => x.k === '연습일지').map(x => x.note.slice(0, 10) || x.d));
+    const prac = new Set(); let open = null;
+    mine.forEach(x => { if (x.k === '연습 시작') open = x; else if (x.k === '연습 끝' && open && open.d === x.d) {
+      if (x.note !== '월말평가 준비' && (new Date(x.t.replace(' ', 'T')) - new Date(open.t.replace(' ', 'T'))) / 60000 >= MIN) prac.add(x.d); open = null; } });
+    const practicing = open && open.d === today ? open.t.slice(11, 16) : null;
+    const fr = fris.map(f => f > today ? 'up' : cls.has(f) ? 'ok' : sh.includes(f) ? 'sh' : f === today ? 'today' : 'miss');
+    const decided = fr.filter(s => s === 'ok' || s === 'sh' || s === 'miss');
+    let streak = 0; for (let i = decided.length - 1; i >= 0 && decided[i] !== 'miss'; i--) streak++;
+    const lastD = decided[decided.length - 1];
+    const status = !decided.length ? 'wait' : lastD === 'miss' ? 'off' : lastD === 'sh' ? 'sh' : 'on';
+    return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'),
+      pts: clsPts + prac.size * PP + ex.size * PE + jr.size * PJ };
+  }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || a.name.localeCompare(b.name, 'ko'));
+  let rk = 0; list.forEach((s, i) => { rk = i && list[i - 1].pts === s.pts ? rk : i + 1; s.rank = rk; });
+  const nextF = fris.find(f => f >= today);
+  return { list, cfg, S, E, today, now, fris, nextF, FT, PC, PF, PE, PJ, PP, MIN, SH, name: String(g('시즌 이름', 'RAW SEASON')).trim() };
+}
+
+function render() {
+  if (!DATA) return; C = compute(DATA); const L = C.list;
+  const m = C.name.match(/^(.*?)(\d+)$/);
+  document.getElementById('sn').innerHTML = (m ? `${esc(m[1])}<span>${m[2]}</span>` : esc(C.name)) + '<small>PRO</small>';
+  const dd = C.nextF ? Math.round((D(C.nextF) - D(C.today)) / 864e5) : null;
+  document.getElementById('nx').textContent = C.today > C.E ? 'SEASON END' : dd === 0 ? `TODAY ${C.FT}` : dd != null ? `NEXT CLASS D-${dd}` : '';
+  document.getElementById('per').textContent = `${md(C.S)} — ${md(C.E)}  ·  FRIDAY ${C.fris.filter(f => f <= C.today).length} / ${C.fris.length}`;
+  const PILL = { on: ['p-on', '🔥 이어가는 중'], off: ['p-off', '💤 끊김'], sh: ['p-sh', '🛡 보호권'], wait: ['p-wait', '시즌 시작 전'] };
+  const FB = { ok: ['f-ok', '✓'], sh: ['f-sh', '🛡'], miss: ['f-miss', '✕'], up: ['f-up', ''], today: ['f-today', ''] };
+  document.getElementById('rows').innerHTML = L.map((s, i) => `
+    <div class="row fade ${s.rank <= 3 ? 'top' : ''}" data-i="${i}"><div class="rk">${String(s.rank).padStart(2, '0')}</div>
+    <div class="nm">${esc(s.name)}</div><div class="pill ${PILL[s.status][0]}">${PILL[s.status][1]}</div>
+    <div class="fr">${s.fr.map(f => `<b class="${FB[f][0]}">${FB[f][1]}</b>`).join('')}</div>
+    <div class="st ${s.streak ? '' : 'off'}">🔥${s.streak}</div><div class="pt">${s.pts}<small>P</small></div></div>`).join('');
+  document.querySelectorAll('.row').forEach(el => el.onclick = () => openUser(L[+el.dataset.i].name));
+  const nw = L.filter(s => s.practicing).sort((a, b) => a.practicing < b.practicing ? -1 : 1);
+  document.getElementById('now').innerHTML = nw.length ? nw.map(s => `<div class="now"><div><i></i>${esc(s.name)}</div><span>${s.practicing}~</span></div>`).join('') : '<div class="empty">지금 연습실에 체크인한 사람이 없어요</div>';
+  const ok = L.filter(s => s.perfect);
+  document.getElementById('port').innerHTML = `<b>${ok.length}</b><span>/ ${L.length}명</span>`;
+  const lost = L.filter(s => !s.perfect).map(s => esc(s.name));
+  document.getElementById('portn').innerHTML = '시즌 금요일 개근(🛡 포함)이면 개인 포폴 영상 촬영' + (lost.length ? `<br>탈락: ${lost.join(', ')}` : '');
+  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 (점수 없음)<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
+    <div class="lg"><span><b class="f-ok"></b>출석</span><span><b class="f-sh"></b>보호권</span><span><b class="f-miss"></b>결석</span><span><b class="f-up"></b>예정</span></div>`;
+}
+
+// ── 출석 창: 이름 → 버튼 → 비밀번호 ──
+let sel = null, kind = null, pin = '', timer = null;
+const box = () => document.getElementById('box'), ov = () => document.getElementById('ov');
+const idle = () => { clearTimeout(timer); timer = setTimeout(close, 25000); };
+function close() { ov().classList.remove('on'); sel = kind = null; pin = ''; note = ''; clearTimeout(timer); }
+function openUser(n) {
+  sel = n; idle(); ov().classList.add('on');
+  box().innerHTML = `<h2>${esc(n)}</h2><p>무엇을 체크할까요?</p><div class="acts">${KINDS.map(([k, e, c]) => `<button class="${c}" data-k="${k}">${k}<small>${e}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
+  box().querySelectorAll('[data-k]').forEach(b => b.onclick = () => pick(b.dataset.k)); document.getElementById('cx').onclick = close;
+}
+// 연습 끝 → 종류, 운동·일지 → 오늘/어제
+let note = '';
+function pick(k) {
+  note = ''; idle();
+  const y = new Date(D(C.today)); y.setDate(y.getDate() - 1); const yest = ymd(y);
+  const opts = k === '연습 끝' ? [['개인연습', '개인연습', `${C.MIN}분 이상 ${C.PP}P`], ['월말평가 준비', '월말평가 준비', '기록만 (점수 없음)']]
+    : DAILY.includes(k) ? [[C.today, '오늘', md(C.today)], [yest, '어제', md(yest)]] : null;
+  if (!opts) return askPin(k);
+  box().innerHTML = `<h2>${esc(sel)}</h2><p>${esc(k)}</p><div class="acts">${opts.map(([v, l, sub]) => `<button data-v="${v}">${l}<small>${sub}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
+  box().querySelectorAll('[data-v]').forEach(b => b.onclick = () => { note = b.dataset.v; askPin(k); }); document.getElementById('cx').onclick = close;
+}
+function askPin(k) {
+  kind = k; pin = ''; idle();
+  box().innerHTML = `<h2>${esc(sel)}</h2><p>${esc(k)}${note ? ' · ' + esc(DAILY.includes(k) ? (note === C.today ? '오늘' : '어제') : note) : ''} · 비밀번호 4자리</p><div class="dots" id="dots">${'<i></i>'.repeat(4)}</div>
+    <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '←', 0, '✕'].map(x => `<button data-p="${x}">${x}</button>`).join('')}</div>`;
+  box().querySelectorAll('[data-p]').forEach(b => b.onclick = () => press(b.dataset.p));
+}
+function press(x) {
+  idle(); if (x === '✕') return close(); if (x === '←') pin = pin.slice(0, -1); else if (pin.length < 4) pin += x;
+  document.querySelectorAll('#dots i').forEach((d, i) => d.classList.toggle('f', i < pin.length));
+  if (pin.length === 4) { box().querySelector('.pad').style.opacity = .4; send(); }
+}
+function send() {
+  const done = r => {
+    if (!r.ok && r.msg === '비밀번호가 달라요') { box().classList.add('shake'); setTimeout(() => box().classList.remove('shake'), 400); pin = '';
+      document.querySelector('#box p').textContent = '비밀번호가 달라요. 다시 입력해요'; box().querySelector('.pad').style.opacity = 1;
+      document.querySelectorAll('#dots i').forEach(d => d.classList.remove('f')); return; }
+    box().innerHTML = r.ok ? `<div class="res">✅</div><h2>${esc(r.name)} · ${esc(r.kind)}</h2><p style="font-size:20px;color:#f4f2ee;margin-top:10px">${r.time}${r.msg ? ' · ' + esc(r.msg) : ''}</p>`
+      : `<div class="res">⚠️</div><h2>${esc(r.msg)}</h2>`;
+    clearTimeout(timer); timer = setTimeout(close, r.ok ? 3000 : 3500); load();
+  };
+  API.checkIn(sel, pin, kind, note, done);
+}
+
+// ── 데이터 ──
+const API = window.google && google.script && google.script.run ? {
+  get: cb => google.script.run.withSuccessHandler(s => cb(JSON.parse(s))).getData(),
+  checkIn: (n, p, k, note, cb) => google.script.run.withSuccessHandler(cb).withFailureHandler(e => cb({ ok: false, msg: '연결 오류, 다시 눌러 주세요' })).checkIn(n, p, k, note)
+} : window.MOCK;
+function load() { if (API) API.get(d => { DATA = d; render(); }); }
+load(); setInterval(load, 60000);
+</script>

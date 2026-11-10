@@ -32,3 +32,7 @@
 - 화면은 1분마다, 그리고 누가 체크할 때마다 새로 읽음
 - 코드를 고친 뒤: Apps Script에 다시 붙여 넣고 **배포 → 배포 관리 → 수정 → 새 버전 → 배포** (주소 그대로)
 - 미리보기(지어낸 예시 10명): `node tools/season/preview.js` → `content/2026-11-10_motivation-ideas/tablet-*.png`
+
+## 체험판 (예시 데이터, 2026-11-10)
+- https://claude.ai/artifact/Jy2C1Sdgrh1GM2CCYNGBXr — 비밀번호 모두 1234, 누를 때마다 시계가 35분씩 흐름, 새로고침하면 처음으로. 실제 시트와 연결 안 됨
+- 만들기: `node tools/season/build_demo.js` (Board.html + sample.js) → content/2026-11-10_motivation-ideas/raw-season-demo.html

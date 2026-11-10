@@ -73,16 +73,23 @@ function checkIn(name, pin, kind, note) {
     const row = read_(TAB.stu).slice(1).find(r => String(r[0]).trim() === name);
     if (!row) return { ok: false, msg: '명단에 없는 이름이에요' };
     if (String(row[3] || '').indexOf('휴원') >= 0) return { ok: false, msg: '휴원 중인 학생이에요' };
-    if (String(row[1]).trim().padStart(4, '0') !== String(pin).trim().padStart(4, '0')) return { ok: false, msg: '비밀번호가 달라요' };
+    // 비밀번호 5번 틀리면 5분 잠금 (친구 번호 맞히기 방지)
+    const cache = CacheService.getScriptCache(), ck = 'pinfail_' + name, fails = +(cache.get(ck) || 0);
+    if (fails >= 5) return { ok: false, msg: '비밀번호를 5번 틀려서 5분 동안 잠겼어요' };
+    if (String(row[1]).trim().padStart(4, '0') !== String(pin).trim().padStart(4, '0')) { cache.put(ck, String(fails + 1), 300); return { ok: false, msg: '비밀번호가 달라요' }; }
+    cache.remove(ck);
     const g = cfg_(), now = new Date(), nowS = fmt_(now), today = nowS.slice(0, 10);
+    // 휴강일: 그날은 시간표 수업이 없는 것으로 (출석 불가, 연습 제한 없음)
+    const holi = String(g('휴강일') || '').match(/\d{4}-\d{2}-\d{2}/g) || [];
+    const TT = holi.indexOf(today) >= 0 ? [[]] : read_(TAB.tt);
     const mine = read_(TAB.log).slice(1).filter(r => String(r[1]).trim() === name && String(r[0]).slice(0, 10) === today)
       .map(r => ({ t: String(r[0]), k: String(r[2]).trim(), note: String(r[3] || '').trim() }));
     const lastT = k => { const a = mine.filter(x => x.k === k); return a.length ? a[a.length - 1].t : ''; };
     const openS = (a, b) => lastT(a) > lastT(b); // 시작만 있고 끝이 없음
     if (kind === '수업 출석') {
       const bf = g('출석: 시작 몇 분 전부터'), af = g('출석: 시작 후 몇 분까지');
-      const sk = g('출석 제외 수업'), w = classesAt_(read_(TAB.tt), nowS, bf === '' ? 20 : +bf, af === '' ? 15 : +af, sk === '' ? 'K-POP' : sk);
-      if (!w.open.length) return { ok: false, msg: '지금은 수업 출석 시간이 아니에요' + (w.next ? ` · 다음 ${w.next.label}` : '') };
+      const sk = g('출석 제외 수업'), w = classesAt_(TT, nowS, bf === '' ? 20 : +bf, af === '' ? 15 : +af, sk === '' ? 'K-POP' : sk);
+      if (!w.open.length) return { ok: false, msg: (holi.indexOf(today) >= 0 ? '오늘은 휴강일이에요' : '지금은 수업 출석 시간이 아니에요') + (w.next ? ` · 다음 ${w.next.label}` : '') };
       const c = w.open.find(x => x.label === note) || (w.open.length === 1 ? w.open[0] : null);
       if (!c) return { ok: false, msg: '어느 수업인지 골라 주세요' };
       note = c.label;
@@ -99,7 +106,7 @@ function checkIn(name, pin, kind, note) {
     const skipS = g('출석 제외 수업') === '' ? 'K-POP' : g('출석 제외 수업');
     if (kind === '연습 시작' && openS('연습 시작', '연습 끝')) return { ok: false, msg: '이미 연습 중이에요. 끝나면 [연습 끝]' };
     if (kind === '연습 시작') {
-      const mm = (+nowS.slice(11, 13)) * 60 + (+nowS.slice(14, 16)), c = classesOn_(read_(TAB.tt), today, skipS).find(c => mm >= c.s && mm < c.e);
+      const mm = (+nowS.slice(11, 13)) * 60 + (+nowS.slice(14, 16)), c = classesOn_(TT, today, skipS).find(c => mm >= c.s && mm < c.e);
       if (c) return { ok: false, msg: `수업 시간에는 연습을 시작할 수 없어요 · ${c.label}` };
     }
     if (kind === '연습 끝' && !openS('연습 시작', '연습 끝')) return { ok: false, msg: '[연습 시작]을 먼저 눌러야 해요' };
@@ -107,7 +114,7 @@ function checkIn(name, pin, kind, note) {
     SpreadsheetApp.getActive().getSheetByName(TAB.log).appendRow([nowS, name, kind, note || '']);
     let msg = '';
     if (kind === '연습 끝') {
-      const pm = pracMin_(read_(TAB.tt), lastT('연습 시작'), nowS, skipS), min = pm.min, need = +g('연습 인정 최소 분') || 0;
+      const pm = pracMin_(TT, lastT('연습 시작'), nowS, skipS), min = pm.min, need = +g('연습 인정 최소 분') || 0;
       const ex = pm.over ? ` (수업 시간 ${pm.over}분 제외)` : '';
       msg = note === '월말평가 준비' ? `월말평가 준비 ${min}분 기록${ex} · 점수 없음` : `개인연습 ${min}분${ex}` + (min >= need ? ' 🔥 인정!' : ` · ${need}분부터 인정`);
     }
@@ -138,6 +145,7 @@ function setup() {
     ['출석: 시작 몇 분 전부터', 20],
     ['출석: 시작 후 몇 분까지', 15],
     ['출석 제외 수업 (이름에 들어가면 제외, 쉼표로)', 'K-POP'],
+    ['휴강일 (날짜를 쉼표로 · 그날은 출석·금요일 도장 없음)', ''],
   ];
   let c = ss.getSheetByName(TAB.cfg);
   if (!c) {

@@ -63,6 +63,7 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
 .box h2{font-family:"Noto Sans KR";font-weight:900;font-size:34px}
 .box p{margin-top:6px;font-family:"Noto Sans KR";font-size:15px;color:#8f8a9c}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.acts button.main{grid-column:1 / -1}
 .acts button,.pad button,.x{font-family:"Noto Sans KR";font-weight:900;border:0;border-radius:16px;cursor:pointer}
 .acts button{height:84px;font-size:22px;background:rgba(255,255,255,.06);color:#f4f2ee;border:1px solid rgba(255,255,255,.1)}
 .acts button:active,.pad button:active{transform:scale(.96)}
@@ -91,11 +92,12 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
     <div class="card"><div class="cap"><span><i></i>포폴 영상 자격</span></div><div id="port"></div><div id="portn"></div></div>
     <div class="card rl" id="rules"></div>
   </div>
-  <div id="hint">👆 내 이름을 눌러서 출석·연습 체크 <small>TAP YOUR NAME</small></div>
+  <div id="hint">👆 내 이름을 눌러서 출석·연습·운동·일지 체크 <small>TAP YOUR NAME</small></div>
   <div id="ov"><div class="box" id="box"></div></div>
 </div>
 <script>
-const KINDS = [['수업 출석', 'CLASS', 'main'], ['연습 시작', 'PRACTICE IN', ''], ['연습 끝', 'PRACTICE OUT', ''], ['인증 올림', '단톡방 영상', '']];
+const KINDS = [['수업 출석', 'CLASS', 'main'], ['연습 시작', 'PRACTICE IN', ''], ['연습 끝', 'PRACTICE OUT', ''], ['운동 완료', '학원·집 · 단톡 인증', ''], ['연습일지', '수업정리 · 단톡 인증', '']];
+const DAILY = ['운동 완료', '연습일지'];
 let DATA = null, C = null;
 
 function fit() { const s = Math.min(innerWidth / 1280, innerHeight / 800), st = document.getElementById('stage');
@@ -114,20 +116,23 @@ function compute(raw) {
   const cfg = {}; raw.cfg.slice(1).forEach(r => { if (r[0] !== '') cfg[String(r[0]).trim()] = r[1]; });
   const g = (k, d) => { const e = Object.entries(cfg).find(([n]) => n.startsWith(k)); return e && e[1] !== '' ? e[1] : d; };
   const S = String(g('시즌 시작', '')).slice(0, 10), E = String(g('시즌 끝', '')).slice(0, 10);
-  const PC = +g('수업 출석 점수', 10), PP = +g('연습실 점수', 10), MIN = +g('연습 인정 최소 분', 30), PV = +g('인증 영상 점수', 5);
+  const PC = +g('수업 점수', 10), PF = +g('전문반 고정수업 점수', 20), PE = +g('운동 루틴 점수', 10), PJ = +g('연습일지 점수', 10), PP = +g('개인연습 점수', 10), MIN = +g('연습 인정 최소 분', 30);
   const SH = +g('보호권', 1), FW = +g('고정수업 요일', 5), FT = String(g('고정수업 시간', '18:30'));
   const now = raw.now, today = now.slice(0, 10);
   const fris = []; for (let d = D(S); ymd(d) <= E; d.setDate(d.getDate() + 1)) if (d.getDay() === FW) fris.push(ymd(d));
   const log = raw.log.slice(1).filter(r => r[0] && String(r[0]).slice(0, 10) >= S && String(r[0]).slice(0, 10) <= E)
-    .map(r => ({ t: String(r[0]), d: String(r[0]).slice(0, 10), n: String(r[1]).trim(), k: String(r[2]).trim() })).sort((a, b) => a.t < b.t ? -1 : 1);
+    .map(r => ({ t: String(r[0]), d: String(r[0]).slice(0, 10), n: String(r[1]).trim(), k: String(r[2]).trim(), note: String(r[3] || '').trim() })).sort((a, b) => a.t < b.t ? -1 : 1);
   const list = raw.stu.slice(1).filter(r => String(r[0]).trim()).map(r => {
     const name = String(r[0]).trim(), mine = log.filter(x => x.n === name);
     const shields = String(r[2] || '').match(/\d{4}-\d{2}-\d{2}/g) || []; const sh = shields.slice(0, SH);
-    const cls = new Set(mine.filter(x => x.k === '수업 출석').map(x => x.d));
-    const cert = new Set(mine.filter(x => x.k === '인증 올림').map(x => x.d));
+    const byDay = {}; mine.filter(x => x.k === '수업 출석').forEach(x => (byDay[x.d] = byDay[x.d] || []).push(x));
+    const cls = new Set(Object.keys(byDay)); let clsPts = 0;
+    Object.entries(byDay).forEach(([d, a]) => a.slice(0, 3).forEach((x, i) => clsPts += i === 0 && D(d).getDay() === FW ? PF : PC));
+    const ex = new Set(mine.filter(x => x.k === '운동 완료').map(x => x.note.slice(0, 10) || x.d));
+    const jr = new Set(mine.filter(x => x.k === '연습일지').map(x => x.note.slice(0, 10) || x.d));
     const prac = new Set(); let open = null;
     mine.forEach(x => { if (x.k === '연습 시작') open = x; else if (x.k === '연습 끝' && open && open.d === x.d) {
-      if ((new Date(x.t.replace(' ', 'T')) - new Date(open.t.replace(' ', 'T'))) / 60000 >= MIN) prac.add(x.d); open = null; } });
+      if (x.note !== '월말평가 준비' && (new Date(x.t.replace(' ', 'T')) - new Date(open.t.replace(' ', 'T'))) / 60000 >= MIN) prac.add(x.d); open = null; } });
     const practicing = open && open.d === today ? open.t.slice(11, 16) : null;
     const fr = fris.map(f => f > today ? 'up' : cls.has(f) ? 'ok' : sh.includes(f) ? 'sh' : f === today ? 'today' : 'miss');
     const decided = fr.filter(s => s === 'ok' || s === 'sh' || s === 'miss');
@@ -135,11 +140,11 @@ function compute(raw) {
     const lastD = decided[decided.length - 1];
     const status = !decided.length ? 'wait' : lastD === 'miss' ? 'off' : lastD === 'sh' ? 'sh' : 'on';
     return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'),
-      pts: cls.size * PC + prac.size * PP + cert.size * PV };
+      pts: clsPts + prac.size * PP + ex.size * PE + jr.size * PJ };
   }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || a.name.localeCompare(b.name, 'ko'));
   let rk = 0; list.forEach((s, i) => { rk = i && list[i - 1].pts === s.pts ? rk : i + 1; s.rank = rk; });
   const nextF = fris.find(f => f >= today);
-  return { list, cfg, S, E, today, now, fris, nextF, FT, PC, PP, MIN, PV, SH, name: String(g('시즌 이름', 'RAW SEASON')).trim() };
+  return { list, cfg, S, E, today, now, fris, nextF, FT, PC, PF, PE, PJ, PP, MIN, SH, name: String(g('시즌 이름', 'RAW SEASON')).trim() };
 }
 
 function render() {
@@ -163,7 +168,7 @@ function render() {
   document.getElementById('port').innerHTML = `<b>${ok.length}</b><span>/ ${L.length}명</span>`;
   const lost = L.filter(s => !s.perfect).map(s => esc(s.name));
   document.getElementById('portn').innerHTML = '시즌 금요일 개근(🛡 포함)이면 개인 포폴 영상 촬영' + (lost.length ? `<br>탈락: ${lost.join(', ')}` : '');
-  document.getElementById('rules').innerHTML = `<b>수업 ${C.PC}P · 연습실 ${C.MIN}분+ ${C.PP}P · 인증 ${C.PV}P</b> (각 하루 1회)<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
+  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 (점수 없음)<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
     <div class="lg"><span><b class="f-ok"></b>출석</span><span><b class="f-sh"></b>보호권</span><span><b class="f-miss"></b>결석</span><span><b class="f-up"></b>예정</span></div>`;
 }
 
@@ -171,15 +176,26 @@ function render() {
 let sel = null, kind = null, pin = '', timer = null;
 const box = () => document.getElementById('box'), ov = () => document.getElementById('ov');
 const idle = () => { clearTimeout(timer); timer = setTimeout(close, 25000); };
-function close() { ov().classList.remove('on'); sel = kind = null; pin = ''; clearTimeout(timer); }
+function close() { ov().classList.remove('on'); sel = kind = null; pin = ''; note = ''; clearTimeout(timer); }
 function openUser(n) {
   sel = n; idle(); ov().classList.add('on');
   box().innerHTML = `<h2>${esc(n)}</h2><p>무엇을 체크할까요?</p><div class="acts">${KINDS.map(([k, e, c]) => `<button class="${c}" data-k="${k}">${k}<small>${e}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
-  box().querySelectorAll('[data-k]').forEach(b => b.onclick = () => askPin(b.dataset.k)); document.getElementById('cx').onclick = close;
+  box().querySelectorAll('[data-k]').forEach(b => b.onclick = () => pick(b.dataset.k)); document.getElementById('cx').onclick = close;
+}
+// 연습 끝 → 종류, 운동·일지 → 오늘/어제
+let note = '';
+function pick(k) {
+  note = ''; idle();
+  const y = new Date(D(C.today)); y.setDate(y.getDate() - 1); const yest = ymd(y);
+  const opts = k === '연습 끝' ? [['개인연습', '개인연습', `${C.MIN}분 이상 ${C.PP}P`], ['월말평가 준비', '월말평가 준비', '기록만 (점수 없음)']]
+    : DAILY.includes(k) ? [[C.today, '오늘', md(C.today)], [yest, '어제', md(yest)]] : null;
+  if (!opts) return askPin(k);
+  box().innerHTML = `<h2>${esc(sel)}</h2><p>${esc(k)}</p><div class="acts">${opts.map(([v, l, sub]) => `<button data-v="${v}">${l}<small>${sub}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
+  box().querySelectorAll('[data-v]').forEach(b => b.onclick = () => { note = b.dataset.v; askPin(k); }); document.getElementById('cx').onclick = close;
 }
 function askPin(k) {
   kind = k; pin = ''; idle();
-  box().innerHTML = `<h2>${esc(sel)}</h2><p>${esc(k)} · 비밀번호 4자리</p><div class="dots" id="dots">${'<i></i>'.repeat(4)}</div>
+  box().innerHTML = `<h2>${esc(sel)}</h2><p>${esc(k)}${note ? ' · ' + esc(DAILY.includes(k) ? (note === C.today ? '오늘' : '어제') : note) : ''} · 비밀번호 4자리</p><div class="dots" id="dots">${'<i></i>'.repeat(4)}</div>
     <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '←', 0, '✕'].map(x => `<button data-p="${x}">${x}</button>`).join('')}</div>`;
   box().querySelectorAll('[data-p]').forEach(b => b.onclick = () => press(b.dataset.p));
 }
@@ -197,13 +213,13 @@ function send() {
       : `<div class="res">⚠️</div><h2>${esc(r.msg)}</h2>`;
     clearTimeout(timer); timer = setTimeout(close, r.ok ? 3000 : 3500); load();
   };
-  API.checkIn(sel, pin, kind, done);
+  API.checkIn(sel, pin, kind, note, done);
 }
 
 // ── 데이터 ──
 const API = window.google && google.script && google.script.run ? {
   get: cb => google.script.run.withSuccessHandler(s => cb(JSON.parse(s))).getData(),
-  checkIn: (n, p, k, cb) => google.script.run.withSuccessHandler(cb).withFailureHandler(e => cb({ ok: false, msg: '연결 오류, 다시 눌러 주세요' })).checkIn(n, p, k)
+  checkIn: (n, p, k, note, cb) => google.script.run.withSuccessHandler(cb).withFailureHandler(e => cb({ ok: false, msg: '연결 오류, 다시 눌러 주세요' })).checkIn(n, p, k, note)
 } : window.MOCK;
 function load() { if (API) API.get(d => { DATA = d; render(); }); }
 load(); setInterval(load, 60000);

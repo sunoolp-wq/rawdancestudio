@@ -29,6 +29,7 @@
 - 가로 원본은 4K일수록 선명 (1080p 가로를 세로로 자르면 화질이 떨어짐)
 
 ## (권장) YOLO로 선생님 따라가기 — `follow_yolo.py` (2026-11-04, HOG 방식보다 정확)
+- 작업 환경 'rawdancestudio'는 시작할 때 글꼴과 `.venv`(ultralytics)를 자동 설치함 (2026-11-10). 그 환경이면 설치 없이 `.venv/bin/python` 바로 사용
     python3 -m venv .venv && .venv/bin/pip install ultralytics lap      # 처음 한 번 (torch 포함, 용량 큼)
     .venv/bin/python tools/class-reel/follow_yolo.py --video 원본.mp4 --start 5 --dur 15 --out 세로.mp4 \
         --pick-x 0.5 --check 확인.jpg

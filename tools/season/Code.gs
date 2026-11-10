@@ -26,11 +26,13 @@ const tz_ = () => SpreadsheetApp.getActive().getSpreadsheetTimeZone();
 const fmt_ = (d, f) => Utilities.formatDate(d, tz_(), f || 'yyyy-MM-dd HH:mm:ss');
 const P_ = x => Date.parse(String(x).replace(' ', 'T')); // 시트 시간대 글자끼리 비교 (스크립트 시간대와 무관)
 const DAYS_ = ['일', '월', '화', '수', '목', '금', '토'];
+// 출석 포인트 제외 수업: [설정] '출석 제외 수업'에 쉼표로 (기본 K-POP → 유아·키즈·취미·성인 K-POP 제외, 원장님 2026-11-10)
+const skip_ = (name, skip) => String(skip || '').split(',').map(x => x.trim()).filter(Boolean).some(x => String(name).indexOf(x) >= 0);
 const hm_ = v => { const m = /(\d{1,2}):(\d{2})/.exec(String(v)); return m ? (+m[1]) * 60 + (+m[2]) : null; };
 // 지금 출석할 수 있는 수업 (시작 before분 전 ~ 시작 after분 후) + 오늘 다음 수업. 태블릿 화면(Board.html)에도 같은 계산이 있음
-function classesAt_(tt, nowS, before, after) {
+function classesAt_(tt, nowS, before, after, skip) {
   const day = DAYS_[new Date(nowS.slice(0, 10) + 'T00:00:00').getDay()], mins = (+nowS.slice(11, 13)) * 60 + (+nowS.slice(14, 16));
-  const list = tt.slice(1).filter(r => String(r[0]).trim().charAt(0) === day && hm_(r[1]) != null).map(r => {
+  const list = tt.slice(1).filter(r => String(r[0]).trim().charAt(0) === day && hm_(r[1]) != null && !skip_(r[3], skip)).map(r => {
     const st = hm_(r[1]); return { start: st, label: `${String(Math.floor(st / 60)).padStart(2, '0')}:${String(st % 60).padStart(2, '0')} ${String(r[3]).trim()}`, teacher: String(r[4] || '').trim() };
   });
   return { open: list.filter(c => mins >= c.start - before && mins <= c.start + after), next: list.filter(c => c.start - before > mins).sort((a, b) => a.start - b.start)[0] || null };
@@ -67,7 +69,7 @@ function checkIn(name, pin, kind, note) {
     const openS = (a, b) => lastT(a) > lastT(b); // 시작만 있고 끝이 없음
     if (kind === '수업 출석') {
       const bf = g('출석: 시작 몇 분 전부터'), af = g('출석: 시작 후 몇 분까지');
-      const w = classesAt_(read_(TAB.tt), nowS, bf === '' ? 20 : +bf, af === '' ? 15 : +af);
+      const sk = g('출석 제외 수업'), w = classesAt_(read_(TAB.tt), nowS, bf === '' ? 20 : +bf, af === '' ? 15 : +af, sk === '' ? 'K-POP' : sk);
       if (!w.open.length) return { ok: false, msg: '지금은 수업 출석 시간이 아니에요' + (w.next ? ` · 다음 ${w.next.label}` : '') };
       const c = w.open.find(x => x.label === note) || (w.open.length === 1 ? w.open[0] : null);
       if (!c) return { ok: false, msg: '어느 수업인지 골라 주세요' };
@@ -117,6 +119,7 @@ function setup() {
     ['고정수업 시간', '18:30'],
     ['출석: 시작 몇 분 전부터', 20],
     ['출석: 시작 후 몇 분까지', 15],
+    ['출석 제외 수업 (이름에 들어가면 제외, 쉼표로)', 'K-POP'],
   ];
   let c = ss.getSheetByName(TAB.cfg);
   if (!c) {

@@ -27,7 +27,7 @@ const mock = `<script>
       if (kind === '수업 출석') {
         const DY = ['일', '월', '화', '수', '목', '금', '토'], hm = v => { const m = /(\\d{1,2}):(\\d{2})/.exec(v); return +m[1] * 60 + +m[2]; };
         const t = new Date(now.replace(' ', 'T')), mins = t.getHours() * 60 + t.getMinutes();
-        const open = S.tt.slice(1).filter(r => r[0] === DY[t.getDay()]).map(r => ({ s: hm(r[1]), label: r[1] + ' ' + r[3] })).filter(c => mins >= c.s - 20 && mins <= c.s + 15);
+        const open = S.tt.slice(1).filter(r => r[0] === DY[t.getDay()] && !r[3].includes('K-POP')).map(r => ({ s: hm(r[1]), label: r[1] + ' ' + r[3] })).filter(c => mins >= c.s - 20 && mins <= c.s + 15);
         if (!open.length) return no('지금은 수업 출석 시간이 아니에요');
         const c = open.find(x => x.label === note) || (open.length === 1 ? open[0] : null); if (!c) return no('어느 수업인지 골라 주세요'); note = c.label;
         const mineC = S.log.slice(1).filter(r => r[1] === name && r[0].slice(0, 10) === today && r[2] === '수업 출석');

@@ -164,7 +164,7 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
       if (kind === '수업 출석') {
         const DY = ['일', '월', '화', '수', '목', '금', '토'], hm = v => { const m = /(\d{1,2}):(\d{2})/.exec(v); return +m[1] * 60 + +m[2]; };
         const t = new Date(now.replace(' ', 'T')), mins = t.getHours() * 60 + t.getMinutes();
-        const open = S.tt.slice(1).filter(r => r[0] === DY[t.getDay()]).map(r => ({ s: hm(r[1]), label: r[1] + ' ' + r[3] })).filter(c => mins >= c.s - 20 && mins <= c.s + 15);
+        const open = S.tt.slice(1).filter(r => r[0] === DY[t.getDay()] && !r[3].includes('K-POP')).map(r => ({ s: hm(r[1]), label: r[1] + ' ' + r[3] })).filter(c => mins >= c.s - 20 && mins <= c.s + 15);
         if (!open.length) return no('지금은 수업 출석 시간이 아니에요');
         const c = open.find(x => x.label === note) || (open.length === 1 ? open[0] : null); if (!c) return no('어느 수업인지 골라 주세요'); note = c.label;
         const mineC = S.log.slice(1).filter(r => r[1] === name && r[0].slice(0, 10) === today && r[2] === '수업 출석');
@@ -216,7 +216,7 @@ function compute(raw) {
     const shields = String(r[2] || '').match(/\d{4}-\d{2}-\d{2}/g) || []; const sh = shields.slice(0, SH);
     // 수업 출석 note = 'HH:MM 수업명'. 전문반(PRO) 수업 = 20P + 금요일 도장. note 없는 옛 기록·직접 입력은 그날 첫 출석을 고정수업으로 침
     const isPro = x => /전문반|PRO/.test(x.note) || (!x.note && D(x.d).getDay() === FW);
-    const byDay = {}; mine.filter(x => x.k === '수업 출석').forEach(x => (byDay[x.d] = byDay[x.d] || []).push(x));
+    const byDay = {}; mine.filter(x => x.k === '수업 출석' && !(x.note && skipCls(x.note))).forEach(x => (byDay[x.d] = byDay[x.d] || []).push(x));
     const proDays = new Set(); let clsPts = 0;
     Object.entries(byDay).forEach(([d, a]) => { const seen = new Set(); a.filter(x => !seen.has(x.note || x.t) && seen.add(x.note || x.t)).slice(0, 3).forEach((x, i) => {
       const pro = isPro(x) && (x.note || i === 0); if (pro) proDays.add(d); clsPts += pro ? PF : PC; }); });
@@ -272,7 +272,7 @@ function render(anim) {
   const w = L.filter(s => s.rank === 1), nx = L.find(s => s.rank > 1);
   document.getElementById('port').innerHTML = w.length ? `<b style="font-family:'Noto Sans KR';font-style:normal;font-size:${w.length > 1 ? 30 : 44}px">${w.map(s => esc(s.name)).join(' · ')}</b>` : '';
   document.getElementById('portn').innerHTML = '시즌 1등에게 개인 포트폴리오 영상 촬영' + (w.length > 1 ? '<br>지금 완전 동점이에요!' : nx ? '<br>' + lead(w[0], nx) + ` · ${md(C.E)} 마감` : '');
-  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 · 수업 출석은 수업 시간에만<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
+  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 · 수업 출석은 장르·고정수업 시간에만 (K-POP 제외)<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
     <div class="lg"><span><b class="f-ok"></b>출석</span><span><b class="f-sh"></b>보호권</span><span><b class="f-miss"></b>결석</span><span><b class="f-up"></b>예정</span></div>`;
 }
 
@@ -289,12 +289,15 @@ function openUser(n) {
 // 지금 출석 가능한 수업 (Code.gs classesAt_와 같은 계산). 시각 = 서버 시각 + 받아 온 뒤 흐른 시간
 const DAYS_ = ['일', '월', '화', '수', '목', '금', '토'];
 const hm = v => { const m = /(\d{1,2}):(\d{2})/.exec(String(v)); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+// 출석 포인트 제외 수업 ([설정] '출석 제외 수업', 기본 K-POP)
+function skipCls(name) { const r = DATA && DATA.cfg.find(r => String(r[0]).trim().startsWith('출석 제외 수업')); const v = r && r[1] !== '' ? String(r[1]) : 'K-POP';
+  return v.split(',').map(x => x.trim()).filter(Boolean).some(x => String(name).includes(x)); }
 const hhmm = n => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
 function classesNow() {
   const cfgv = k => { const r = DATA.cfg.find(r => String(r[0]).trim().startsWith(k)); return r && r[1] !== '' ? +r[1] : null; };
   const bf = cfgv('출석: 시작 몇 분 전부터') ?? 20, af = cfgv('출석: 시작 후 몇 분까지') ?? 15;
   const t = new Date(Date.parse(DATA.now.replace(' ', 'T')) + (Date.now() - fetchedAt)), mins = t.getHours() * 60 + t.getMinutes();
-  const list = (DATA.tt || []).slice(1).filter(r => String(r[0]).trim().charAt(0) === DAYS_[t.getDay()] && hm(r[1]) != null)
+  const list = (DATA.tt || []).slice(1).filter(r => String(r[0]).trim().charAt(0) === DAYS_[t.getDay()] && hm(r[1]) != null && !skipCls(r[3]))
     .map(r => ({ start: hm(r[1]), label: hhmm(hm(r[1])) + ' ' + String(r[3]).trim(), teacher: String(r[4] || '').trim() }));
   const next = list.filter(c => c.start - bf > mins).sort((a, b) => a.start - b.start)[0];
   return { bf, af, open: list.filter(c => mins >= c.start - bf && mins <= c.start + af), next: next ? Object.assign(next, { from: hhmm(next.start - bf) }) : null };

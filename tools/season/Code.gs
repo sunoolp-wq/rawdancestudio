@@ -1,76 +1,88 @@
 /**
- * RAW SEASON 랭크보드 — 구글 시트에 붙이는 코드 (확장 프로그램 → Apps Script)
- * 1) 이 파일 내용을 Code.gs에, Board.html 내용을 새 HTML 파일 "Board"에 붙여 넣기
- * 2) 위쪽 함수 선택에서 setup 실행 (처음 한 번, 권한 허용) → 탭 4개가 생김
- * 3) 배포 → 새 배포 → 유형: 웹 앱 → 실행: 나 / 액세스: 나만(학원 TV가 원장님 구글 계정으로 로그인된 경우) → 배포 → 나온 주소를 TV에서 열기
- * 선생님은 [출석] 탭에서 오늘 날짜 칸만 체크하면 끝. 점수·연속 기록·티어는 화면이 알아서 계산.
+ * RAW SEASON (전문반) — 구글 시트 + 학원 태블릿 한 대
+ *  - 태블릿 화면 = 순위표 (🔥 금요일 연속 출석·점수·지금 연습실·포폴 영상 자격)
+ *  - 내 이름 누르기 → 수업 출석 / 연습 시작 / 연습 끝 / 인증 올림 → 비밀번호 4자리 → 시트에 기록
+ * 설치: tools/season/README.md
  */
-const TAB = { att: '출석', mis: '미션', cfg: '설정' };
+const TAB = { stu: '학생', log: '기록', cfg: '설정' };
+const KINDS = ['수업 출석', '연습 시작', '연습 끝', '인증 올림'];
 
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Board')
-    .setTitle('RAW SEASON')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+  return HtmlService.createHtmlOutputFromFile('Board').setTitle('RAW SEASON')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
 }
 
-// 화면이 1분마다 부르는 함수: 시트 3개를 그대로 넘긴다 (날짜는 yyyy-MM-dd 글자로)
+const tz_ = () => SpreadsheetApp.getActive().getSpreadsheetTimeZone();
+const fmt_ = (d, f) => Utilities.formatDate(d, tz_(), f || 'yyyy-MM-dd HH:mm:ss');
+function read_(name) {
+  const sh = SpreadsheetApp.getActive().getSheetByName(name);
+  if (!sh) return [];
+  return sh.getDataRange().getValues().map(r => r.map(c => c instanceof Date ? fmt_(c) : c));
+}
+
+// 태블릿 화면이 1분마다·기록 직후 부름 (비밀번호 열은 보내지 않음)
 function getData() {
-  const ss = SpreadsheetApp.getActive();
-  const tz = ss.getSpreadsheetTimeZone();
-  const read = name => {
-    const sh = ss.getSheetByName(name);
-    if (!sh) return [];
-    return sh.getDataRange().getValues().map(r => r.map(c =>
-      c instanceof Date ? Utilities.formatDate(c, tz, 'yyyy-MM-dd') : c));
-  };
-  return JSON.stringify({ att: read(TAB.att), mis: read(TAB.mis), cfg: read(TAB.cfg),
-    today: Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd') });
+  return JSON.stringify({ stu: read_(TAB.stu).map(r => [r[0], '', r[2]]), log: read_(TAB.log), cfg: read_(TAB.cfg), now: fmt_(new Date()) });
 }
 
-// 처음 한 번: 탭 만들기 (이미 있으면 건드리지 않음)
+// 태블릿에서 누르면 기록 한 줄
+function checkIn(name, pin, kind) {
+  const lock = LockService.getScriptLock(); lock.waitLock(10000);
+  try {
+    if (KINDS.indexOf(kind) < 0) return { ok: false, msg: '알 수 없는 버튼이에요' };
+    const row = read_(TAB.stu).slice(1).find(r => String(r[0]).trim() === name);
+    if (!row) return { ok: false, msg: '명단에 없는 이름이에요' };
+    if (String(row[1]).trim().padStart(4, '0') !== String(pin).trim().padStart(4, '0')) return { ok: false, msg: '비밀번호가 달라요' };
+    const now = new Date(), today = fmt_(now, 'yyyy-MM-dd');
+    const mine = read_(TAB.log).slice(1).filter(r => String(r[1]).trim() === name && String(r[0]).slice(0, 10) === today).map(r => String(r[2]).trim());
+    const last = k => mine.lastIndexOf(k);
+    if (kind === '수업 출석' && mine.includes('수업 출석')) return { ok: false, msg: '오늘 수업 출석은 이미 했어요' };
+    if (kind === '인증 올림' && mine.includes('인증 올림')) return { ok: false, msg: '오늘 인증은 이미 올렸어요' };
+    if (kind === '연습 시작' && last('연습 시작') > last('연습 끝')) return { ok: false, msg: '이미 연습 중이에요. 끝날 때 [연습 끝]을 눌러요' };
+    if (kind === '연습 끝' && last('연습 시작') <= last('연습 끝')) return { ok: false, msg: '[연습 시작]을 먼저 눌러야 해요' };
+    SpreadsheetApp.getActive().getSheetByName(TAB.log).appendRow([fmt_(now), name, kind]);
+    let msg = '';
+    if (kind === '연습 끝') {
+      const st = read_(TAB.log).slice(1).filter(r => String(r[1]).trim() === name && String(r[2]).trim() === '연습 시작' && String(r[0]).slice(0, 10) === today).pop();
+      const P = x => Date.parse(String(x).replace(' ', 'T')); // 둘 다 시트 시간대 글자로 비교 (스크립트 시간대와 무관)
+      const min = Math.round((P(fmt_(now)) - P(st[0])) / 60000);
+      msg = `오늘 연습 ${min}분` + (min >= 30 ? ' 🔥 인정!' : ' (30분부터 인정)');
+    }
+    return { ok: true, name, kind, time: fmt_(now, 'HH:mm'), msg };
+  } finally { lock.releaseLock(); }
+}
+
+// 처음 한 번: 탭 3개 만들기 (이미 있으면 건드리지 않음)
 function setup() {
   const ss = SpreadsheetApp.getActive();
-  let cfg = ss.getSheetByName(TAB.cfg);
-  if (!cfg) {
-    cfg = ss.insertSheet(TAB.cfg);
-    cfg.getRange(1, 1, 13, 2).setValues([
+  if (ss.getSpreadsheetTimeZone() !== 'Asia/Seoul') ss.setSpreadsheetTimeZone('Asia/Seoul');
+  if (!ss.getSheetByName(TAB.cfg)) {
+    const c = ss.insertSheet(TAB.cfg);
+    c.getRange(1, 1, 11, 2).setValues([
       ['항목', '값'],
       ['시즌 이름', 'RAW SEASON 1'],
-      ['시즌 시작', '2026-11-16'],
-      ['시즌 끝', '2026-12-31'],
-      ['출석 1회 점수', 10],
-      ['연속 보너스 (2주 연속부터 매주)', 5],
-      ['CREW 기준 점수', 60],
-      ['CORE 기준 점수', 150],
-      ['RAW 기준 점수', 250],
-      ['미션: 셀프캠', 5],
-      ['미션: 사이퍼 참여', 10],
-      ['미션: 팝업 참여', 10],
-      ['미션: 공연·버스킹', 20],
+      ['시즌 시작', '2026-11-13'],
+      ['시즌 끝', '2026-12-25'],
+      ['수업 출석 점수 (하루 1회)', 10],
+      ['연습실 점수 (하루 1회)', 10],
+      ['연습 인정 최소 분', 30],
+      ['인증 영상 점수 (하루 1회)', 5],
+      ['보호권 (시즌당)', 1],
+      ['고정수업 요일 (0=일 … 5=금)', 5],
+      ['고정수업 시간', '18:30'],
     ]);
-    cfg.setColumnWidth(1, 260).getRange('A1:B1').setFontWeight('bold');
+    c.getRange('A:A').setNumberFormat('@'); c.getRange('B3:B4').setNumberFormat('@');
+    c.setColumnWidth(1, 260).getRange('A1:B1').setFontWeight('bold');
   }
-  const conf = Object.fromEntries(cfg.getDataRange().getValues().slice(1).map(r => [r[0], r[1]]));
-  if (!ss.getSheetByName(TAB.att)) {
-    const att = ss.insertSheet(TAB.att);
-    const tz = ss.getSpreadsheetTimeZone();
-    const ymd = v => v instanceof Date ? Utilities.formatDate(v, tz, 'yyyy-MM-dd') : String(v).slice(0, 10);
-    const s = new Date(ymd(conf['시즌 시작']) + 'T00:00:00');
-    const e = new Date(ymd(conf['시즌 끝']) + 'T00:00:00');
-    const days = [];
-    for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) if (d.getDay() >= 1 && d.getDay() <= 5) days.push(new Date(d));
-    att.getRange(1, 1, 1, 2).setValues([['이름', '반']]);
-    att.getRange(1, 3, 1, days.length).setValues([days]).setNumberFormat('MM/dd (ddd)');
-    att.getRange(2, 3, 200, days.length).insertCheckboxes();
-    att.setFrozenRows(1); att.setFrozenColumns(2);
-    att.getRange('1:1').setFontWeight('bold');
+  if (!ss.getSheetByName(TAB.stu)) {
+    const s = ss.insertSheet(TAB.stu);
+    s.getRange(1, 1, 1, 3).setValues([['이름', '비밀번호 4자리', '보호권 쓴 금요일 (보호자 연락 확인 후 원장님이 입력)']]).setFontWeight('bold');
+    s.getRange('B:B').setNumberFormat('@'); s.getRange('C:C').setNumberFormat('@');
+    s.setColumnWidth(3, 380); s.setFrozenRows(1);
   }
-  if (!ss.getSheetByName(TAB.mis)) {
-    const mis = ss.insertSheet(TAB.mis);
-    mis.getRange(1, 1, 1, 3).setValues([['날짜', '이름', '미션']]).setFontWeight('bold');
-    const names = Object.keys(conf).filter(k => k.startsWith('미션: ')).map(k => k.slice(4));
-    mis.getRange(2, 3, 500, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(names).build());
-    mis.getRange(2, 1, 500, 1).setNumberFormat('yyyy-mm-dd');
-    mis.setFrozenRows(1);
+  if (!ss.getSheetByName(TAB.log)) {
+    const l = ss.insertSheet(TAB.log);
+    l.getRange(1, 1, 1, 3).setValues([['시각', '이름', '종류']]).setFontWeight('bold');
+    l.getRange('A:A').setNumberFormat('@'); l.setFrozenRows(1);
   }
 }

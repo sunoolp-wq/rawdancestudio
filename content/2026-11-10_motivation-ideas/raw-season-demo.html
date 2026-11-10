@@ -219,16 +219,19 @@ function compute(raw) {
     let streak = 0; for (let i = decided.length - 1; i >= 0 && decided[i] !== 'miss'; i--) streak++;
     const lastD = decided[decided.length - 1];
     const status = !decided.length ? 'wait' : lastD === 'miss' ? 'off' : lastD === 'sh' ? 'sh' : 'on';
-    return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'),
+    return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'), prac: prac.size,
       pts: clsPts + prac.size * PP + ex.size * PE + jr.size * PJ };
-  }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || a.name.localeCompare(b.name, 'ko'));
-  let rk = 0; list.forEach((s, i) => { rk = i && list[i - 1].pts === s.pts ? rk : i + 1; s.rank = rk; });
+  }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || b.prac - a.prac || a.name.localeCompare(b.name, 'ko'));
+  // 동점 → 금요일 연속 기록 → 개인연습 횟수 (원장님 2026-11-10). 셋 다 같을 때만 같은 순위
+  const same = (a, b) => a.pts === b.pts && a.streak === b.streak && a.prac === b.prac;
+  let rk = 0; list.forEach((s, i) => { rk = i && same(list[i - 1], s) ? rk : i + 1; s.rank = rk; });
   const nextF = fris.find(f => f >= today);
   const feed = log.filter(x => x.d === today && x.k !== '연습 시작').slice(-6).reverse();
   return { list, cfg, S, E, today, now, fris, nextF, feed, FT, PC, PF, PE, PJ, PP, MIN, SH, name: String(g('시즌 이름', 'RAW SEASON')).trim() };
 }
 
 let PREV = null;
+const lead = (a, b) => a.pts > b.pts ? `2등과 ${a.pts - b.pts}P 차이` : a.streak !== b.streak ? '2등과 같은 점수 · 금요일 연속 기록으로 앞서요' : '2등과 같은 점수 · 개인연습 횟수로 앞서요';
 function countUp(el, to) { const t0 = performance.now(), d = 800; const f = t => { const k = Math.min(1, (t - t0) / d); el.firstChild.nodeValue = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
 function render(anim) {
   if (!DATA) return; C = compute(DATA); const L = C.list;
@@ -255,7 +258,7 @@ function render(anim) {
   document.getElementById('now').innerHTML = nw.length ? nw.map(s => `<div class="now"><div><i></i>${esc(s.name)}</div><span>${s.practicing}~</span></div>`).join('') : '<div class="empty">지금 연습실에 체크인한 사람이 없어요</div>';
   const w = L.filter(s => s.rank === 1), nx = L.find(s => s.rank > 1);
   document.getElementById('port').innerHTML = w.length ? `<b style="font-family:'Noto Sans KR';font-style:normal;font-size:${w.length > 1 ? 30 : 44}px">${w.map(s => esc(s.name)).join(' · ')}</b>` : '';
-  document.getElementById('portn').innerHTML = '시즌 1등에게 개인 포트폴리오 영상 촬영' + (w.length > 1 ? '<br>지금 동점이에요!' : nx ? `<br>2등과 ${w[0].pts - nx.pts}P 차이 · ${md(C.E)} 마감` : '');
+  document.getElementById('portn').innerHTML = '시즌 1등에게 개인 포트폴리오 영상 촬영' + (w.length > 1 ? '<br>지금 완전 동점이에요!' : nx ? '<br>' + lead(w[0], nx) + ` · ${md(C.E)} 마감` : '');
   document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 (점수 없음)<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
     <div class="lg"><span><b class="f-ok"></b>출석</span><span><b class="f-sh"></b>보호권</span><span><b class="f-miss"></b>결석</span><span><b class="f-up"></b>예정</span></div>`;
 }
@@ -328,7 +331,7 @@ function scenes() {
     out.push(`<div class="a-k swipe">🎬 포트폴리오 영상 촬영권 · 시즌 1등 단 한 명</div><div class="a-mid slam" style="margin-top:16px;font-size:44px;color:#c3bfcc;animation-delay:.1s">지금 1등</div>
     <div class="a-big slam" style="margin-top:10px;animation-delay:.35s;font-family:'Noto Sans KR';font-style:normal">${w.map(s => esc(s.name)).join(' · ')}</div>
     <div class="a-mid rise a-gold" style="margin-top:22px;animation-delay:.6s;font-family:Montserrat;font-style:italic"><span class="cu" data-to="${w[0].pts}">0</span>P</div>
-    <div class="a-sub rise" style="animation-delay:.85s">${w.length > 1 ? '동점! 한 번만 더 오면 단독 1등' : gap > 0 ? `2등과 ${gap}P 차이 · 아직 뒤집을 수 있어요` : ''} · ${md(C.E)} 마감</div>`); }
+    <div class="a-sub rise" style="animation-delay:.85s">${w.length > 1 ? '완전 동점! 한 번만 더 오면 단독 1등' : (L.find(s => s.rank > 1) ? lead(w[0], L.find(s => s.rank > 1)) + ' · 아직 뒤집을 수 있어요' : '')} · ${md(C.E)} 마감</div>`); }
   out.push(`<div class="a-k swipe">RAW SEASON</div><div class="tapbig slam" style="margin-top:20px">TAP YOUR<br>NAME 👆</div><div class="a-sub rise" style="animation-delay:.4s">내 이름을 눌러서 출석 · 연습 · 운동 · 연습일지 체크</div>`);
   return out;
 }

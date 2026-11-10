@@ -9,6 +9,8 @@
 const TAB = { stu: '학생', log: '기록', cfg: '설정' };
 // 처음 setup 때 [학생] 탭에 넣을 명단 [이름, 상태]. 상태에 '휴원'이 들어가면 화면에 안 나오고 체크도 안 됨
 const ROSTER = [];
+// 처음 setup 때 [설정] 탭에 넣을 시즌 (나중엔 [설정] 탭에서 고침)
+const SEASON = { name: 'RAW SEASON 1', start: '2026-11-13', end: '2026-12-25' };
 const KINDS = ['수업 출석', '연습 시작', '연습 끝', '운동 완료', '연습일지'];
 const DAILY = ['운동 완료', '연습일지']; // 오늘/어제 골라서, 날짜마다 1회
 const PRAC_TYPES = ['개인연습', '월말평가 준비'];
@@ -84,9 +86,9 @@ function setup() {
     const c = ss.insertSheet(TAB.cfg);
     const rows = [
       ['항목', '값'],
-      ['시즌 이름', 'RAW SEASON 1'],
-      ['시즌 시작', '2026-11-13'],
-      ['시즌 끝', '2026-12-25'],
+      ['시즌 이름', SEASON.name],
+      ['시즌 시작', SEASON.start],
+      ['시즌 끝', SEASON.end],
       ['수업 점수 (수업마다, 하루 3회까지)', 10],
       ['전문반 고정수업 점수', 20],
       ['운동 루틴 점수 (하루 1회)', 10],

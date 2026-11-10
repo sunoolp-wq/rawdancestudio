@@ -7,6 +7,8 @@
  * 설치: tools/season/README.md
  */
 const TAB = { stu: '학생', log: '기록', cfg: '설정' };
+// 처음 setup 때 [학생] 탭에 넣을 명단 [이름, 상태]. 상태에 '휴원'이 들어가면 화면에 안 나오고 체크도 안 됨
+const ROSTER = [];
 const KINDS = ['수업 출석', '연습 시작', '연습 끝', '운동 완료', '연습일지'];
 const DAILY = ['운동 완료', '연습일지']; // 오늘/어제 골라서, 날짜마다 1회
 const PRAC_TYPES = ['개인연습', '월말평가 준비'];
@@ -31,7 +33,8 @@ function cfg_() {
 
 // 태블릿 화면이 1분마다·기록 직후 부름 (비밀번호 열은 보내지 않음)
 function getData() {
-  return JSON.stringify({ stu: read_(TAB.stu).map(r => [r[0], '', r[2]]), log: read_(TAB.log), cfg: read_(TAB.cfg), now: fmt_(new Date()) });
+  const stu = read_(TAB.stu).filter((r, i) => i === 0 || String(r[3] || '').indexOf('휴원') < 0).map(r => [r[0], '', r[2]]);
+  return JSON.stringify({ stu, log: read_(TAB.log), cfg: read_(TAB.cfg), now: fmt_(new Date()) });
 }
 
 // 태블릿에서 누르면 기록 한 줄. note = 연습 끝: '개인연습' | '월말평가 준비' / 운동 완료·연습일지: 'yyyy-MM-dd' (오늘 또는 어제)
@@ -41,6 +44,7 @@ function checkIn(name, pin, kind, note) {
     if (KINDS.indexOf(kind) < 0) return { ok: false, msg: '알 수 없는 버튼이에요' };
     const row = read_(TAB.stu).slice(1).find(r => String(r[0]).trim() === name);
     if (!row) return { ok: false, msg: '명단에 없는 이름이에요' };
+    if (String(row[3] || '').indexOf('휴원') >= 0) return { ok: false, msg: '휴원 중인 학생이에요' };
     if (String(row[1]).trim().padStart(4, '0') !== String(pin).trim().padStart(4, '0')) return { ok: false, msg: '비밀번호가 달라요' };
     const g = cfg_(), now = new Date(), nowS = fmt_(now), today = nowS.slice(0, 10);
     const mine = read_(TAB.log).slice(1).filter(r => String(r[1]).trim() === name && String(r[0]).slice(0, 10) === today)
@@ -99,9 +103,13 @@ function setup() {
   }
   if (!ss.getSheetByName(TAB.stu)) {
     const s = ss.insertSheet(TAB.stu);
-    s.getRange(1, 1, 1, 3).setValues([['이름', '비밀번호 4자리', '보호권 쓴 금요일 (보호자 연락 확인 후 원장님이 입력)']]).setFontWeight('bold');
+    s.getRange(1, 1, 1, 4).setValues([['이름', '비밀번호 4자리', '보호권 쓴 금요일 (보호자 연락 확인 후 원장님이 입력)', '상태 (휴원이면 화면에 안 나옴)']]).setFontWeight('bold');
     s.getRange('B:B').setNumberFormat('@'); s.getRange('C:C').setNumberFormat('@');
-    s.setColumnWidth(3, 380); s.setFrozenRows(1);
+    s.setColumnWidth(3, 380).setColumnWidth(4, 220); s.setFrozenRows(1);
+    // 명단 + 비밀번호 4자리 자동 생성 (원장님이 학생마다 따로 알려 주고, 바꿔도 됨)
+    const used = {};
+    const pin = () => { let p; do { p = String(1000 + Math.floor(Math.random() * 9000)); } while (used[p]); used[p] = 1; return p; };
+    if (ROSTER.length) s.getRange(2, 1, ROSTER.length, 4).setValues(ROSTER.map(([n, st]) => [n, pin(), '', st || '']));
   }
   if (!ss.getSheetByName(TAB.log)) {
     const l = ss.insertSheet(TAB.log);

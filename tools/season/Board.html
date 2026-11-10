@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAW SEASON</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;0,900;1,800;1,900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#0e0d12;overflow:hidden}
+body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:#0e0d12}
+.g{position:absolute;border-radius:50%;pointer-events:none}
+#g1{width:1500px;height:1500px;right:-520px;top:-780px;background:radial-gradient(circle,rgba(124,92,255,.40),rgba(124,92,255,0) 62%)}
+#g2{width:1200px;height:1200px;left:-560px;bottom:-760px;background:radial-gradient(circle,rgba(124,92,255,.24),rgba(124,92,255,0) 62%)}
+/* 머리 */
+.hd{position:absolute;left:72px;right:72px;top:52px;display:flex;align-items:flex-end;justify-content:space-between}
+.hd .l{display:flex;align-items:flex-end;gap:34px}
+.hd img{height:54px;margin-bottom:10px}
+#sn{font-weight:900;font-style:italic;font-size:96px;line-height:.86;letter-spacing:-.03em}
+#sn span{color:transparent;-webkit-text-stroke:2.5px #b9a6ff}
+.hd .r{text-align:right}
+#dd{font-weight:900;font-style:italic;font-size:64px;line-height:.9;color:#b9a6ff}
+#per{margin-top:10px;font-weight:600;font-size:20px;letter-spacing:.32em;color:#8f8a9c;margin-right:-.32em}
+.rule{position:absolute;left:72px;right:72px;top:176px;height:1px;background:#2f2c38}
+/* 순위 */
+#rank{position:absolute;left:72px;top:206px;width:1130px}
+.cap{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:20px;letter-spacing:.4em;color:#b9a6ff;margin-bottom:14px}
+.cap i{display:inline-block;width:12px;height:12px;border-radius:50%;background:#b9a6ff;box-shadow:0 0 18px #b9a6ff;margin-right:14px;vertical-align:1px}
+#pg{letter-spacing:.2em;color:#6f6a7c;font-size:18px}
+.row{display:grid;grid-template-columns:92px 1fr 150px 130px 150px;align-items:center;height:64px;padding:0 26px;margin-bottom:8px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)}
+.row.top{background:linear-gradient(90deg,rgba(185,166,255,.16),rgba(185,166,255,.03));border-color:rgba(185,166,255,.28)}
+.rk{font-weight:900;font-style:italic;font-size:34px;color:#6f6a7c}
+.row.top .rk{color:#f4f2ee;font-size:40px}
+.nm{font-family:"Noto Sans KR",sans-serif;font-weight:900;font-size:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm small{font-family:Montserrat;font-weight:600;font-size:16px;letter-spacing:.12em;color:#8f8a9c;margin-left:16px}
+.st{font-weight:800;font-size:26px;color:#f5be46;text-align:right}
+.st.off{color:#4a4655}
+.pt{font-weight:900;font-size:32px;text-align:right}
+.pt small{font-weight:600;font-size:15px;color:#8f8a9c;margin-left:6px}
+.tb{justify-self:center;font-weight:800;font-size:15px;letter-spacing:.14em;padding:7px 14px;border-radius:8px;border:1.5px solid}
+.t-ROOKIE{color:#8f8a9c;border-color:#4a4655}
+.t-CREW{color:#7fd1ff;border-color:rgba(127,209,255,.55)}
+.t-CORE{color:#0e0d12;background:#b9a6ff;border-color:#b9a6ff}
+.t-RAW{color:#0e0d12;background:linear-gradient(135deg,#ffe29a,#f5be46);border-color:#f5be46;box-shadow:0 0 22px rgba(245,190,70,.45)}
+/* 오른쪽 */
+#side{position:absolute;left:1250px;right:72px;top:206px}
+.card{border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);padding:22px 30px;margin-bottom:16px}
+.fl{display:flex;align-items:center;justify-content:space-between;height:48px;border-bottom:1px solid rgba(255,255,255,.06)}
+.fl:last-child{border-bottom:0}
+.fl b{font-family:"Noto Sans KR";font-weight:900;font-size:26px}
+.fl b em{font-style:normal;font-family:Montserrat;font-weight:900;font-style:italic;color:#6f6a7c;font-size:22px;margin-right:16px}
+.fl span{font-weight:900;font-size:30px;color:#f5be46}
+.fl span small{font-size:16px;font-weight:600;color:#8f8a9c;margin-left:4px}
+.tr{display:grid;grid-template-columns:120px 1fr 64px;align-items:center;gap:16px;height:40px}
+.tr .bar{height:12px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden}
+.tr .bar i{display:block;height:100%;border-radius:6px}
+.tr b{font-weight:900;font-size:24px;text-align:right}
+.rule2{font-size:16px;line-height:1.65;color:#8f8a9c;font-family:"Noto Sans KR"}
+.rule2 b{color:#f4f2ee;font-weight:700}
+/* 아래 흐르는 줄 */
+#tick{position:absolute;left:0;right:0;bottom:0;height:78px;background:#b9a6ff;color:#0e0d12;overflow:hidden;display:flex;align-items:center}
+#tick .lab{position:relative;z-index:2;height:100%;display:flex;align-items:center;padding:0 34px;background:#0e0d12;color:#b9a6ff;font-weight:900;font-style:italic;font-size:28px;letter-spacing:.06em}
+#tw{flex:1;overflow:hidden;white-space:nowrap}
+#tt{display:inline-block;padding-left:100%;font-family:"Noto Sans KR";font-weight:900;font-size:30px;animation:mq 60s linear infinite}
+#tt .s{margin:0 26px;opacity:.45}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+#upd{position:absolute;left:72px;bottom:94px;font-size:15px;letter-spacing:.12em;color:#4a4655}
+.fade{animation:fd .6s ease both}
+@keyframes fd{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style></head><body>
+<div id="stage">
+  <div class="g" id="g1"></div><div class="g" id="g2"></div>
+  <div class="hd">
+    <div class="l"><img src="data:image/png;base64,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" alt="RAW"><div id="sn"></div></div>
+    <div class="r"><div id="dd"></div><div id="per"></div></div>
+  </div>
+  <div class="rule"></div>
+  <div id="rank"><div class="cap"><span><i></i>SEASON RANKING</span><span id="pg"></span></div><div id="rows"></div></div>
+  <div id="side">
+    <div class="card"><div class="cap"><span><i></i>🔥 STREAK</span><span id="pg2" style="color:#6f6a7c;letter-spacing:.2em;font-size:16px">연속 출석 주</span></div><div id="streak"></div></div>
+    <div class="card"><div class="cap"><span><i></i>TIER</span></div><div id="tiers"></div></div>
+    <div class="card rule2" id="howto"></div>
+  </div>
+  <div id="upd"></div>
+  <div id="tick"><div class="lab">THIS WEEK</div><div id="tw"><div id="tt"></div></div></div>
+</div>
+<script>
+const TIERS = ['RAW', 'CORE', 'CREW', 'ROOKIE'];
+const TCOL = { RAW: '#f5be46', CORE: '#b9a6ff', CREW: '#7fd1ff', ROOKIE: '#4a4655' };
+const PER = 10, ROT = 8000;
+let DATA = null, page = 0;
+
+function fit() { const s = Math.min(innerWidth / 1920, innerHeight / 1080); const st = document.getElementById('stage');
+  st.style.transform = `scale(${s})`; st.style.left = (innerWidth - 1920 * s) / 2 + 'px'; st.style.top = (innerHeight - 1080 * s) / 2 + 'px'; }
+addEventListener('resize', fit); fit();
+
+const D = s => new Date(s + 'T00:00:00');
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const monday = s => { const d = D(s); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return ymd(d); };
+const addDays = (s, n) => { const d = D(s); d.setDate(d.getDate() + n); return ymd(d); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// 시트 값 → 학생별 점수·연속 기록·티어
+function compute(raw) {
+  const cfg = {}; raw.cfg.slice(1).forEach(r => { if (r[0] !== '') cfg[String(r[0]).trim()] = r[1]; });
+  const S = String(cfg['시즌 시작']).slice(0, 10), E = String(cfg['시즌 끝']).slice(0, 10);
+  const today = raw.today, P = +cfg['출석 1회 점수'] || 10;
+  const B = +(Object.entries(cfg).find(([k]) => k.startsWith('연속 보너스')) || [0, 0])[1];
+  const TH = { RAW: +cfg['RAW 기준 점수'] || 250, CORE: +cfg['CORE 기준 점수'] || 150, CREW: +cfg['CREW 기준 점수'] || 60, ROOKIE: 0 };
+  const MP = {}; Object.entries(cfg).forEach(([k, v]) => { if (k.startsWith('미션: ')) MP[k.slice(4).trim()] = +v || 0; });
+  const tierOf = p => TIERS.find(t => p >= TH[t]);
+  const head = raw.att[0] || [], dates = head.slice(2).map(String);
+  const curW = monday(today), lastCut = addDays(curW, -1);
+  const score = (row, name, cut) => {
+    const days = dates.filter((d, i) => row[i + 2] === true && d >= S && d <= E && d <= cut);
+    const weeks = [...new Set(days.map(monday))].sort();
+    let bonus = 0, run = 0, prev = null;
+    weeks.forEach(w => { run = prev && addDays(prev, 7) === w ? run + 1 : 1; if (run >= 2) bonus += B; prev = w; });
+    const mis = raw.mis.slice(1).filter(r => String(r[1]).trim() === name && String(r[0]) >= S && String(r[0]) <= cut)
+      .reduce((a, r) => a + (MP[String(r[2]).trim()] || 0), 0);
+    return { n: days.length, weeks: new Set(weeks), pts: days.length * P + bonus + mis };
+  };
+  const list = raw.att.slice(1).filter(r => String(r[0]).trim()).map(r => {
+    const name = String(r[0]).trim(), now = score(r, name, today), before = score(r, name, lastCut);
+    const thisWeek = now.weeks.has(curW);
+    let w = thisWeek ? curW : addDays(curW, -7), streak = 0;
+    while (now.weeks.has(w)) { streak++; w = addDays(w, -7); }
+    const tier = tierOf(now.pts), prevTier = tierOf(before.pts);
+    return { name, cls: String(r[1] || ''), pts: now.pts, n: now.n, streak, thisWeek, tier,
+      up: TIERS.indexOf(tier) < TIERS.indexOf(prevTier) ? prevTier : null };
+  }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || a.name.localeCompare(b.name, 'ko'));
+  let rk = 0; list.forEach((s, i) => { rk = i && list[i - 1].pts === s.pts ? rk : i + 1; s.rank = rk; });
+  const left = Math.ceil((D(E) - D(today)) / 864e5);
+  const wNo = Math.floor((D(curW) - D(monday(S))) / 6048e5) + 1, wAll = Math.floor((D(monday(E)) - D(monday(S))) / 6048e5) + 1;
+  return { list, cfg, S, E, today, left, wNo, wAll, TH, P, B, MP };
+}
+
+function render() {
+  if (!DATA) return; const C = compute(DATA), L = C.list;
+  const nm = String(C.cfg['시즌 이름'] || 'RAW SEASON').trim(), m = nm.match(/^(.*?)(\d+)$/);
+  document.getElementById('sn').innerHTML = m ? `${esc(m[1])}<span>${m[2]}</span>` : esc(nm);
+  document.getElementById('dd').textContent = C.today > C.E ? 'SEASON END' : C.today < C.S ? 'COMING SOON' : 'D-' + C.left;
+  const f = s => s.slice(5).replace('-', '.');
+  document.getElementById('per').textContent = `${f(C.S)} — ${f(C.E)}  ·  WEEK ${Math.max(1, Math.min(C.wNo, C.wAll))} / ${C.wAll}`;
+  const pages = Math.max(1, Math.ceil(L.length / PER)); page %= pages;
+  document.getElementById('pg').textContent = pages > 1 ? `${page + 1} / ${pages}` : '';
+  document.getElementById('rows').innerHTML = L.slice(page * PER, page * PER + PER).map(s => `
+    <div class="row fade ${s.rank <= 3 ? 'top' : ''}"><div class="rk">${String(s.rank).padStart(2, '0')}</div>
+    <div class="nm">${esc(s.name)}<small>${esc(s.cls)}</small></div>
+    <div class="tb t-${s.tier}">${s.tier}</div>
+    <div class="st ${s.streak ? '' : 'off'}">🔥 ${s.streak}</div>
+    <div class="pt">${s.pts}<small>P</small></div></div>`).join('');
+  const sk = [...L].filter(s => s.streak).sort((a, b) => b.streak - a.streak || b.pts - a.pts).slice(0, 5);
+  document.getElementById('streak').innerHTML = sk.map((s, i) => `<div class="fl"><b><em>${i + 1}</em>${esc(s.name)}</b><span>${s.streak}<small>주</small></span></div>`).join('') || '<div class="fl"><b>아직 기록 없음</b></div>';
+  const cnt = Object.fromEntries(TIERS.map(t => [t, L.filter(s => s.tier === t).length])), mx = Math.max(1, ...Object.values(cnt));
+  document.getElementById('tiers').innerHTML = TIERS.map(t => `<div class="tr"><div class="tb t-${t}" style="justify-self:start">${t}</div>
+    <div class="bar"><i style="width:${cnt[t] / mx * 100}%;background:${TCOL[t]}"></i></div><b>${cnt[t]}</b></div>`).join('');
+  document.getElementById('howto').innerHTML = `<b>출석 ${C.P}P</b> · <b>2주 연속부터 매주 +${C.B}P</b><br>` +
+    Object.entries(C.MP).map(([k, v]) => `${esc(k)} +${v}`).join(' · ') +
+    `<br>CREW ${C.TH.CREW} · CORE ${C.TH.CORE} · RAW ${C.TH.RAW}`;
+  const ups = L.filter(s => s.up).map(s => `🎉 ${esc(s.name)} ${s.up} → ${s.tier}`);
+  const risk = L.filter(s => !s.thisWeek && s.streak >= 2).sort((a, b) => b.streak - a.streak).map(s => `🔥 ${esc(s.name)} ${s.streak}주 연속 — 이번 주 오면 이어져요`);
+  const top = L.slice(0, 1).map(s => `👑 1위 ${esc(s.name)} ${s.pts}P`);
+  const items = [...top, ...ups, ...risk];
+  document.getElementById('tt').innerHTML = (items.length ? items : ['이번 주도 RAW하게 🔥']).join('<span class="s">/</span>');
+  const now = new Date(); document.getElementById('upd').textContent = `UPDATED ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
+function load() {
+  if (window.google && google.script && google.script.run) google.script.run.withSuccessHandler(s => { DATA = JSON.parse(s); render(); }).getData();
+  else if (window.SAMPLE) { DATA = window.SAMPLE; render(); }
+}
+load(); setInterval(load, 60000);
+setInterval(() => { page++; render(); }, ROT);
+</script>
+</body></html>

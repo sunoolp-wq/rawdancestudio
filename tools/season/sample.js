@@ -10,6 +10,7 @@ names.forEach((n, i) => days.forEach(d => {
   const fri = new Date(d + 'T00:00:00').getDay() === 5, lazy = missP[i];
   if (fri && d < '2026-12-04') { if (!(i === 4 && d === '2026-11-20') && rnd() > lazy) add(d, '18:2' + (i % 10), n, '수업 출석'); }
   if (!fri && rnd() < 0.4 - lazy * 0.3) add(d, '17:1' + (i % 10), n, '수업 출석');
+  if (d >= NOW.slice(0, 10)) return;
   if (rnd() < 0.45 - lazy * 0.4) { add(d, '16:5' + (i % 10), n, '연습 시작'); log.push([`${d} ${rnd() < 0.8 ? '17:4' : '17:0'}${i % 10}:00`, n, '연습 끝', rnd() < 0.25 ? '월말평가 준비' : '개인연습']); }
   if (rnd() < 0.55 - lazy * 0.5) log.push([`${d} 22:10:00`, n, '운동 완료', d]);
   if (rnd() < 0.5 - lazy * 0.5) log.push([`${d} 22:30:00`, n, '연습일지', d]);

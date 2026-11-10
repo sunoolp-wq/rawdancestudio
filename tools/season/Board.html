@@ -78,6 +78,56 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
 .res+h2{margin-top:12px}
 .shake{animation:sk .35s}@keyframes sk{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
 .fade{animation:fd .5s ease both}@keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── 움직임: 촤라락 등장 · 점수 반짝 · 대기화면 ── */
+.row{position:relative}
+.row.in{animation:sIn .6s cubic-bezier(.2,.9,.25,1) both;animation-delay:calc(var(--i) * 60ms)}
+@keyframes sIn{0%{opacity:0;transform:translateX(90px) skewX(-10deg)}60%{opacity:1;transform:translateX(-6px) skewX(2deg)}100%{opacity:1;transform:none}}
+.row.in .fr b{animation:pop .4s cubic-bezier(.3,1.6,.5,1) both;animation-delay:calc(var(--i) * 60ms + 260ms + var(--d) * 45ms)}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.row.hit{animation:hit 2.2s ease-out}
+@keyframes hit{0%,30%{box-shadow:0 0 0 2px #f5be46,0 0 34px rgba(245,190,70,.55);background:rgba(245,190,70,.16)}100%{box-shadow:none}}
+.plus{position:absolute;right:20px;top:-6px;font-weight:900;font-style:italic;font-size:26px;color:#f5be46;text-shadow:0 0 16px rgba(245,190,70,.6);animation:up 1.8s ease-out forwards;pointer-events:none}
+@keyframes up{0%{opacity:0;transform:translateY(16px) scale(.6)}20%{opacity:1;transform:translateY(0) scale(1.15)}100%{opacity:0;transform:translateY(-34px)}}
+.st:not(.off){display:inline-block;animation:fl 1.8s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes fl{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.07) rotate(-2deg)}}
+#att{position:absolute;inset:0;z-index:8;background:#0e0d12;display:none;overflow:hidden}
+#att.on{display:block}
+#att .bg1{position:absolute;width:1400px;height:1400px;border-radius:50%;left:-300px;top:-700px;background:radial-gradient(circle,rgba(124,92,255,.45),rgba(124,92,255,0) 60%);animation:drift 14s ease-in-out infinite alternate}
+#att .bg2{position:absolute;width:1100px;height:1100px;border-radius:50%;right:-420px;bottom:-640px;background:radial-gradient(circle,rgba(245,190,70,.16),rgba(245,190,70,0) 60%);animation:drift 11s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(160px,90px)}}
+#sc{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 90px}
+#att .bar{position:absolute;left:0;bottom:0;height:5px;background:#b9a6ff;animation:bar linear forwards}
+@keyframes bar{from{width:0}to{width:100%}}
+#att .tap{position:absolute;left:0;right:0;bottom:30px;text-align:center;font-family:"Noto Sans KR";font-weight:700;font-size:17px;color:#8f8a9c;letter-spacing:.04em;animation:bl 2s infinite}
+.a-k{font-weight:800;font-size:18px;letter-spacing:.42em;color:#b9a6ff}
+.a-big{font-weight:900;font-style:italic;font-size:132px;line-height:.9;letter-spacing:-.04em;white-space:nowrap}
+.a-big .o{color:transparent;-webkit-text-stroke:3px #b9a6ff}
+.a-mid{font-family:"Noto Sans KR";font-weight:900;font-size:64px;line-height:1.1}
+.a-sub{font-family:"Noto Sans KR";font-weight:500;font-size:24px;color:#c3bfcc;margin-top:18px}
+.a-gold{color:#f5be46}
+.slam{animation:slam .55s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes slam{0%{opacity:0;transform:scale(1.9) skewX(-8deg)}100%{opacity:1;transform:none}}
+.rise{animation:rise .6s cubic-bezier(.2,.9,.25,1) both}
+@keyframes rise{0%{opacity:0;transform:translateY(40px)}100%{opacity:1;transform:none}}
+.swipe{animation:swp .6s cubic-bezier(.2,.9,.25,1) both}
+@keyframes swp{0%{opacity:0;transform:translateX(-120px) skewX(12deg)}100%{opacity:1;transform:none}}
+.pod{display:flex;gap:26px;align-items:flex-end;margin-top:34px}
+.pod>div{flex:1;border-radius:20px;padding:26px 28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.pod>div.p1{background:linear-gradient(160deg,rgba(245,190,70,.22),rgba(245,190,70,.04));border-color:rgba(245,190,70,.5);padding-top:46px}
+.pod .r{font-weight:900;font-style:italic;font-size:64px;line-height:1;color:transparent;-webkit-text-stroke:2px #b9a6ff}
+.pod .p1 .r{-webkit-text-stroke:2px #f5be46}
+.pod .n{font-family:"Noto Sans KR";font-weight:900;font-size:44px;margin-top:10px}
+.pod .v{font-weight:900;font-size:34px;color:#f5be46;margin-top:4px}
+.feed{margin-top:26px;display:grid;gap:12px}
+.feed div{display:flex;gap:22px;align-items:center;font-family:"Noto Sans KR";font-size:30px;font-weight:700}
+.feed b{font-family:Montserrat;font-weight:800;font-size:22px;color:#8f8a9c;width:80px}
+.feed em{font-style:normal;font-size:20px;padding:5px 14px;border-radius:20px;background:rgba(185,166,255,.14);color:#b9a6ff}
+.chips{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.chips span{font-family:"Noto Sans KR";font-weight:900;font-size:28px;padding:10px 22px;border-radius:40px;background:rgba(245,190,70,.14);color:#f5be46}
+.tapbig{font-weight:900;font-style:italic;font-size:140px;line-height:.9;letter-spacing:-.03em;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.04);text-shadow:0 0 50px rgba(185,166,255,.6)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style></head><body>
 <div id="stage">
   <div class="g" id="g1"></div><div class="g" id="g2"></div>
@@ -93,6 +143,7 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
     <div class="card rl" id="rules"></div>
   </div>
   <div id="hint">👆 내 이름을 눌러서 출석·연습·운동·일지 체크 <small>TAP YOUR NAME</small></div>
+  <div id="att"><div class="bg1"></div><div class="bg2"></div><div id="sc"></div><div class="tap">화면을 누르면 순위표로 돌아가요 · TAP TO START</div><div class="bar" id="abar"></div></div>
   <div id="ov"><div class="box" id="box"></div></div>
 </div>
 <script>
@@ -144,10 +195,13 @@ function compute(raw) {
   }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || a.name.localeCompare(b.name, 'ko'));
   let rk = 0; list.forEach((s, i) => { rk = i && list[i - 1].pts === s.pts ? rk : i + 1; s.rank = rk; });
   const nextF = fris.find(f => f >= today);
-  return { list, cfg, S, E, today, now, fris, nextF, FT, PC, PF, PE, PJ, PP, MIN, SH, name: String(g('시즌 이름', 'RAW SEASON')).trim() };
+  const feed = log.filter(x => x.d === today && x.k !== '연습 시작').slice(-6).reverse();
+  return { list, cfg, S, E, today, now, fris, nextF, feed, FT, PC, PF, PE, PJ, PP, MIN, SH, name: String(g('시즌 이름', 'RAW SEASON')).trim() };
 }
 
-function render() {
+let PREV = null;
+function countUp(el, to) { const t0 = performance.now(), d = 800; const f = t => { const k = Math.min(1, (t - t0) / d); el.firstChild.nodeValue = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
+function render(anim) {
   if (!DATA) return; C = compute(DATA); const L = C.list;
   const m = C.name.match(/^(.*?)(\d+)$/);
   document.getElementById('sn').innerHTML = (m ? `${esc(m[1])}<span>${m[2]}</span>` : esc(C.name)) + '<small>PRO</small>';
@@ -157,11 +211,17 @@ function render() {
   const PILL = { on: ['p-on', '🔥 이어가는 중'], off: ['p-off', '💤 끊김'], sh: ['p-sh', '🛡 보호권'], wait: ['p-wait', '시즌 시작 전'] };
   const FB = { ok: ['f-ok', '✓'], sh: ['f-sh', '🛡'], miss: ['f-miss', '✕'], up: ['f-up', ''], today: ['f-today', ''] };
   document.getElementById('rows').innerHTML = L.map((s, i) => `
-    <div class="row fade ${s.rank <= 3 ? 'top' : ''}" data-i="${i}"><div class="rk">${String(s.rank).padStart(2, '0')}</div>
+    <div class="row ${anim ? 'in' : ''} ${s.rank <= 3 ? 'top' : ''}" data-i="${i}" style="--i:${i}"><div class="rk">${String(s.rank).padStart(2, '0')}</div>
     <div class="nm">${esc(s.name)}</div><div class="pill ${PILL[s.status][0]}">${PILL[s.status][1]}</div>
-    <div class="fr">${s.fr.map(f => `<b class="${FB[f][0]}">${FB[f][1]}</b>`).join('')}</div>
+    <div class="fr">${s.fr.map((f, j) => `<b class="${FB[f][0]}" style="--d:${j}">${FB[f][1]}</b>`).join('')}</div>
     <div class="st ${s.streak ? '' : 'off'}">🔥${s.streak}</div><div class="pt">${s.pts}<small>P</small></div></div>`).join('');
-  document.querySelectorAll('.row').forEach(el => el.onclick = () => openUser(L[+el.dataset.i].name));
+  document.querySelectorAll('.row').forEach(el => {
+    const st = L[+el.dataset.i]; el.onclick = () => openUser(st.name);
+    if (anim) countUp(el.querySelector('.pt'), st.pts);
+    const before = PREV && PREV[st.name];
+    if (!anim && before != null && st.pts > before) { el.classList.add('hit'); el.insertAdjacentHTML('beforeend', `<div class="plus">+${st.pts - before}P</div>`); }
+  });
+  PREV = Object.fromEntries(L.map(s => [s.name, s.pts]));
   const nw = L.filter(s => s.practicing).sort((a, b) => a.practicing < b.practicing ? -1 : 1);
   document.getElementById('now').innerHTML = nw.length ? nw.map(s => `<div class="now"><div><i></i>${esc(s.name)}</div><span>${s.practicing}~</span></div>`).join('') : '<div class="empty">지금 연습실에 체크인한 사람이 없어요</div>';
   const ok = L.filter(s => s.perfect);
@@ -211,17 +271,60 @@ function send() {
       document.querySelectorAll('#dots i').forEach(d => d.classList.remove('f')); return; }
     box().innerHTML = r.ok ? `<div class="res">✅</div><h2>${esc(r.name)} · ${esc(r.kind)}</h2><p style="font-size:20px;color:#f4f2ee;margin-top:10px">${r.time}${r.msg ? ' · ' + esc(r.msg) : ''}</p>`
       : `<div class="res">⚠️</div><h2>${esc(r.msg)}</h2>`;
-    clearTimeout(timer); timer = setTimeout(close, r.ok ? 3000 : 3500); load();
+    clearTimeout(timer); timer = setTimeout(() => { close(); load(); }, r.ok ? 2600 : 3200);
   };
   API.checkIn(sel, pin, kind, note, done);
 }
+
+
+// ── 대기화면: 아무도 안 누르면 장면이 슉슉 넘어감 ──
+const IDLE_MS = 45000, SCENE_MS = 5500;
+let lastTouch = Date.now(), attOn = false, aTimer = null;
+const att = () => document.getElementById('att');
+function scenes() {
+  const L = C.list, top = L.slice(0, 3), mx = Math.max(0, ...L.map(s => s.streak));
+  const kings = L.filter(s => s.streak === mx && mx > 0).map(s => s.name);
+  const ok = L.filter(s => s.perfect).map(s => s.name);
+  const dd = C.nextF ? Math.round((D(C.nextF) - D(C.today)) / 864e5) : null;
+  const m = C.name.match(/^(.*?)(\d+)$/);
+  const out = [];
+  out.push(`<div class="a-k swipe">PRO 전문반 · ${md(C.S)} — ${md(C.E)}</div><div class="a-big slam" style="margin-top:18px;animation-delay:.12s">${m ? esc(m[1]) + '<span class="o">' + m[2] + '</span>' : esc(C.name)}</div>
+    <div class="a-mid rise a-gold" style="margin-top:26px;animation-delay:.45s;font-family:Montserrat;font-style:italic">${dd === 0 ? 'TODAY ' + esc(C.FT) : dd != null ? 'NEXT CLASS D-' + dd : 'SEASON END'}</div>`);
+  if (top.length) out.push(`<div class="a-k swipe">SEASON TOP 3</div><div class="pod">${[top[1], top[0], top[2]].filter(Boolean).map((s, i) => `
+    <div class="${s === top[0] ? 'p1' : ''} rise" style="animation-delay:${[.35, .1, .55][i]}s"><div class="r">${String(s.rank).padStart(2, '0')}</div><div class="n">${esc(s.name)}</div><div class="v"><span class="cu" data-to="${s.pts}">0</span>P</div></div>`).join('')}</div>`);
+  if (kings.length) out.push(`<div class="a-k swipe">🔥 STREAK KING</div><div class="a-big slam" style="margin-top:18px;animation-delay:.1s"><span class="cu" data-to="${mx}">0</span>주 <span class="o">연속</span></div>
+    <div class="a-mid rise" style="margin-top:26px;animation-delay:.5s">${kings.map(esc).join(' · ')}</div><div class="a-sub rise" style="animation-delay:.7s">금요일 전문반 수업을 한 번도 안 빠졌어요</div>`);
+  out.push(`<div class="a-k swipe">TODAY · ${md(C.today)}</div><div class="a-mid slam" style="margin-top:14px;animation-delay:.1s">오늘 체크인</div>` + (C.feed.length
+    ? `<div class="feed">${C.feed.map((x, i) => `<div class="swipe" style="animation-delay:${.3 + i * .12}s"><b>${x.t.slice(11, 16)}</b>${esc(x.n)}<em>${esc(x.k === '연습 끝' ? (x.note || '연습') : x.k)}</em></div>`).join('')}</div>`
+    : `<div class="a-sub rise" style="animation-delay:.4s">아직 아무도 없어요. 오늘 첫 번째 체크인 주인공은?</div>`));
+  out.push(`<div class="a-k swipe">포폴 영상 자격</div><div class="a-big slam" style="margin-top:18px;animation-delay:.1s"><span class="cu a-gold" data-to="${ok.length}">0</span> <span class="o">/ ${L.length}</span></div>
+    <div class="chips">${ok.map((n, i) => `<span class="rise" style="animation-delay:${.45 + i * .08}s">${esc(n)}</span>`).join('')}</div><div class="a-sub rise" style="animation-delay:.9s">시즌 끝까지 금요일 개근하면 개인 포트폴리오 영상 촬영</div>`);
+  out.push(`<div class="a-k swipe">RAW SEASON</div><div class="tapbig slam" style="margin-top:20px">TAP YOUR<br>NAME 👆</div><div class="a-sub rise" style="animation-delay:.4s">내 이름을 눌러서 출석 · 연습 · 운동 · 연습일지 체크</div>`);
+  return out;
+}
+function playAttract(i) {
+  if (!attOn) return; const list = scenes();
+  if (i >= list.length) { stopAttract(true); return; }
+  const sc = document.getElementById('sc'); sc.innerHTML = list[i];
+  sc.querySelectorAll('.cu').forEach(el => countUp(el, +el.dataset.to));
+  const bar = document.getElementById('abar'); bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = `bar ${SCENE_MS}ms linear forwards`;
+  aTimer = setTimeout(() => playAttract(i + 1), SCENE_MS);
+}
+function startAttract() { if (attOn || !C || ov().classList.contains('on')) return; attOn = true; att().classList.add('on'); playAttract(0); }
+function stopAttract(cycleDone) {
+  clearTimeout(aTimer); if (!attOn) return; attOn = false; att().classList.remove('on'); render(true);
+  if (cycleDone) lastTouch = Date.now() - IDLE_MS + 25000; // 순위표 25초 보여 주고 다시 대기화면
+}
+addEventListener('pointerdown', () => { lastTouch = Date.now(); if (attOn) stopAttract(false); }, true);
+setInterval(() => { if (!attOn && Date.now() - lastTouch > IDLE_MS) startAttract(); }, 1000);
 
 // ── 데이터 ──
 const API = window.google && google.script && google.script.run ? {
   get: cb => google.script.run.withSuccessHandler(s => cb(JSON.parse(s))).getData(),
   checkIn: (n, p, k, note, cb) => google.script.run.withSuccessHandler(cb).withFailureHandler(e => cb({ ok: false, msg: '연결 오류, 다시 눌러 주세요' })).checkIn(n, p, k, note)
 } : window.MOCK;
-function load() { if (API) API.get(d => { DATA = d; render(); }); }
+let first = true;
+function load() { if (API) API.get(d => { DATA = d; render(first); first = false; }); }
 load(); setInterval(load, 60000);
 </script>
 </body></html>

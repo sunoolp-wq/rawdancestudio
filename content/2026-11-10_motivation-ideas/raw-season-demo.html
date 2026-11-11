@@ -465,6 +465,7 @@ function setup() {
     ['출석: 시작 몇 분 전부터', 20],
     ['출석: 시작 후 몇 분까지', 15],
     ['지각 출석 점수 (%)', 50],
+    ['일 연속 출석 보너스 (점 · 바로 앞 수업일에도 출석하면)', 1],
     ['출석 제외 수업 (이름에 들어가면 제외, 쉼표로)', 'K-POP'],
     ['휴강일 (날짜를 쉼표로 · 그날은 출석·금요일 도장 없음)', ''],
     [MASTER_KEY + ' (4자리 · 학생과 다르게 · 학생에게 알려 주지 않기)', mp],
@@ -543,6 +544,8 @@ function compute(raw) {
   const LP = +g('지각 출석 점수', 50), SH = +g('보호권', 1), FW = +g('고정수업 요일', 5), FT = String(g('고정수업 시간', '18:30'));
   const now = raw.now, today = now.slice(0, 10);
   const fris = []; for (let d = D(S); ymd(d) <= E; d.setDate(d.getDate() + 1)) if (d.getDay() === FW && !isHoli(ymd(d))) fris.push(ymd(d));
+  // 수업 있는 날 목록 (일 연속 출석 계산용: 수업 없는 주말·휴강일은 건너뜀)
+  const BD = +g('일 연속 출석 보너스', 1), cdays = []; for (let d = D(S); ymd(d) <= E && ymd(d) <= today; d.setDate(d.getDate() + 1)) if (classesOn(ymd(d)).length) cdays.push(ymd(d));
   // 오늘 금요일 전문반 출석 시간(시작 후 N분)이 지나면 바로 ✕
   const proToday = classesOn(today).filter(c => /전문반|PRO/.test(c.label));
   const proClosed = proToday.length > 0 && (+now.slice(11, 13)) * 60 + (+now.slice(14, 16)) > Math.max(...proToday.map(c => c.e));
@@ -560,6 +563,10 @@ function compute(raw) {
       const pro = isPro(x) && (x.note || i === 0); if (pro) proDays.add(d); else genre++; const p = pro ? PF : PC, got = isLate(x) ? Math.round(p * LP / 100) : p; clsPts += got;
       items.push({ d, t: x.t.slice(11, 16), what: (base(x.note) || '수업 출석').slice(6) || '수업 출석', tag: isLate(x) ? '지각' : pro ? '전문반' : '수업', pts: got }); }); });
     const cls = proDays;
+    // 일 연속 출석 보너스 (원장님 2026-11-11): 바로 앞 수업 있는 날에도 수업 출석했으면 그날 +1점. 주말·휴강일은 건너뜀
+    let dayBonus = 0, dstreak = 0;
+    cdays.forEach((d, i) => { if (byDay[d]) { const cont = i > 0 && byDay[cdays[i - 1]]; dstreak = cont ? dstreak + 1 : 1; if (cont && BD) { dayBonus += BD; items.push({ d, t: '', what: `일 연속 출석 ${dstreak}일째`, tag: '연속', pts: BD }); } }
+      else if (d < today) dstreak = 0; });
     const ex = new Set(mine.filter(x => x.k === '운동 완료').map(x => x.note.slice(0, 10) || x.d));
     const jr = new Set(mine.filter(x => x.k === '연습일지').map(x => x.note.slice(0, 10) || x.d));
     ex.forEach(d => items.push({ d, t: '', what: '운동 루틴', tag: '운동', pts: PE })); jr.forEach(d => items.push({ d, t: '', what: '연습일지 (수업정리)', tag: '일지', pts: PJ }));
@@ -576,7 +583,7 @@ function compute(raw) {
     const lastD = decided[decided.length - 1];
     const status = !decided.length ? 'wait' : lastD === 'miss' ? 'off' : lastD === 'sh' ? 'sh' : 'on';
     return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'), prac: prac.size, genre, ex: ex.size, jr: jr.size, pro: proDays.size, items: items.sort((a, b) => (b.d + b.t).localeCompare(a.d + a.t)),
-      pts: clsPts + prac.size * PP + ex.size * PE + jr.size * PJ };
+      dstreak, pts: clsPts + dayBonus + prac.size * PP + ex.size * PE + jr.size * PJ };
   }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || b.prac - a.prac || a.name.localeCompare(b.name, 'ko'));
   // 동점 → 금요일 연속 기록 → 개인연습 횟수 (원장님 2026-11-10). 셋 다 같을 때만 같은 순위
   const same = (a, b) => a.pts === b.pts && a.streak === b.streak && a.prac === b.prac;
@@ -618,7 +625,7 @@ function render(anim) {
   const w = L.filter(s => s.rank === 1), nx = L.find(s => s.rank > 1);
   document.getElementById('port').innerHTML = w.length ? `<b style="font-family:'Noto Sans KR';font-style:normal;font-size:${w.length > 1 ? 30 : 44}px">${w.map(s => esc(s.name)).join(' · ')}</b>` : '';
   document.getElementById('portn').innerHTML = (w.length ? `${w[0].pts}P` : '') + (w.length > 1 ? ' · 지금 완전 동점이에요!' : nx ? ' · ' + lead(w[0], nx) : '') + `<br>${md(C.E)} 시즌 마감`;
-  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 · 연습은 수업 시간 제외<br>수업 출석은 장르·고정수업 시간에만<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
+  document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P · 수업 일 연속 +1</b><br>월말평가 준비는 기록만 · 연습은 수업 시간 제외<br>수업 출석은 장르·고정수업 시간에만<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
     <div class="lg"><span><b class="f-ok"></b>출석</span><span><b class="f-sh"></b>보호권</span><span><b class="f-miss"></b>결석</span><span><b class="f-up"></b>예정</span></div>`;
 }
 
@@ -640,7 +647,7 @@ function myRecord(n) {
   const week = st.items.filter(x => x.d >= wk && x.d <= C.today), wsum = week.reduce((a, x) => a + x.pts, 0);
   const DW = ['일', '월', '화', '수', '목', '금', '토'];
   box().innerHTML = `<h2>${esc(n)} <span style="font-family:Montserrat;font-style:italic;color:#f5be46">${st.pts}P</span></h2>
-    <p>시즌 ${st.rank}위 · 🔥 금요일 ${st.streak}주 연속<br>전문반 ${st.pro}회 · 장르 ${st.genre}회 · 개인연습 ${st.prac}일 · 운동 ${st.ex}일 · 일지 ${st.jr}일</p>
+    <p>시즌 ${st.rank}위 · 🔥 금요일 ${st.streak}주 연속 · 📅 ${st.dstreak}일 연속<br>전문반 ${st.pro}회 · 장르 ${st.genre}회 · 개인연습 ${st.prac}일 · 운동 ${st.ex}일 · 일지 ${st.jr}일</p>
     <div class="mine"><div class="mh">이번 주 (${md(wk)}~) <b>+${wsum}P</b></div>${week.length ? week.map(x => `<div class="mr"><span>${md(x.d)}(${DW[D(x.d).getDay()]}) ${x.t}</span><em>${esc(x.tag)}</em><b>${esc(x.what)}</b><i>${x.pts ? '+' + x.pts + 'P' : '0P'}</i></div>`).join('') : '<div class="mr" style="justify-content:center;color:#8f8a9c">이번 주 기록이 아직 없어요</div>'}</div>
     <button class="x" id="bk">← 돌아가기</button><button class="x" id="cx" style="margin-left:8px">닫기</button>`;
   document.getElementById('bk').onclick = () => openUser(n); document.getElementById('cx').onclick = close;

@@ -522,6 +522,10 @@ let DATA = null, C = null;
 function fit() { const s = Math.min(innerWidth / 1280, innerHeight / 800), st = document.getElementById('stage');
   st.style.transform = `scale(${s})`; st.style.left = (innerWidth - 1280 * s) / 2 + 'px'; st.style.top = (innerHeight - 800 * s) / 2 + 'px'; }
 addEventListener('resize', fit); fit();
+// 전체 화면 (주소창 숨기기 시도, 2026-11-11): 화면을 누를 때마다 전체 화면이 아니면 다시 켬. 브라우저가 막으면 아무 일도 안 함
+const fsOn = () => { try { const d = document, el = d.documentElement; if ((d.fullscreenEnabled || d.webkitFullscreenEnabled) && !(d.fullscreenElement || d.webkitFullscreenElement)) {
+  const r = (el.requestFullscreen || el.webkitRequestFullscreen).call(el, { navigationUI: 'hide' }); if (r && r.catch) r.catch(() => {}); } } catch (e) {} };
+addEventListener('pointerup', fsOn);
 // 화면 꺼짐 방지
 let wl = null; const wake = async () => { try { if ('wakeLock' in navigator && !wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => wl = null); } } catch (e) {} };
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); }); addEventListener('pointerdown', wake);

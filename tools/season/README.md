@@ -61,3 +61,7 @@
 ## 체험판 (예시 데이터, 2026-11-10)
 - https://claude.ai/artifact/Jy2C1Sdgrh1GM2CCYNGBXr — 비밀번호 모두 1234, 누를 때마다 시계가 35분씩 흐름, 새로고침하면 처음으로. 실제 시트와 연결 안 됨
 - 만들기: `node tools/season/build_demo.js` (Board.html + sample.js) → content/2026-11-10_motivation-ideas/raw-season-demo.html
+
+## 주소창 (2026-11-11)
+- Board가 화면을 누를 때 전체 화면을 요청함 (구글 Apps Script 화면 안에서 허용되면 주소창이 사라짐, 막히면 그대로)
+- 확실한 방법: 키오스크 브라우저 앱(Fully Kiosk Browser 등)에 주소를 넣기. 앱 안 구글 로그인은 구글이 막는 경우가 많아 배포 액세스를 '모든 사용자'로 바꾸고 태블릿은 구글 로그아웃

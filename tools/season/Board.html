@@ -146,7 +146,7 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
   <div id="list"><div class="cap"><span><i></i>SEASON RANKING</span><em>금요일 고정수업 도장 · 🔥 연속 · 점수</em></div><div id="rows"></div></div>
   <div id="side">
     <div class="card"><div class="cap"><span><i></i>NOW 연습 중</span></div><div id="now"></div></div>
-    <div class="card"><div class="cap"><span><i></i>🎬 포폴 영상 · 1등</span></div><div id="port"></div><div id="portn"></div></div>
+    <div class="card"><div class="cap"><span><i></i>👑 지금 1등</span></div><div id="port"></div><div id="portn"></div></div>
     <div class="card rl" id="rules"></div>
   </div>
   <div id="hint">👆 내 이름을 눌러서 출석·연습·운동·일지 체크 <small>TAP YOUR NAME</small></div>
@@ -257,7 +257,7 @@ function render(anim) {
   document.getElementById('now').innerHTML = nw.length ? nw.map(s => `<div class="now"><div><i></i>${esc(s.name)}</div><span>${s.practicing}~</span></div>`).join('') : '<div class="empty">지금 연습실에 체크인한 사람이 없어요</div>';
   const w = L.filter(s => s.rank === 1), nx = L.find(s => s.rank > 1);
   document.getElementById('port').innerHTML = w.length ? `<b style="font-family:'Noto Sans KR';font-style:normal;font-size:${w.length > 1 ? 30 : 44}px">${w.map(s => esc(s.name)).join(' · ')}</b>` : '';
-  document.getElementById('portn').innerHTML = '시즌 1등에게 개인 포트폴리오 영상 촬영' + (w.length > 1 ? '<br>지금 완전 동점이에요!' : nx ? '<br>' + lead(w[0], nx) + ` · ${md(C.E)} 마감` : '');
+  document.getElementById('portn').innerHTML = (w.length ? `${w[0].pts}P` : '') + (w.length > 1 ? ' · 지금 완전 동점이에요!' : nx ? ' · ' + lead(w[0], nx) : '') + `<br>${md(C.E)} 시즌 마감`;
   document.getElementById('rules').innerHTML = `<b>전문반 ${C.PF}P · 수업 ${C.PC}P · 개인연습 ${C.MIN}분+ ${C.PP}P<br>운동 ${C.PE}P · 연습일지 ${C.PJ}P</b> (단톡 인증)<br>월말평가 준비는 기록만 · 연습은 수업 시간 제외<br>수업 출석은 장르·고정수업 시간에만<br>금요일 빠지면 🔥 0부터 · 🛡 보호권 시즌 ${C.SH}장<br>(보호권은 수업 전 보호자 연락 시에만)
     <div class="lg"><span><b class="f-ok"></b>출석</span><span><b class="f-sh"></b>보호권</span><span><b class="f-miss"></b>결석</span><span><b class="f-up"></b>예정</span></div>`;
 }
@@ -384,7 +384,7 @@ function finalScenes() {
     `<div class="conf">${conf}</div><div class="a-k swipe">${esc(C.name)} · FINAL · ${md(C.S)} — ${md(C.E)}</div><div class="a-mid slam" style="margin-top:16px;font-size:44px;color:#c3bfcc;animation-delay:.1s">🏆 시즌 1등</div>
      <div class="a-big slam a-gold" style="margin-top:10px;animation-delay:.35s;font-family:'Noto Sans KR';font-style:normal">${w.map(s => esc(s.name)).join(' · ')}</div>
      <div class="a-mid rise" style="margin-top:22px;animation-delay:.6s;font-family:Montserrat;font-style:italic"><span class="cu" data-to="${w.length ? w[0].pts : 0}">0</span>P</div>
-     <div class="a-sub rise" style="animation-delay:.85s">🎬 개인 포트폴리오 영상 촬영 확정! 축하해요</div>`,
+     <div class="a-sub rise" style="animation-delay:.85s">축하해요! 이번 시즌 1등 👏</div>`,
     `<div class="a-k swipe">FINAL TOP 3</div><div class="pod">${[top[1], top[0], top[2]].filter(Boolean).map((s, i) => `
      <div class="${s === top[0] ? 'p1' : ''} rise" style="animation-delay:${[.35, .1, .55][i]}s"><div class="r">${String(s.rank).padStart(2, '0')}</div><div class="n">${esc(s.name)}</div><div class="v"><span class="cu" data-to="${s.pts}">0</span>P</div></div>`).join('')}</div>`,
     `<div class="a-k swipe">THANK YOU</div><div class="a-big slam" style="margin-top:18px">${m ? esc(m[1]) + '<span class="o">' + m[2] + '</span>' : esc(C.name)}</div><div class="a-mid rise" style="margin-top:26px;animation-delay:.45s">모두 수고했어요 👏</div><div class="a-sub rise" style="animation-delay:.7s">다음 시즌에서 다시 만나요</div>`];
@@ -406,7 +406,7 @@ function scenes() {
     ? `<div class="feed">${C.feed.map((x, i) => `<div class="swipe" style="animation-delay:${.3 + i * .12}s"><b>${x.t.slice(11, 16)}</b>${esc(x.n)}<em>${esc(x.k === '연습 끝' ? (x.note || '연습') : x.k)}</em></div>`).join('')}</div>`
     : `<div class="a-sub rise" style="animation-delay:.4s">아직 아무도 없어요. 오늘 첫 번째 체크인 주인공은?</div>`));
   if (L.length) { const w = L.filter(s => s.rank === 1), gap = w[0].pts - ((L.find(s => s.rank > 1) || { pts: w[0].pts }).pts);
-    out.push(`<div class="a-k swipe">🎬 포트폴리오 영상 촬영권 · 시즌 1등 단 한 명</div><div class="a-mid slam" style="margin-top:16px;font-size:44px;color:#c3bfcc;animation-delay:.1s">지금 1등</div>
+    out.push(`<div class="a-k swipe">👑 SEASON LEADER</div><div class="a-mid slam" style="margin-top:16px;font-size:44px;color:#c3bfcc;animation-delay:.1s">지금 1등</div>
     <div class="a-big slam" style="margin-top:10px;animation-delay:.35s;font-family:'Noto Sans KR';font-style:normal">${w.map(s => esc(s.name)).join(' · ')}</div>
     <div class="a-mid rise a-gold" style="margin-top:22px;animation-delay:.6s;font-family:Montserrat;font-style:italic"><span class="cu" data-to="${w[0].pts}">0</span>P</div>
     <div class="a-sub rise" style="animation-delay:.85s">${w.length > 1 ? '완전 동점! 한 번만 더 오면 단독 1등' : (L.find(s => s.rank > 1) ? lead(w[0], L.find(s => s.rank > 1)) + ' · 아직 뒤집을 수 있어요' : '')} · ${md(C.E)} 마감</div>`); }

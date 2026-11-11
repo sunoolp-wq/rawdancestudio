@@ -72,6 +72,11 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
 .dots i{width:18px;height:18px;border-radius:50%;border:2px solid #6f6a7c}.dots i.f{background:#b9a6ff;border-color:#b9a6ff}
 .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:330px;margin:0 auto}
 .pad button{height:62px;font-family:Montserrat;font-size:26px;background:rgba(255,255,255,.06);color:#f4f2ee}
+.mine{margin-top:16px;max-height:330px;overflow:auto;text-align:left;border:1px solid rgba(255,255,255,.08);border-radius:14px}
+.mh{display:flex;justify-content:space-between;padding:10px 16px;font-family:"Noto Sans KR";font-weight:700;font-size:14px;color:#8f8a9c;border-bottom:1px solid rgba(255,255,255,.06)}.mh b{color:#f5be46;font-family:Montserrat}
+.mr{display:flex;gap:12px;align-items:center;padding:9px 16px;font-family:"Noto Sans KR";font-size:15px;border-bottom:1px solid rgba(255,255,255,.04)}
+.mr span{color:#8f8a9c;font-size:13px;width:92px;flex:none}.mr em{font-style:normal;font-size:12px;padding:2px 8px;border-radius:10px;background:rgba(185,166,255,.14);color:#b9a6ff;flex:none}
+.mr b{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mr i{font-style:normal;font-family:Montserrat;font-weight:800;color:#f5be46;flex:none}
 .x{margin-top:18px;height:46px;width:160px;font-size:16px;background:transparent;color:#8f8a9c;border:1px solid #34303f!important}
 .res{font-size:76px;line-height:1}
 .res+h2{margin-top:12px}
@@ -180,6 +185,7 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
  *  - 원장님 비밀번호로 누르면 시간 제한 없이 대신 처리 (기록 E열 '원장님 처리')
  *  - 연습은 수업 시간에 시작 불가, 연습 분에서 수업 시간 제외. 월말평가 준비는 기록만
  *  - [순위] 탭: 태블릿 화면 순위를 그대로 저장 / [리포트] 탭: 매주 일요일 20시 학부모 문자 문구 자동 생성
+ *  - 매일 23시 원장님께 오늘 요약 메일 (단톡 인증 확인할 운동·연습일지 목록) / 시트 메뉴 '새 시즌 시작'으로 기록 보관 후 시즌 전환
  * 설치: tools/season/README.md
  */
 const TAB = { stu: '학생', log: '기록', cfg: '설정', tt: '시간표', rank: '순위', rep: '리포트' };
@@ -199,7 +205,8 @@ function doGet() {
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
 }
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu('RAW SEASON').addItem('이번 주 리포트 만들기', 'weeklyReport').addItem('설치·업데이트 (setup)', 'setup').addToUi();
+  SpreadsheetApp.getUi().createMenu('RAW SEASON').addItem('이번 주 리포트 만들기', 'weeklyReport').addItem('오늘 요약 메일 지금 보내기', 'dailySummary')
+    .addSeparator().addItem('새 시즌 시작 (기록 보관)', 'newSeasonMenu').addItem('설치·업데이트 (setup)', 'setup').addToUi();
 }
 
 const tz_ = () => SpreadsheetApp.getActive().getSpreadsheetTimeZone();
@@ -254,7 +261,7 @@ function pracToday_(rows, tt, skip) {
 // 태블릿 화면이 1분마다·기록 직후 부름 (학생 비밀번호·원장님 비밀번호는 보내지 않음)
 function getData() {
   const stu = read_(TAB.stu).filter((r, i) => i === 0 || String(r[3] || '').indexOf('휴원') < 0).map(r => [r[0], '', r[2]]);
-  const cfg = read_(TAB.cfg).filter(r => String(r[0]).trim().indexOf(MASTER_KEY) !== 0);
+  const cfg = read_(TAB.cfg).filter(r => String(r[0]).trim().indexOf(MASTER_KEY) !== 0 && String(r[0]).trim().indexOf('요약 메일') !== 0);
   return JSON.stringify({ stu, log: read_(TAB.log), cfg, tt: read_(TAB.tt), now: fmt_(new Date()) });
 }
 
@@ -386,6 +393,55 @@ function weeklyReport() {
   return out.length;
 }
 
+// 매일 23시 (트리거) 또는 시트 메뉴 → 원장님께 오늘 요약 메일 (원장님 2026-11-11 D2)
+function dailySummary() {
+  const g = cfg_(), to = String(g('요약 메일') || '').trim();
+  if (!to) return 'no-mail';
+  const today = fmt_(new Date(), 'yyyy-MM-dd'), md = s => (+s.slice(5, 7)) + '/' + (+s.slice(8, 10));
+  const log = read_(TAB.log).slice(1).map(r => ({ t: String(r[0]), n: String(r[1]).trim(), k: String(r[2]).trim(), note: String(r[3] || '').trim(), memo: String(r[4] || '').trim() }))
+    .filter(x => x.t.slice(0, 10) === today).sort((a, b) => a.t < b.t ? -1 : 1);
+  const verify = log.filter(x => DAILY.indexOf(x.k) >= 0), late = log.filter(x => x.k === '수업 출석' && x.note.indexOf('(지각)') >= 0), byMaster = log.filter(x => x.memo === '원장님 처리');
+  const open = {}; log.forEach(x => { if (x.k === '연습 시작') open[x.n] = x.t; else if (x.k === '연습 끝') delete open[x.n]; });
+  const names = [...new Set(log.map(x => x.n))];
+  const line = x => `- ${x.t.slice(11, 16)} ${x.n} · ${x.k}${x.note ? ' · ' + (DAILY.indexOf(x.k) >= 0 ? (x.note === today ? '오늘' : md(x.note)) : x.note) : ''}`;
+  const body = [`RAW SEASON 오늘 요약 (${md(today)})`, '',
+    `오늘 체크한 학생 ${names.length}명 · 기록 ${log.length}줄`, '',
+    `■ 단톡방 인증 확인할 것 (운동·연습일지) ${verify.length}건`, ...(verify.length ? verify.map(line) : ['- 없음']),
+    '  → 인증이 없으면 시트 [기록] 탭에서 그 줄을 삭제하면 점수가 빠져요', '',
+    `■ 지각 출석 ${late.length}건`, ...(late.length ? late.map(line) : ['- 없음']), '',
+    `■ 원장님 처리 ${byMaster.length}건`, ...(byMaster.length ? byMaster.map(line) : ['- 없음']), '',
+    `■ 연습 끝을 안 누른 학생 (오늘 연습 불인정)`, ...(Object.keys(open).length ? Object.entries(open).map(([n, t]) => `- ${n} · ${t.slice(11, 16)} 시작`) : ['- 없음']), '',
+    '■ 오늘 전체 기록', ...(log.length ? log.map(line) : ['- 없음'])].join('\n');
+  MailApp.sendEmail(to, `[RAW SEASON] ${md(today)} 오늘 요약 · 인증 확인 ${verify.length}건`, body);
+  return body;
+}
+
+// 새 시즌: [기록]·[순위]를 '기록 (시즌 이름)'·'순위 (시즌 이름)'으로 보관 → 기록 비우기, 보호권 칸 비우기, [설정] 시즌 이름·날짜 바꾸기 (원장님 2026-11-11 D3)
+function newSeasonMenu() {
+  const ui = SpreadsheetApp.getUi(), g = cfg_(), old = String(g('시즌 이름') || 'RAW SEASON').trim();
+  const ask = (q, d) => { const r = ui.prompt('새 시즌 시작', `${q}\n(비우면: ${d})`, ui.ButtonSet.OK_CANCEL); if (r.getSelectedButton() !== ui.Button.OK) throw new Error('취소'); return r.getResponseText().trim() || d; };
+  try {
+    const m = old.match(/^(.*?)(\d+)$/), nm = ask('새 시즌 이름', m ? m[1] + (+m[2] + 1) : old + ' 2');
+    const st = ask('시작 날짜 (예 2026-12-01)', ''), en = ask('끝 날짜 (예 2026-12-31)', '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(st) || !/^\d{4}-\d{2}-\d{2}$/.test(en) || st > en) { ui.alert('날짜를 2026-12-01 처럼 써 주세요. 아무것도 바꾸지 않았어요.'); return; }
+    if (ui.alert('새 시즌 시작', `'${old}' 기록을 보관 탭으로 옮기고\n${nm} (${st} ~ ${en})을 시작할까요?\n보호권 칸도 비워져요.`, ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
+    ui.alert(newSeason_(nm, st, en));
+  } catch (e) { if (String(e.message) !== '취소') throw e; }
+}
+function newSeason_(name, start, end) {
+  const ss = SpreadsheetApp.getActive(), old = String(cfg_()('시즌 이름') || 'RAW SEASON').trim();
+  [TAB.log, TAB.rank].forEach(t => { const sh = ss.getSheetByName(t); if (!sh) return;
+    let nm = `${t} (${old})`, i = 2; while (ss.getSheetByName(nm)) nm = `${t} (${old}) ${i++}`;
+    sh.copyTo(ss).setName(nm);
+    const last = sh.getLastRow(); if (t === TAB.log) { if (last > 1) sh.deleteRows(2, last - 1); } else sh.clearContents(); });
+  const stu = ss.getSheetByName(TAB.stu); if (stu && stu.getLastRow() > 1) stu.getRange(2, 3, stu.getLastRow() - 1, 1).clearContent();
+  const c = ss.getSheetByName(TAB.cfg), v = c.getDataRange().getValues();
+  v.forEach((r, i) => { const k = String(r[0]).trim(), set = x => c.getRange(i + 1, 2).setNumberFormat('@').setValue(x);
+    if (k.indexOf('시즌 이름') === 0) set(name); else if (k.indexOf('시즌 시작') === 0) set(start); else if (k.indexOf('시즌 끝') === 0) set(end); });
+  PropertiesService.getScriptProperties().deleteProperty('boardHash');
+  return `${name} 시작 준비 끝 (${start} ~ ${end}).\n지난 기록은 '${TAB.log} (${old})' 탭에 보관했어요. 태블릿은 1분 안에 새 시즌으로 바뀌어요.`;
+}
+
 // 처음 한 번: 탭 만들기. 이미 설치했으면 다시 실행해도 됨 (없는 탭·설정 항목·트리거만 추가, 기존 내용은 그대로)
 function setup() {
   const ss = SpreadsheetApp.getActive();
@@ -412,6 +468,7 @@ function setup() {
     ['출석 제외 수업 (이름에 들어가면 제외, 쉼표로)', 'K-POP'],
     ['휴강일 (날짜를 쉼표로 · 그날은 출석·금요일 도장 없음)', ''],
     [MASTER_KEY + ' (4자리 · 학생과 다르게 · 학생에게 알려 주지 않기)', mp],
+    ['요약 메일 받을 주소 (비우면 안 보냄)', Session.getEffectiveUser().getEmail()],
   ];
   let c = ss.getSheetByName(TAB.cfg);
   if (!c) {
@@ -446,6 +503,9 @@ function setup() {
   // 매주 일요일 20시 주간 리포트 (한 번만 만듦)
   if (!ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'weeklyReport'))
     ScriptApp.newTrigger('weeklyReport').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(20).create();
+  // 매일 23시 원장님 요약 메일 (한 번만 만듦)
+  if (!ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'dailySummary'))
+    ScriptApp.newTrigger('dailySummary').timeBased().everyDays(1).atHour(23).create();
 }
 
   window.MOCK = {
@@ -491,24 +551,27 @@ function compute(raw) {
     const base = n => String(n || '').replace(' (지각)', '').trim(), isLate = x => x.note.indexOf('(지각)') >= 0;
     const isPro = x => /전문반|PRO/.test(x.note) || (!x.note && D(x.d).getDay() === FW);
     const byDay = {}; mine.filter(x => x.k === '수업 출석' && !(x.note && skipCls(x.note))).forEach(x => (byDay[x.d] = byDay[x.d] || []).push(x));
-    const proDays = new Set(); let clsPts = 0, genre = 0;
+    const proDays = new Set(), items = []; let clsPts = 0, genre = 0;
     Object.entries(byDay).forEach(([d, a]) => { const seen = new Set(); a.filter(x => !seen.has(base(x.note) || x.t) && seen.add(base(x.note) || x.t)).slice(0, 3).forEach((x, i) => {
-      const pro = isPro(x) && (x.note || i === 0); if (pro) proDays.add(d); else genre++; const p = pro ? PF : PC; clsPts += isLate(x) ? Math.round(p * LP / 100) : p; }); });
+      const pro = isPro(x) && (x.note || i === 0); if (pro) proDays.add(d); else genre++; const p = pro ? PF : PC, got = isLate(x) ? Math.round(p * LP / 100) : p; clsPts += got;
+      items.push({ d, t: x.t.slice(11, 16), what: (base(x.note) || '수업 출석').slice(6) || '수업 출석', tag: isLate(x) ? '지각' : pro ? '전문반' : '수업', pts: got }); }); });
     const cls = proDays;
     const ex = new Set(mine.filter(x => x.k === '운동 완료').map(x => x.note.slice(0, 10) || x.d));
     const jr = new Set(mine.filter(x => x.k === '연습일지').map(x => x.note.slice(0, 10) || x.d));
+    ex.forEach(d => items.push({ d, t: '', what: '운동 루틴', tag: '운동', pts: PE })); jr.forEach(d => items.push({ d, t: '', what: '연습일지 (수업정리)', tag: '일지', pts: PJ }));
     // 개인연습: 하루 합계(수업 시간 제외)가 MIN분 이상이면 그날 1회 인정 (원장님 2026-11-10)
     const prac = new Set(), pday = {}; let open = null;
     mine.forEach(x => { if (x.k === '연습 시작') open = x; else if (x.k === '연습 끝' && open && open.d === x.d) {
       if (x.note !== '월말평가 준비') pday[x.d] = (pday[x.d] || 0) + pracMin(open.t, x.t); open = null; } });
-    Object.entries(pday).forEach(([d, m]) => { if (m >= MIN) prac.add(d); });
+    Object.entries(pday).forEach(([d, m]) => { if (m >= MIN) prac.add(d); items.push({ d, t: '', what: `개인연습 하루 합계 ${m}분`, tag: '연습', pts: m >= MIN ? PP : 0 }); });
+    mine.filter(x => x.k === '연습 끝' && x.note === '월말평가 준비').forEach(x => items.push({ d: x.d, t: x.t.slice(11, 16), what: '월말평가 준비 (기록만)', tag: '연습', pts: 0 }));
     const practicing = open && open.d === today ? open.t.slice(11, 16) : null;
     const fr = fris.map(f => f > today ? 'up' : cls.has(f) ? 'ok' : sh.includes(f) ? 'sh' : f === today && !proClosed ? 'today' : 'miss');
     const decided = fr.filter(s => s === 'ok' || s === 'sh' || s === 'miss');
     let streak = 0; for (let i = decided.length - 1; i >= 0 && decided[i] !== 'miss'; i--) streak++;
     const lastD = decided[decided.length - 1];
     const status = !decided.length ? 'wait' : lastD === 'miss' ? 'off' : lastD === 'sh' ? 'sh' : 'on';
-    return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'), prac: prac.size, genre, ex: ex.size, jr: jr.size,
+    return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'), prac: prac.size, genre, ex: ex.size, jr: jr.size, pro: proDays.size, items: items.sort((a, b) => (b.d + b.t).localeCompare(a.d + a.t)),
       pts: clsPts + prac.size * PP + ex.size * PE + jr.size * PJ };
   }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || b.prac - a.prac || a.name.localeCompare(b.name, 'ko'));
   // 동점 → 금요일 연속 기록 → 개인연습 횟수 (원장님 2026-11-10). 셋 다 같을 때만 같은 순위
@@ -563,8 +626,20 @@ function close() { ov().classList.remove('on'); sel = kind = null; pin = ''; not
 function openUser(n) {
   sel = n; idle(); ov().classList.add('on');
   if (C && (C.today > C.E || C.today < C.S)) { box().innerHTML = `<div class="res">🏁</div><h2>${C.today > C.E ? '시즌이 끝났어요' : '시즌 시작 전이에요'}</h2><p style="font-size:17px;margin-top:10px">${C.today > C.E ? '다음 시즌을 기다려 주세요!' : md(C.S) + '부터 체크할 수 있어요'}</p><button class="x" id="cx">닫기</button>`; document.getElementById('cx').onclick = close; return; }
-  box().innerHTML = `<h2>${esc(n)}</h2><p>무엇을 체크할까요?</p><div class="acts">${KINDS.map(([k, e, c]) => `<button class="${c}" data-k="${k}">${k}<small>${e}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
-  box().querySelectorAll('[data-k]').forEach(b => b.onclick = () => pick(b.dataset.k)); document.getElementById('cx').onclick = close;
+  box().innerHTML = `<h2>${esc(n)}</h2><p>무엇을 체크할까요?</p><div class="acts">${KINDS.map(([k, e, c]) => `<button class="${c}" data-k="${k}">${k}<small>${e}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button><button class="x" id="my" style="margin-left:8px;color:#b9a6ff;border-color:rgba(185,166,255,.4)!important">📋 내 기록</button>`;
+  box().querySelectorAll('[data-k]').forEach(b => b.onclick = () => pick(b.dataset.k)); document.getElementById('cx').onclick = close; document.getElementById('my').onclick = () => myRecord(n);
+}
+// 내 기록 (원장님 2026-11-11 D1): 비밀번호 없이 이번 주 내역 + 시즌 합계 (점수는 원래 모두에게 공개)
+function myRecord(n) {
+  idle(); const st = C.list.find(s => s.name === n); if (!st) return close();
+  const dow = (D(C.today).getDay() + 6) % 7, mon = new Date(D(C.today)); mon.setDate(mon.getDate() - dow); const wk = ymd(mon);
+  const week = st.items.filter(x => x.d >= wk && x.d <= C.today), wsum = week.reduce((a, x) => a + x.pts, 0);
+  const DW = ['일', '월', '화', '수', '목', '금', '토'];
+  box().innerHTML = `<h2>${esc(n)} <span style="font-family:Montserrat;font-style:italic;color:#f5be46">${st.pts}P</span></h2>
+    <p>시즌 ${st.rank}위 · 🔥 금요일 ${st.streak}주 연속<br>전문반 ${st.pro}회 · 장르 ${st.genre}회 · 개인연습 ${st.prac}일 · 운동 ${st.ex}일 · 일지 ${st.jr}일</p>
+    <div class="mine"><div class="mh">이번 주 (${md(wk)}~) <b>+${wsum}P</b></div>${week.length ? week.map(x => `<div class="mr"><span>${md(x.d)}(${DW[D(x.d).getDay()]}) ${x.t}</span><em>${esc(x.tag)}</em><b>${esc(x.what)}</b><i>${x.pts ? '+' + x.pts + 'P' : '0P'}</i></div>`).join('') : '<div class="mr" style="justify-content:center;color:#8f8a9c">이번 주 기록이 아직 없어요</div>'}</div>
+    <button class="x" id="bk">← 돌아가기</button><button class="x" id="cx" style="margin-left:8px">닫기</button>`;
+  document.getElementById('bk').onclick = () => openUser(n); document.getElementById('cx').onclick = close;
 }
 // 지금 출석 가능한 수업 (Code.gs classesAt_와 같은 계산). 시각 = 서버 시각 + 받아 온 뒤 흐른 시간
 const DAYS_ = ['일', '월', '화', '수', '목', '금', '토'];
@@ -601,7 +676,7 @@ function pick(k) {
     : DAILY.includes(k) ? [[C.today, '오늘', md(C.today)], [yest, '어제', md(yest)]] : null;
   if (k === '연습 시작') {
     const n = nowStr(), mm = (+n.slice(11, 13)) * 60 + (+n.slice(14, 16)), c = classesOn(n.slice(0, 10)).find(c => mm >= c.s && mm < c.e);
-    if (c) { box().innerHTML = `<div class="res">🙅</div><h2>수업 시간에는 연습을 시작할 수 없어요</h2><p style="font-size:17px;margin-top:10px">지금 <b style="color:#f4f2ee">${esc(c.label)}</b><br>수업이 끝난 뒤에 [연습 시작]을 눌러요</p><button class="x" id="cx">닫기</button>`;
+    if (c) { beep(false); box().innerHTML = `<div class="res">🙅</div><h2>수업 시간에는 연습을 시작할 수 없어요</h2><p style="font-size:17px;margin-top:10px">지금 <b style="color:#f4f2ee">${esc(c.label)}</b><br>수업이 끝난 뒤에 [연습 시작]을 눌러요</p><button class="x" id="cx">닫기</button>`;
       document.getElementById('cx').onclick = close; return; }
   }
   if (k === '수업 출석') {
@@ -611,7 +686,7 @@ function pick(k) {
       box().innerHTML = `<h2>${esc(sel)}</h2><p>원장님 처리 · 오늘 어느 수업이에요?</p><div class="acts">${w.all.map(c => `<button data-v="${esc(c.label)}">${esc(c.label.slice(6))}<small>${esc(c.label.slice(0, 5))} · ${esc(c.teacher)}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
       box().querySelectorAll('[data-v]').forEach(b => b.onclick = () => { note = b.dataset.v; askPin(k, true); }); document.getElementById('cx').onclick = close; }; };
     const cands = w.open.map(c => Object.assign({ lt: false }, c)).concat(w.late.map(c => Object.assign({ lt: true }, c)));
-    if (!cands.length) { box().innerHTML = `<div class="res">⏰</div><h2>지금은 수업 출석 시간이 아니에요</h2><p style="font-size:17px;margin-top:10px">${w.next ? `다음 수업 <b style="color:#f4f2ee">${esc(w.next.label)}</b> · ${esc(w.next.from)}부터 출석` : '오늘 남은 수업이 없어요'}<br>수업 시작 ${w.bf}분 전 ~ 시작 ${w.af}분 후 (그 뒤 수업 끝까지는 지각)</p><button class="x" id="cx">닫기</button>${masterBtn}`;
+    if (!cands.length) { beep(false); box().innerHTML = `<div class="res">⏰</div><h2>지금은 수업 출석 시간이 아니에요</h2><p style="font-size:17px;margin-top:10px">${w.next ? `다음 수업 <b style="color:#f4f2ee">${esc(w.next.label)}</b> · ${esc(w.next.from)}부터 출석` : '오늘 남은 수업이 없어요'}<br>수업 시작 ${w.bf}분 전 ~ 시작 ${w.af}분 후 (그 뒤 수업 끝까지는 지각)</p><button class="x" id="cx">닫기</button>${masterBtn}`;
       document.getElementById('cx').onclick = close; bindMaster(); return; }
     if (cands.length === 1 && !cands[0].lt) { note = cands[0].label; return askPin(k); }
     box().innerHTML = `<h2>${esc(sel)}</h2><p>${cands.some(c => c.lt) ? '지각 출석은 점수 절반, 🔥는 그대로예요' : '어느 수업이에요?'}</p><div class="acts">${cands.map(c => `<button data-v="${esc(c.label)}"${c.lt ? ' style="border-color:#f5be46"' : ''}>${esc(c.label.slice(6))}${c.lt ? ' <span style="color:#f5be46">지각</span>' : ''}<small>${esc(c.label.slice(0, 5))} · ${esc(c.teacher)}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
@@ -632,8 +707,15 @@ function press(x) {
   document.querySelectorAll('#dots i').forEach((d, i) => d.classList.toggle('f', i < pin.length));
   if (pin.length === 4) { box().querySelector('.pad').style.opacity = .4; send(); }
 }
+// 체크 효과음 (원장님 2026-11-11 D6): 성공 '띵동', 실패 '삑'. 화면을 누른 뒤에만 소리 남
+let AC = null; addEventListener('pointerdown', () => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch (e) {} });
+function beep(ok) { try { if (!AC) return; const t = AC.currentTime, notes = ok ? [[988, 0], [1319, .12]] : [[196, 0], [185, .14]];
+  notes.forEach(([f, d]) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = ok ? 'sine' : 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t + d); g.gain.exponentialRampToValueAtTime(ok ? .35 : .12, t + d + .02); g.gain.exponentialRampToValueAtTime(0.0001, t + d + (ok ? .32 : .2));
+    o.connect(g).connect(AC.destination); o.start(t + d); o.stop(t + d + .35); }); } catch (e) {} }
 function send() {
   const done = r => {
+    beep(!!r.ok);
     if (!r.ok && r.msg === '비밀번호가 달라요') { box().classList.add('shake'); setTimeout(() => box().classList.remove('shake'), 400); pin = '';
       document.querySelector('#box p').textContent = '비밀번호가 달라요. 다시 입력해요'; box().querySelector('.pad').style.opacity = 1;
       document.querySelectorAll('#dots i').forEach(d => d.classList.remove('f')); return; }

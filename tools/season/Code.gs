@@ -8,6 +8,7 @@
  *  - 원장님 비밀번호로 누르면 시간 제한 없이 대신 처리 (기록 E열 '원장님 처리')
  *  - 연습은 수업 시간에 시작 불가, 연습 분에서 수업 시간 제외. 월말평가 준비는 기록만
  *  - [순위] 탭: 태블릿 화면 순위를 그대로 저장 / [리포트] 탭: 매주 일요일 20시 학부모 문자 문구 자동 생성
+ *  - 매일 23시 원장님께 오늘 요약 메일 (단톡 인증 확인할 운동·연습일지 목록) / 시트 메뉴 '새 시즌 시작'으로 기록 보관 후 시즌 전환
  * 설치: tools/season/README.md
  */
 const TAB = { stu: '학생', log: '기록', cfg: '설정', tt: '시간표', rank: '순위', rep: '리포트' };
@@ -27,7 +28,8 @@ function doGet() {
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
 }
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu('RAW SEASON').addItem('이번 주 리포트 만들기', 'weeklyReport').addItem('설치·업데이트 (setup)', 'setup').addToUi();
+  SpreadsheetApp.getUi().createMenu('RAW SEASON').addItem('이번 주 리포트 만들기', 'weeklyReport').addItem('오늘 요약 메일 지금 보내기', 'dailySummary')
+    .addSeparator().addItem('새 시즌 시작 (기록 보관)', 'newSeasonMenu').addItem('설치·업데이트 (setup)', 'setup').addToUi();
 }
 
 const tz_ = () => SpreadsheetApp.getActive().getSpreadsheetTimeZone();
@@ -82,7 +84,7 @@ function pracToday_(rows, tt, skip) {
 // 태블릿 화면이 1분마다·기록 직후 부름 (학생 비밀번호·원장님 비밀번호는 보내지 않음)
 function getData() {
   const stu = read_(TAB.stu).filter((r, i) => i === 0 || String(r[3] || '').indexOf('휴원') < 0).map(r => [r[0], '', r[2]]);
-  const cfg = read_(TAB.cfg).filter(r => String(r[0]).trim().indexOf(MASTER_KEY) !== 0);
+  const cfg = read_(TAB.cfg).filter(r => String(r[0]).trim().indexOf(MASTER_KEY) !== 0 && String(r[0]).trim().indexOf('요약 메일') !== 0);
   return JSON.stringify({ stu, log: read_(TAB.log), cfg, tt: read_(TAB.tt), now: fmt_(new Date()) });
 }
 
@@ -214,6 +216,55 @@ function weeklyReport() {
   return out.length;
 }
 
+// 매일 23시 (트리거) 또는 시트 메뉴 → 원장님께 오늘 요약 메일 (원장님 2026-11-11 D2)
+function dailySummary() {
+  const g = cfg_(), to = String(g('요약 메일') || '').trim();
+  if (!to) return 'no-mail';
+  const today = fmt_(new Date(), 'yyyy-MM-dd'), md = s => (+s.slice(5, 7)) + '/' + (+s.slice(8, 10));
+  const log = read_(TAB.log).slice(1).map(r => ({ t: String(r[0]), n: String(r[1]).trim(), k: String(r[2]).trim(), note: String(r[3] || '').trim(), memo: String(r[4] || '').trim() }))
+    .filter(x => x.t.slice(0, 10) === today).sort((a, b) => a.t < b.t ? -1 : 1);
+  const verify = log.filter(x => DAILY.indexOf(x.k) >= 0), late = log.filter(x => x.k === '수업 출석' && x.note.indexOf('(지각)') >= 0), byMaster = log.filter(x => x.memo === '원장님 처리');
+  const open = {}; log.forEach(x => { if (x.k === '연습 시작') open[x.n] = x.t; else if (x.k === '연습 끝') delete open[x.n]; });
+  const names = [...new Set(log.map(x => x.n))];
+  const line = x => `- ${x.t.slice(11, 16)} ${x.n} · ${x.k}${x.note ? ' · ' + (DAILY.indexOf(x.k) >= 0 ? (x.note === today ? '오늘' : md(x.note)) : x.note) : ''}`;
+  const body = [`RAW SEASON 오늘 요약 (${md(today)})`, '',
+    `오늘 체크한 학생 ${names.length}명 · 기록 ${log.length}줄`, '',
+    `■ 단톡방 인증 확인할 것 (운동·연습일지) ${verify.length}건`, ...(verify.length ? verify.map(line) : ['- 없음']),
+    '  → 인증이 없으면 시트 [기록] 탭에서 그 줄을 삭제하면 점수가 빠져요', '',
+    `■ 지각 출석 ${late.length}건`, ...(late.length ? late.map(line) : ['- 없음']), '',
+    `■ 원장님 처리 ${byMaster.length}건`, ...(byMaster.length ? byMaster.map(line) : ['- 없음']), '',
+    `■ 연습 끝을 안 누른 학생 (오늘 연습 불인정)`, ...(Object.keys(open).length ? Object.entries(open).map(([n, t]) => `- ${n} · ${t.slice(11, 16)} 시작`) : ['- 없음']), '',
+    '■ 오늘 전체 기록', ...(log.length ? log.map(line) : ['- 없음'])].join('\n');
+  MailApp.sendEmail(to, `[RAW SEASON] ${md(today)} 오늘 요약 · 인증 확인 ${verify.length}건`, body);
+  return body;
+}
+
+// 새 시즌: [기록]·[순위]를 '기록 (시즌 이름)'·'순위 (시즌 이름)'으로 보관 → 기록 비우기, 보호권 칸 비우기, [설정] 시즌 이름·날짜 바꾸기 (원장님 2026-11-11 D3)
+function newSeasonMenu() {
+  const ui = SpreadsheetApp.getUi(), g = cfg_(), old = String(g('시즌 이름') || 'RAW SEASON').trim();
+  const ask = (q, d) => { const r = ui.prompt('새 시즌 시작', `${q}\n(비우면: ${d})`, ui.ButtonSet.OK_CANCEL); if (r.getSelectedButton() !== ui.Button.OK) throw new Error('취소'); return r.getResponseText().trim() || d; };
+  try {
+    const m = old.match(/^(.*?)(\d+)$/), nm = ask('새 시즌 이름', m ? m[1] + (+m[2] + 1) : old + ' 2');
+    const st = ask('시작 날짜 (예 2026-12-01)', ''), en = ask('끝 날짜 (예 2026-12-31)', '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(st) || !/^\d{4}-\d{2}-\d{2}$/.test(en) || st > en) { ui.alert('날짜를 2026-12-01 처럼 써 주세요. 아무것도 바꾸지 않았어요.'); return; }
+    if (ui.alert('새 시즌 시작', `'${old}' 기록을 보관 탭으로 옮기고\n${nm} (${st} ~ ${en})을 시작할까요?\n보호권 칸도 비워져요.`, ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
+    ui.alert(newSeason_(nm, st, en));
+  } catch (e) { if (String(e.message) !== '취소') throw e; }
+}
+function newSeason_(name, start, end) {
+  const ss = SpreadsheetApp.getActive(), old = String(cfg_()('시즌 이름') || 'RAW SEASON').trim();
+  [TAB.log, TAB.rank].forEach(t => { const sh = ss.getSheetByName(t); if (!sh) return;
+    let nm = `${t} (${old})`, i = 2; while (ss.getSheetByName(nm)) nm = `${t} (${old}) ${i++}`;
+    sh.copyTo(ss).setName(nm);
+    const last = sh.getLastRow(); if (t === TAB.log) { if (last > 1) sh.deleteRows(2, last - 1); } else sh.clearContents(); });
+  const stu = ss.getSheetByName(TAB.stu); if (stu && stu.getLastRow() > 1) stu.getRange(2, 3, stu.getLastRow() - 1, 1).clearContent();
+  const c = ss.getSheetByName(TAB.cfg), v = c.getDataRange().getValues();
+  v.forEach((r, i) => { const k = String(r[0]).trim(), set = x => c.getRange(i + 1, 2).setNumberFormat('@').setValue(x);
+    if (k.indexOf('시즌 이름') === 0) set(name); else if (k.indexOf('시즌 시작') === 0) set(start); else if (k.indexOf('시즌 끝') === 0) set(end); });
+  PropertiesService.getScriptProperties().deleteProperty('boardHash');
+  return `${name} 시작 준비 끝 (${start} ~ ${end}).\n지난 기록은 '${TAB.log} (${old})' 탭에 보관했어요. 태블릿은 1분 안에 새 시즌으로 바뀌어요.`;
+}
+
 // 처음 한 번: 탭 만들기. 이미 설치했으면 다시 실행해도 됨 (없는 탭·설정 항목·트리거만 추가, 기존 내용은 그대로)
 function setup() {
   const ss = SpreadsheetApp.getActive();
@@ -240,6 +291,7 @@ function setup() {
     ['출석 제외 수업 (이름에 들어가면 제외, 쉼표로)', 'K-POP'],
     ['휴강일 (날짜를 쉼표로 · 그날은 출석·금요일 도장 없음)', ''],
     [MASTER_KEY + ' (4자리 · 학생과 다르게 · 학생에게 알려 주지 않기)', mp],
+    ['요약 메일 받을 주소 (비우면 안 보냄)', Session.getEffectiveUser().getEmail()],
   ];
   let c = ss.getSheetByName(TAB.cfg);
   if (!c) {
@@ -274,4 +326,7 @@ function setup() {
   // 매주 일요일 20시 주간 리포트 (한 번만 만듦)
   if (!ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'weeklyReport'))
     ScriptApp.newTrigger('weeklyReport').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(20).create();
+  // 매일 23시 원장님 요약 메일 (한 번만 만듦)
+  if (!ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'dailySummary'))
+    ScriptApp.newTrigger('dailySummary').timeBased().everyDays(1).atHour(23).create();
 }

@@ -73,6 +73,11 @@ body{color:#f4f2ee;font-family:Montserrat,"Noto Sans KR",sans-serif}
 .dots i{width:18px;height:18px;border-radius:50%;border:2px solid #6f6a7c}.dots i.f{background:#b9a6ff;border-color:#b9a6ff}
 .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:330px;margin:0 auto}
 .pad button{height:62px;font-family:Montserrat;font-size:26px;background:rgba(255,255,255,.06);color:#f4f2ee}
+.mine{margin-top:16px;max-height:330px;overflow:auto;text-align:left;border:1px solid rgba(255,255,255,.08);border-radius:14px}
+.mh{display:flex;justify-content:space-between;padding:10px 16px;font-family:"Noto Sans KR";font-weight:700;font-size:14px;color:#8f8a9c;border-bottom:1px solid rgba(255,255,255,.06)}.mh b{color:#f5be46;font-family:Montserrat}
+.mr{display:flex;gap:12px;align-items:center;padding:9px 16px;font-family:"Noto Sans KR";font-size:15px;border-bottom:1px solid rgba(255,255,255,.04)}
+.mr span{color:#8f8a9c;font-size:13px;width:92px;flex:none}.mr em{font-style:normal;font-size:12px;padding:2px 8px;border-radius:10px;background:rgba(185,166,255,.14);color:#b9a6ff;flex:none}
+.mr b{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mr i{font-style:normal;font-family:Montserrat;font-weight:800;color:#f5be46;flex:none}
 .x{margin-top:18px;height:46px;width:160px;font-size:16px;background:transparent;color:#8f8a9c;border:1px solid #34303f!important}
 .res{font-size:76px;line-height:1}
 .res+h2{margin-top:12px}
@@ -186,24 +191,27 @@ function compute(raw) {
     const base = n => String(n || '').replace(' (지각)', '').trim(), isLate = x => x.note.indexOf('(지각)') >= 0;
     const isPro = x => /전문반|PRO/.test(x.note) || (!x.note && D(x.d).getDay() === FW);
     const byDay = {}; mine.filter(x => x.k === '수업 출석' && !(x.note && skipCls(x.note))).forEach(x => (byDay[x.d] = byDay[x.d] || []).push(x));
-    const proDays = new Set(); let clsPts = 0, genre = 0;
+    const proDays = new Set(), items = []; let clsPts = 0, genre = 0;
     Object.entries(byDay).forEach(([d, a]) => { const seen = new Set(); a.filter(x => !seen.has(base(x.note) || x.t) && seen.add(base(x.note) || x.t)).slice(0, 3).forEach((x, i) => {
-      const pro = isPro(x) && (x.note || i === 0); if (pro) proDays.add(d); else genre++; const p = pro ? PF : PC; clsPts += isLate(x) ? Math.round(p * LP / 100) : p; }); });
+      const pro = isPro(x) && (x.note || i === 0); if (pro) proDays.add(d); else genre++; const p = pro ? PF : PC, got = isLate(x) ? Math.round(p * LP / 100) : p; clsPts += got;
+      items.push({ d, t: x.t.slice(11, 16), what: (base(x.note) || '수업 출석').slice(6) || '수업 출석', tag: isLate(x) ? '지각' : pro ? '전문반' : '수업', pts: got }); }); });
     const cls = proDays;
     const ex = new Set(mine.filter(x => x.k === '운동 완료').map(x => x.note.slice(0, 10) || x.d));
     const jr = new Set(mine.filter(x => x.k === '연습일지').map(x => x.note.slice(0, 10) || x.d));
+    ex.forEach(d => items.push({ d, t: '', what: '운동 루틴', tag: '운동', pts: PE })); jr.forEach(d => items.push({ d, t: '', what: '연습일지 (수업정리)', tag: '일지', pts: PJ }));
     // 개인연습: 하루 합계(수업 시간 제외)가 MIN분 이상이면 그날 1회 인정 (원장님 2026-11-10)
     const prac = new Set(), pday = {}; let open = null;
     mine.forEach(x => { if (x.k === '연습 시작') open = x; else if (x.k === '연습 끝' && open && open.d === x.d) {
       if (x.note !== '월말평가 준비') pday[x.d] = (pday[x.d] || 0) + pracMin(open.t, x.t); open = null; } });
-    Object.entries(pday).forEach(([d, m]) => { if (m >= MIN) prac.add(d); });
+    Object.entries(pday).forEach(([d, m]) => { if (m >= MIN) prac.add(d); items.push({ d, t: '', what: `개인연습 하루 합계 ${m}분`, tag: '연습', pts: m >= MIN ? PP : 0 }); });
+    mine.filter(x => x.k === '연습 끝' && x.note === '월말평가 준비').forEach(x => items.push({ d: x.d, t: x.t.slice(11, 16), what: '월말평가 준비 (기록만)', tag: '연습', pts: 0 }));
     const practicing = open && open.d === today ? open.t.slice(11, 16) : null;
     const fr = fris.map(f => f > today ? 'up' : cls.has(f) ? 'ok' : sh.includes(f) ? 'sh' : f === today && !proClosed ? 'today' : 'miss');
     const decided = fr.filter(s => s === 'ok' || s === 'sh' || s === 'miss');
     let streak = 0; for (let i = decided.length - 1; i >= 0 && decided[i] !== 'miss'; i--) streak++;
     const lastD = decided[decided.length - 1];
     const status = !decided.length ? 'wait' : lastD === 'miss' ? 'off' : lastD === 'sh' ? 'sh' : 'on';
-    return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'), prac: prac.size, genre, ex: ex.size, jr: jr.size,
+    return { name, fr, streak, status, perfect: !decided.includes('miss'), practicing, shUsed: fr.includes('sh'), prac: prac.size, genre, ex: ex.size, jr: jr.size, pro: proDays.size, items: items.sort((a, b) => (b.d + b.t).localeCompare(a.d + a.t)),
       pts: clsPts + prac.size * PP + ex.size * PE + jr.size * PJ };
   }).sort((a, b) => b.pts - a.pts || b.streak - a.streak || b.prac - a.prac || a.name.localeCompare(b.name, 'ko'));
   // 동점 → 금요일 연속 기록 → 개인연습 횟수 (원장님 2026-11-10). 셋 다 같을 때만 같은 순위
@@ -258,8 +266,20 @@ function close() { ov().classList.remove('on'); sel = kind = null; pin = ''; not
 function openUser(n) {
   sel = n; idle(); ov().classList.add('on');
   if (C && (C.today > C.E || C.today < C.S)) { box().innerHTML = `<div class="res">🏁</div><h2>${C.today > C.E ? '시즌이 끝났어요' : '시즌 시작 전이에요'}</h2><p style="font-size:17px;margin-top:10px">${C.today > C.E ? '다음 시즌을 기다려 주세요!' : md(C.S) + '부터 체크할 수 있어요'}</p><button class="x" id="cx">닫기</button>`; document.getElementById('cx').onclick = close; return; }
-  box().innerHTML = `<h2>${esc(n)}</h2><p>무엇을 체크할까요?</p><div class="acts">${KINDS.map(([k, e, c]) => `<button class="${c}" data-k="${k}">${k}<small>${e}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
-  box().querySelectorAll('[data-k]').forEach(b => b.onclick = () => pick(b.dataset.k)); document.getElementById('cx').onclick = close;
+  box().innerHTML = `<h2>${esc(n)}</h2><p>무엇을 체크할까요?</p><div class="acts">${KINDS.map(([k, e, c]) => `<button class="${c}" data-k="${k}">${k}<small>${e}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button><button class="x" id="my" style="margin-left:8px;color:#b9a6ff;border-color:rgba(185,166,255,.4)!important">📋 내 기록</button>`;
+  box().querySelectorAll('[data-k]').forEach(b => b.onclick = () => pick(b.dataset.k)); document.getElementById('cx').onclick = close; document.getElementById('my').onclick = () => myRecord(n);
+}
+// 내 기록 (원장님 2026-11-11 D1): 비밀번호 없이 이번 주 내역 + 시즌 합계 (점수는 원래 모두에게 공개)
+function myRecord(n) {
+  idle(); const st = C.list.find(s => s.name === n); if (!st) return close();
+  const dow = (D(C.today).getDay() + 6) % 7, mon = new Date(D(C.today)); mon.setDate(mon.getDate() - dow); const wk = ymd(mon);
+  const week = st.items.filter(x => x.d >= wk && x.d <= C.today), wsum = week.reduce((a, x) => a + x.pts, 0);
+  const DW = ['일', '월', '화', '수', '목', '금', '토'];
+  box().innerHTML = `<h2>${esc(n)} <span style="font-family:Montserrat;font-style:italic;color:#f5be46">${st.pts}P</span></h2>
+    <p>시즌 ${st.rank}위 · 🔥 금요일 ${st.streak}주 연속<br>전문반 ${st.pro}회 · 장르 ${st.genre}회 · 개인연습 ${st.prac}일 · 운동 ${st.ex}일 · 일지 ${st.jr}일</p>
+    <div class="mine"><div class="mh">이번 주 (${md(wk)}~) <b>+${wsum}P</b></div>${week.length ? week.map(x => `<div class="mr"><span>${md(x.d)}(${DW[D(x.d).getDay()]}) ${x.t}</span><em>${esc(x.tag)}</em><b>${esc(x.what)}</b><i>${x.pts ? '+' + x.pts + 'P' : '0P'}</i></div>`).join('') : '<div class="mr" style="justify-content:center;color:#8f8a9c">이번 주 기록이 아직 없어요</div>'}</div>
+    <button class="x" id="bk">← 돌아가기</button><button class="x" id="cx" style="margin-left:8px">닫기</button>`;
+  document.getElementById('bk').onclick = () => openUser(n); document.getElementById('cx').onclick = close;
 }
 // 지금 출석 가능한 수업 (Code.gs classesAt_와 같은 계산). 시각 = 서버 시각 + 받아 온 뒤 흐른 시간
 const DAYS_ = ['일', '월', '화', '수', '목', '금', '토'];
@@ -296,7 +316,7 @@ function pick(k) {
     : DAILY.includes(k) ? [[C.today, '오늘', md(C.today)], [yest, '어제', md(yest)]] : null;
   if (k === '연습 시작') {
     const n = nowStr(), mm = (+n.slice(11, 13)) * 60 + (+n.slice(14, 16)), c = classesOn(n.slice(0, 10)).find(c => mm >= c.s && mm < c.e);
-    if (c) { box().innerHTML = `<div class="res">🙅</div><h2>수업 시간에는 연습을 시작할 수 없어요</h2><p style="font-size:17px;margin-top:10px">지금 <b style="color:#f4f2ee">${esc(c.label)}</b><br>수업이 끝난 뒤에 [연습 시작]을 눌러요</p><button class="x" id="cx">닫기</button>`;
+    if (c) { beep(false); box().innerHTML = `<div class="res">🙅</div><h2>수업 시간에는 연습을 시작할 수 없어요</h2><p style="font-size:17px;margin-top:10px">지금 <b style="color:#f4f2ee">${esc(c.label)}</b><br>수업이 끝난 뒤에 [연습 시작]을 눌러요</p><button class="x" id="cx">닫기</button>`;
       document.getElementById('cx').onclick = close; return; }
   }
   if (k === '수업 출석') {
@@ -306,7 +326,7 @@ function pick(k) {
       box().innerHTML = `<h2>${esc(sel)}</h2><p>원장님 처리 · 오늘 어느 수업이에요?</p><div class="acts">${w.all.map(c => `<button data-v="${esc(c.label)}">${esc(c.label.slice(6))}<small>${esc(c.label.slice(0, 5))} · ${esc(c.teacher)}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
       box().querySelectorAll('[data-v]').forEach(b => b.onclick = () => { note = b.dataset.v; askPin(k, true); }); document.getElementById('cx').onclick = close; }; };
     const cands = w.open.map(c => Object.assign({ lt: false }, c)).concat(w.late.map(c => Object.assign({ lt: true }, c)));
-    if (!cands.length) { box().innerHTML = `<div class="res">⏰</div><h2>지금은 수업 출석 시간이 아니에요</h2><p style="font-size:17px;margin-top:10px">${w.next ? `다음 수업 <b style="color:#f4f2ee">${esc(w.next.label)}</b> · ${esc(w.next.from)}부터 출석` : '오늘 남은 수업이 없어요'}<br>수업 시작 ${w.bf}분 전 ~ 시작 ${w.af}분 후 (그 뒤 수업 끝까지는 지각)</p><button class="x" id="cx">닫기</button>${masterBtn}`;
+    if (!cands.length) { beep(false); box().innerHTML = `<div class="res">⏰</div><h2>지금은 수업 출석 시간이 아니에요</h2><p style="font-size:17px;margin-top:10px">${w.next ? `다음 수업 <b style="color:#f4f2ee">${esc(w.next.label)}</b> · ${esc(w.next.from)}부터 출석` : '오늘 남은 수업이 없어요'}<br>수업 시작 ${w.bf}분 전 ~ 시작 ${w.af}분 후 (그 뒤 수업 끝까지는 지각)</p><button class="x" id="cx">닫기</button>${masterBtn}`;
       document.getElementById('cx').onclick = close; bindMaster(); return; }
     if (cands.length === 1 && !cands[0].lt) { note = cands[0].label; return askPin(k); }
     box().innerHTML = `<h2>${esc(sel)}</h2><p>${cands.some(c => c.lt) ? '지각 출석은 점수 절반, 🔥는 그대로예요' : '어느 수업이에요?'}</p><div class="acts">${cands.map(c => `<button data-v="${esc(c.label)}"${c.lt ? ' style="border-color:#f5be46"' : ''}>${esc(c.label.slice(6))}${c.lt ? ' <span style="color:#f5be46">지각</span>' : ''}<small>${esc(c.label.slice(0, 5))} · ${esc(c.teacher)}</small></button>`).join('')}</div><button class="x" id="cx">닫기</button>`;
@@ -327,8 +347,15 @@ function press(x) {
   document.querySelectorAll('#dots i').forEach((d, i) => d.classList.toggle('f', i < pin.length));
   if (pin.length === 4) { box().querySelector('.pad').style.opacity = .4; send(); }
 }
+// 체크 효과음 (원장님 2026-11-11 D6): 성공 '띵동', 실패 '삑'. 화면을 누른 뒤에만 소리 남
+let AC = null; addEventListener('pointerdown', () => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch (e) {} });
+function beep(ok) { try { if (!AC) return; const t = AC.currentTime, notes = ok ? [[988, 0], [1319, .12]] : [[196, 0], [185, .14]];
+  notes.forEach(([f, d]) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = ok ? 'sine' : 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t + d); g.gain.exponentialRampToValueAtTime(ok ? .35 : .12, t + d + .02); g.gain.exponentialRampToValueAtTime(0.0001, t + d + (ok ? .32 : .2));
+    o.connect(g).connect(AC.destination); o.start(t + d); o.stop(t + d + .35); }); } catch (e) {} }
 function send() {
   const done = r => {
+    beep(!!r.ok);
     if (!r.ok && r.msg === '비밀번호가 달라요') { box().classList.add('shake'); setTimeout(() => box().classList.remove('shake'), 400); pin = '';
       document.querySelector('#box p').textContent = '비밀번호가 달라요. 다시 입력해요'; box().querySelector('.pad').style.opacity = 1;
       document.querySelectorAll('#dots i').forEach(d => d.classList.remove('f')); return; }

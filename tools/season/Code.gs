@@ -61,7 +61,9 @@ function pracMin_(tt, startS, endS, skip) {
 // 지금 출석: open = 시작 before분 전~시작 after분 후 (정상), late = 그 뒤~수업 끝 (지각), next = 다음 수업
 function classesAt_(tt, nowS, before, after, skip) {
   const list = classesOn_(tt, nowS.slice(0, 10), skip), m = mins_(nowS);
-  return { all: list, open: list.filter(c => m >= c.s - before && m <= c.s + after), late: list.filter(c => m > c.s + after && m <= c.e),
+  // 연속 수업: 다음 수업 정상 출석 시간이면 앞 수업 지각은 안 보여 줌 (원장님 2026-11-11, 20:50 WAACKING→JAZZ). 지각은 수업 끝 '전'까지만
+  const open = list.filter(c => m >= c.s - before && m <= c.s + after);
+  return { all: list, open, late: open.length ? [] : list.filter(c => m > c.s + after && m < c.e),
     next: list.filter(c => c.s - before > m).sort((a, b) => a.s - b.s)[0] || null };
 }
 function read_(name) {

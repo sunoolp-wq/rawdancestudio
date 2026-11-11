@@ -314,7 +314,8 @@ function classesNow() {
     .map(r => ({ start: hm(r[1]), label: hhmm(hm(r[1])) + ' ' + String(r[3]).trim(), teacher: String(r[4] || '').trim() }));
   const next = list.filter(c => c.start - bf > mins).sort((a, b) => a.start - b.start)[0];
   const ends = classesOn(ymd(t)).reduce((o, c) => (o[hhmm(c.s) + ' ' + c.label.slice(12)] = c.e, o), {});
-  return { bf, af, all: list, open: list.filter(c => mins >= c.start - bf && mins <= c.start + af), late: list.filter(c => mins > c.start + af && mins <= (ends[c.label] || c.start + af)),
+  const open = list.filter(c => mins >= c.start - bf && mins <= c.start + af); // 연속 수업: 다음 수업 출석 시간이면 앞 수업 지각은 숨김
+  return { bf, af, all: list, open, late: open.length ? [] : list.filter(c => mins > c.start + af && mins < (ends[c.label] || c.start + af)),
     next: next ? Object.assign(next, { from: hhmm(next.start - bf) }) : null };
 }
 // 수업 출석 → 수업 고르기, 연습 끝 → 종류, 운동·일지 → 오늘/어제

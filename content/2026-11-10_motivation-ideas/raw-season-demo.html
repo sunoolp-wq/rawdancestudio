@@ -596,7 +596,7 @@ function render(anim) {
   const dd = C.nextF ? Math.round((D(C.nextF) - D(C.today)) / 864e5) : null;
   document.getElementById('nx').textContent = C.today > C.E ? 'SEASON END' : dd === 0 ? `TODAY ${C.FT}` : dd != null ? `NEXT CLASS D-${dd}` : '';
   document.getElementById('per').textContent = `${md(C.S)} — ${md(C.E)}  ·  FRIDAY ${C.fris.filter(f => f <= C.today).length} / ${C.fris.length}`;
-  const PILL = { on: ['p-on', '🔥 이어가는 중'], off: ['p-off', '💤 끊김'], sh: ['p-sh', '🛡 보호권'], wait: ['p-wait', '시즌 시작 전'] };
+  const PILL = { on: ['p-on', '🔥 이어가는 중'], off: ['p-off', '💤 끊김'], sh: ['p-sh', '🛡 보호권'], wait: ['p-wait', C.today < C.S ? '시즌 시작 전' : C.nextF ? `첫 금요일 ${md(C.nextF)}` : '대기'] };
   const FB = { ok: ['f-ok', '✓'], sh: ['f-sh', '🛡'], miss: ['f-miss', '✕'], up: ['f-up', ''], today: ['f-today', ''] };
   document.getElementById('rows').innerHTML = L.map((s, i) => `
     <div class="row ${anim ? 'in' : ''} ${s.rank <= 3 ? 'top' : ''}" data-i="${i}" style="--i:${i}"><div class="rk">${String(s.rank).padStart(2, '0')}</div>
@@ -611,7 +611,7 @@ function render(anim) {
   });
   PREV = Object.fromEntries(L.map(s => [s.name, s.pts]));
   // [순위] 탭에 저장 (시트가 바뀐 경우만 실제로 씀)
-  if (API && API.save) { const ST = { on: '이어가는 중', off: '끊김', sh: '보호권', wait: '시작 전' }, FS = { ok: '✓', sh: '🛡', miss: '✕', up: '○', today: '·' };
+  if (API && API.save) { const ST = { on: '이어가는 중', off: '끊김', sh: '보호권', wait: '첫 금요일 전' }, FS = { ok: '✓', sh: '🛡', miss: '✕', up: '○', today: '·' };
     API.save(JSON.stringify(L.map(s => [s.rank, s.name, s.pts, s.streak, ST[s.status], s.fr.map(f => FS[f]).join(' '), s.genre, s.prac, s.ex, s.jr]))); }
   const nw = L.filter(s => s.practicing).sort((a, b) => a.practicing < b.practicing ? -1 : 1);
   document.getElementById('now').innerHTML = nw.length ? nw.map(s => `<div class="now"><div><i></i>${esc(s.name)}</div><span>${s.practicing}~</span></div>`).join('') : '<div class="empty">지금 연습실에 체크인한 사람이 없어요</div>';

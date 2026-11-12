@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+/* 광고 릴스 자막 v2 (원장님 고른 시안 1·2·6 조합, 2026-11-13)
+   - 6 촬영 화면: 영상 내내 모서리 표시 + ● REC(깜빡) + 타임코드 + 컷 번호
+   - 2 빅 타이포: 박자 센 곳은 큰 단어 하나 (박자에 '툭' 커졌다 자리 잡음)
+   - 1 에디토리얼: 설명은 왼쪽 아래 정렬, 번호 — 영어 + 얇은 선 + 한글 (왼→오 쓸려 나옴) */
+html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden}
+.hud .c{position:absolute;width:84px;height:84px;border-color:rgba(244,242,238,.85);border-style:solid;border-width:0}
+.tl{left:56px;top:230px;border-left-width:4px!important;border-top-width:4px!important}.tr{right:56px;top:230px;border-right-width:4px!important;border-top-width:4px!important}
+.bl{left:56px;bottom:300px;border-left-width:4px!important;border-bottom-width:4px!important}.br{right:56px;bottom:300px;border-right-width:4px!important;border-bottom-width:4px!important}
+#rec{position:absolute;left:82px;top:258px;font:600 28px Montserrat;color:#fff;letter-spacing:.14em;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+#rec i{display:inline-block;width:18px;height:18px;border-radius:50%;background:#ff3b4a;margin-right:12px;vertical-align:1px}
+#tc{position:absolute;right:82px;top:258px;font:500 28px Montserrat;color:#fff;letter-spacing:.12em;font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+#idx{position:absolute;right:82px;bottom:322px;font:600 24px Montserrat;color:rgba(244,242,238,.85);letter-spacing:.2em}
+#scrim{position:absolute;left:0;right:0;bottom:0;height:58%;background:linear-gradient(to bottom,rgba(6,5,10,0),rgba(6,5,10,.5) 45%,rgba(6,5,10,.82));opacity:0}
+/* 에디토리얼 */
+#ed{position:absolute;left:84px;right:84px;bottom:410px}
+#ed .tag{font:600 26px Montserrat;letter-spacing:.3em;color:#b9a6ff;display:flex;align-items:center;gap:18px;white-space:nowrap}
+#ed .tag .ln{flex:1;height:2px;background:rgba(244,242,238,.4);transform-origin:left}
+#ed .h{font:400 80px "Gothic A1 ExtraBold";line-height:1.18;color:#f4f2ee;margin-top:24px;letter-spacing:-.01em;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+#ed .h em{font-style:normal;color:#b9a6ff}
+#ed .info{margin-top:30px;font:400 30px "Gothic A1 Light";color:#e9e6f0;line-height:1.85;border-top:2px solid rgba(244,242,238,.28);padding-top:20px}
+#ed .info b{font-family:"Gothic A1 ExtraBold";font-weight:400;color:#fff}
+#ed .tiny{margin-top:14px;font:400 24px "Gothic A1 Light";color:rgba(233,230,240,.75)}
+/* 빅 타이포 */
+#big{position:absolute;left:40px;right:40px;top:0;text-align:center}
+#big .en{font:400 52px "Bebas Neue";letter-spacing:.5em;margin-right:-.5em;color:#b9a6ff;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+#big .pre{font:700 46px "IBM Plex Sans KR";color:#fff;letter-spacing:.06em;text-shadow:0 2px 14px rgba(0,0,0,.6);margin-bottom:6px}
+#big .w{font:400 330px "Black Han Sans";line-height:.95;color:#f4f2ee;letter-spacing:-.02em;white-space:nowrap;text-shadow:0 10px 50px rgba(0,0,0,.55);display:inline-block;transform-origin:50% 60%}
+#big .sub{font:700 42px "IBM Plex Sans KR";color:#fff;letter-spacing:.08em;margin-top:14px;text-shadow:0 2px 14px rgba(0,0,0,.65)}
+</style></head><body>
+<div id="scrim"></div>
+<div class="hud" id="hud"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div><div id="rec"><i></i>REC</div><div id="tc"></div><div id="idx"></div></div>
+<div id="ed"></div><div id="big"></div>
+<script>
+let CUES = [], FPS = 24000 / 1001, CUTS = [], END = 1e9;
+const $ = id => document.getElementById(id);
+const md = s => String(s || '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[(.+?)\]/g, '<em>$1</em>').replace(/\n/g, '<br>');
+window.setup = (cues, cuts, end) => { CUES = cues; CUTS = cuts || []; END = end || 1e9; };
+let cur = -2;
+function fit(el, max) { let fs = 330; el.style.fontSize = fs + 'px'; while (el.scrollWidth > max && fs > 120) { fs -= 6; el.style.fontSize = fs + 'px'; } }
+window.render = t => {
+  // HUD: 엔딩 디졸브 전까지 계속
+  const f = Math.round(t * FPS), s = Math.floor(t), ff = f - Math.round(s * FPS);
+  $('tc').textContent = `00:00:${String(s).padStart(2, '0')}:${String(Math.max(0, ff)).padStart(2, '0')}`;
+  $('rec').querySelector('i').style.opacity = (t % 1) < 0.6 ? 1 : 0.15;
+  const ci = CUTS.filter(x => x <= t + 1e-6).length; $('idx').textContent = CUTS.length ? `${String(ci).padStart(2, '0')} / ${String(CUTS.length).padStart(2, '0')}` : '';
+  $('hud').style.opacity = t > END - 1 ? Math.max(0, END - t) : 1;
+  const i = CUES.findIndex(c => t >= c.a && t < c.b);
+  if (i !== cur) {
+    cur = i; $('ed').innerHTML = ''; $('big').innerHTML = '';
+    if (i >= 0) { const c = CUES[i];
+      if (c.type === 'big') {
+        $('big').innerHTML = (c.en ? `<div class="en">${c.en}</div>` : '') + (c.pre ? `<div class="pre">${c.pre}</div>` : '') + `<div class="w">${c.word}</div>` + (c.sub ? `<div class="sub">${md(c.sub)}</div>` : '');
+        $('big').style.top = (c.y || 760) + 'px'; fit($('big').querySelector('.w'), 1000);
+      } else {
+        $('ed').innerHTML = `<div class="tag"><span>${c.tag}</span><span class="ln"></span></div><div class="h">${md(c.h)}</div>` + (c.info ? `<div class="info">${c.info.map(md).join('<br>')}</div>` : '') + (c.tiny ? `<div class="tiny">${c.tiny}</div>` : '');
+      } } }
+  $('scrim').style.opacity = cur >= 0 && CUES[cur].type !== 'big' ? 1 : 0.35;
+  if (cur < 0) return;
+  const c = CUES[cur], lt = t - c.a, left = c.b - t, out = c.end ? 1 : Math.min(1, left / 0.12);
+  if (c.type === 'big') {   // 박자에 툭: 1.18배 → 1배 (0.12초), 끝 0.12초 사라짐
+    const k = Math.min(1, lt / 0.12), sc = 1.18 - 0.18 * (1 - Math.pow(1 - k, 3));
+    const w = $('big').querySelector('.w'); w.style.transform = `scale(${sc})`; $('big').style.opacity = Math.min(1, lt / 0.05) * out;
+  } else {                  // 왼쪽에서 쓸려 나옴 (0.28초), 선은 그려짐
+    const k = Math.min(1, lt / 0.28), e = 1 - Math.pow(1 - k, 3);
+    $('ed').querySelectorAll('.h, .info, .tiny').forEach(x => x.style.clipPath = `inset(0 ${(1 - e) * 100}% 0 0)`);
+    const ln = $('ed').querySelector('.ln'); if (ln) ln.style.transform = `scaleX(${e})`;
+    $('ed').style.opacity = Math.min(1, lt / 0.06) * out;
+  }
+};
+</script></body></html>

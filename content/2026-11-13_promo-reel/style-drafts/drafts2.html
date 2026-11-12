@@ -1,0 +1,67 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+/* 자막 시안 2차 6종 (7~12). ?s=7..12&scene=hook|usp|end&bg=이미지 */
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}
+#bg{position:absolute;inset:0;background-size:1080px 1920px}
+.L{position:absolute;inset:0}
+.scrimB{position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(to bottom,rgba(6,5,10,0),rgba(6,5,10,.6) 45%,rgba(6,5,10,.88))}
+.info{font:500 30px "Noto Sans KR";color:#f4f2ee;line-height:1.8;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+/* 7 크롬 Y2K */
+.chrome{background:linear-gradient(180deg,#ffffff 0%,#dfe3ea 30%,#8a8f9c 48%,#2b2d35 52%,#c9ced8 64%,#ffffff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 0 rgba(0,0,0,.35)) drop-shadow(0 0 24px rgba(142,116,255,.55))}
+.s7 .en{font:italic 900 150px Montserrat;letter-spacing:-.02em;text-align:center;line-height:1}
+.s7 .ko{font:400 104px "Black Han Sans";text-align:center;line-height:1.1;margin-top:14px}
+/* 8 반복 아웃라인 포스터 */
+.s8 .rows{position:absolute;left:-20px;right:-20px;text-align:center;font:400 190px Anton;line-height:.92;letter-spacing:.01em}
+.s8 .o{color:transparent;-webkit-text-stroke:2.5px rgba(244,242,238,.85)}
+.s8 .f{color:#f4f2ee}
+.s8 .ko{position:absolute;left:0;right:0;text-align:center;font:400 70px "Black Han Sans";color:#121116;background:#b9a6ff;padding:12px 0 6px}
+/* 9 영상 품은 글자 (마스크) */
+.s9 .panel{position:absolute;left:0;right:0;background:rgba(10,9,14,.9)}
+.s9 .mask{position:absolute;inset:0;background-size:1080px 1920px;-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;font:400 300px "Black Han Sans";line-height:1;filter:brightness(1.35) saturate(1.2)}
+.s9 .en{position:absolute;left:0;right:0;text-align:center;font:600 30px Montserrat;letter-spacing:.5em;color:#b9a6ff;margin-right:-.5em}
+.s9 .sub{position:absolute;left:0;right:0;text-align:center;font:700 44px "Noto Sans KR";color:#f4f2ee}
+/* 10 채팅 말풍선 */
+.s10 .chat{position:absolute;left:60px;right:60px;bottom:400px;display:flex;flex-direction:column;gap:22px}
+.s10 .b{max-width:76%;font:500 44px "Noto Sans KR";line-height:1.4;padding:22px 32px;border-radius:40px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.s10 .l{align-self:flex-start;background:rgba(244,242,238,.95);color:#17151f;border-bottom-left-radius:10px}
+.s10 .r{align-self:flex-end;background:#8e74ff;color:#fff;border-bottom-right-radius:10px}
+.s10 .r b{font-weight:900}
+.s10 .who{font:600 26px "Noto Sans KR";color:rgba(244,242,238,.8);margin-left:16px}
+/* 11 숏폼 자막 (단어 하이라이트) */
+.s11 .cap{position:absolute;left:50px;right:50px;text-align:center;font:400 96px "Black Han Sans";line-height:1.25;color:#fff;-webkit-text-stroke:14px #000;paint-order:stroke fill}
+.s11 .cap .hl{color:#f5be46}
+.s11 .em{font-size:110px;position:absolute;left:0;right:0;text-align:center}
+/* 12 글리치 */
+.s12 .scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px);mix-blend-mode:multiply}
+.s12 .g{position:absolute;left:0;right:0;text-align:center;font:400 250px "Black Han Sans";color:#fff;line-height:1;text-shadow:-9px 0 #ff2a6d,9px 0 #00e5ff}
+.s12 .g2{clip-path:inset(42% 0 44% 0);transform:translateX(26px);opacity:.95}
+.s12 .g3{clip-path:inset(70% 0 18% 0);transform:translateX(-30px)}
+.s12 .en{position:absolute;left:0;right:0;text-align:center;font:400 64px "Bebas Neue";letter-spacing:.3em;color:#00e5ff;text-shadow:3px 0 #ff2a6d;margin-right:-.3em}
+.s12 .sub{position:absolute;left:0;right:0;text-align:center;font:700 44px "Noto Sans KR";color:#fff;letter-spacing:.04em}
+.s12 .rec{position:absolute;left:70px;top:240px;font:400 46px "Bebas Neue";letter-spacing:.15em;color:#fff}
+</style></head><body><div id="bg"></div><div id="o" class="L"></div>
+<script>
+const q = new URLSearchParams(location.search), s = +q.get('s'), sc = q.get('scene'), BG = q.get('bg');
+document.getElementById('bg').style.backgroundImage = `url(${BG})`;
+const T = {
+  hook: { en: 'PRO CLASS', ko: '연습은<br>이 열기 속에서', word: '열기', sub: '연습은 이 열기 속에서', rows: 'PRO CLASS',
+          chat: [['l', '예고 실기 어디서 준비해?'], ['r', '로우 수원점<br><b>분위기 장난 아님</b>']], cap: '연습은 이 <span class="hl">열기</span> 속에서', emo: '🔥' },
+  usp: { en: 'FREE PASS', ko: '모든 수업<br>무제한 프리패스', word: '무제한', sub: '모든 수업 프리패스', rows: 'FREE PASS',
+          chat: [['l', '전문반이면 수업 몇 개 들어?'], ['r', '<b>모든 수업 무제한</b><br>프리패스야']], cap: '모든 수업 <span class="hl">무제한</span><br>프리패스', emo: '' },
+  end: { en: 'RAW DANCE', ko: '수원점 전문반', word: '전문반', sub: 'RAW DANCE SUWON', rows: 'RAW SUWON',
+          chat: [['l', '상담은 어떻게 해?'], ['r', '카톡 <b>로우댄스수원점학원</b><br>031-225-6600']], cap: '로우댄스학원 수원점<br><span class="hl">전문반</span>', emo: '' }
+}[sc];
+const INFO = '중·고등 · 예고·예대 입시 · 기획사 준비<br>상담 카톡 \'로우댄스수원점학원\' · 031-225-6600<br>수원 팔달구 매산로 136, 4층';
+const o = document.getElementById('o'); o.className = 'L s' + s; const end = sc === 'end';
+const info = top => end ? `<div class="info" style="position:absolute;left:40px;right:40px;top:${top}px">${INFO}</div>` : '';
+if (s === 7) o.innerHTML = `<div class="scrimB"></div><div style="position:absolute;left:30px;right:30px;top:${end ? 1020 : 1060}px"><div class="en chrome">${T.en}</div><div class="ko chrome">${T.ko}</div></div>${info(1460)}`;
+if (s === 8) { const r = Array.from({ length: 5 }, (_, i) => `<div class="${i === 2 ? 'f' : 'o'}">${T.rows}</div>`).join('');
+  o.innerHTML = `<div class="scrimB" style="height:70%"></div><div class="rows" style="top:${end ? 760 : 820}px">${r}</div><div class="ko" style="top:${end ? 1720 : 1700}px">${end ? '전문반 상담 · 카톡 로우댄스수원점학원' : T.sub}</div>${end ? `<div class="info" style="position:absolute;left:40px;right:40px;top:640px;font-size:28px">${INFO}</div>` : ''}`; }
+if (s === 9) o.innerHTML = `<div class="panel" style="top:${end ? 900 : 980}px;height:${end ? 760 : 520}px"></div><div class="mask" style="background-image:url(${BG});padding-top:${end ? 1010 : 1060}px">${T.word}</div>
+  <div class="en" style="top:${end ? 940 : 1010}px">${end ? 'RAW DANCE SUWON' : T.en}</div><div class="sub" style="top:${end ? 1340 : 1390}px">${end ? '' : T.sub}</div>${info(1340)}`;
+if (s === 10) o.innerHTML = `<div class="scrimB"></div><div class="chat"><div class="who">${end ? '로우 수원점' : '친구'}</div>${T.chat.map(([w, t]) => `<div class="b ${w}">${t}</div>`).join('')}${end ? `<div class="info" style="margin-top:16px">수원 팔달구 매산로 136, 4층 · 중·고등 · 예고·예대 입시 · 기획사 준비</div>` : ''}</div>`;
+if (s === 11) o.innerHTML = `<div class="cap" style="top:${end ? 1040 : 1120}px">${T.cap}</div>${T.emo ? `<div class="em" style="top:${940}px">${T.emo}</div>` : ''}${info(1400)}`;
+if (s === 12) o.innerHTML = `<div class="scan"></div><div class="rec">● REC</div><div class="en" style="top:${end ? 860 : 900}px">${end ? 'RAW DANCE SUWON' : T.en}</div>
+  <div class="g" style="top:${end ? 960 : 1000}px">${T.word}</div><div class="g g2" style="top:${end ? 960 : 1000}px">${T.word}</div><div class="g g3" style="top:${end ? 960 : 1000}px">${T.word}</div>
+  <div class="sub" style="top:${end ? 1240 : 1290}px">${end ? '' : T.sub}</div>${info(1260)}`;
+</script></body></html>

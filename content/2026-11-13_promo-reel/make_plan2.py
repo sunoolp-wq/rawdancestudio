@@ -43,7 +43,7 @@ T = {  # 자막 (검수 반영 2026-11-13)
  "area": {"type": "big", "en": "STUDIO", "word": "100평", "sub": "4층 · 홀 3개 · 2026 오픈"},
  "open": {"type": "big", "en": "PRACTICE ROOM", "word": "항시 개방", "sub": "연습실"},
  "equip": {"type": "big", "en": "EQUIPMENT", "word": "최신 장비", "sub": "촬영 장비 · LED 조명"},
- "all": {"type": "big", "en": "FREE PASS", "word": "전부", "sub": "전문반은 전 클래스 프리패스"},
+ "all": {"type": "big", "en": "FREE PASS", "word": "전부", "sub": "팝업 수업까지 프리패스"},
  "behind": {"type": "ed", "tag": "07 — BEHIND", "h": "수업이 끝나도\n[연습]은 계속"},
  "fb": {"type": "ed", "tag": "08 — FEEDBACK", "h": "쌤 피드백은\n[바로바로]"},
  "yuni1": {"type": "ed", "tag": "09 — T. YUNI", "h": "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반"},
@@ -88,8 +88,8 @@ B1 = 4 * 60 / 114.84375
 o1 = [(1, BURST, "raw", None), (1, G["MINKYUNG"][1], "teach", G["MINKYUNG"][0]),
       (1, G["YELLS"][1], "pro", G["YELLS"][0]), (1, G["NOFF"][1], "area", G["NOFF"][0]), (1, G["HEEONE"][1], None, G["HEEONE"][0]),
       (1, G["ARIN"][1], "open", G["ARIN"][0]), (1, G["YUNI"][1], None, G["YUNI"][0]), (1, G["HWANU"][1], "equip", G["HWANU"][0]),
-      (1, G["RAEKU"][1], None, G["RAEKU"][0]), (1, G["GAON"][1], "all", G["GAON"][0]), (1, G["KIRY"][1], None, G["KIRY"][0]),
-      (1, G["POPUP"][1], None, G["POPUP"][0]),
+      (1, G["RAEKU"][1], None, G["RAEKU"][0]), (1, G["GAON"][1], None, G["GAON"][0]), (1, G["KIRY"][1], None, G["KIRY"][0]),
+      (1, G["POPUP"][1], "all", G["POPUP"][0]),
       (1, BEH["practice"], "behind", None), (1, BEH["feedback"], "fb", None), (1, BEH["yuni1"], "yuni1", None), (1, BEH["yuni2"], "yuni2", None),
       (1, BEH["busk1"], "stage", BUSK_LBL), (1, BEH["order"], None, None)] + climax(8, B1) + [(2, ENDING, "end", None, {"speed": 0.72})]
 build("v1", B1, 6.5, o1)
@@ -99,8 +99,8 @@ B2 = 4 * 60 / 129.19921875
 o2 = [(1, BURST, "raw", None), (1, G["MINKYUNG"][1], "teach", G["MINKYUNG"][0]),
       (1, G["YELLS"][1], "pro", G["YELLS"][0]), (1, G["NOFF"][1], "area", G["NOFF"][0]), (1, G["HEEONE"][1], None, G["HEEONE"][0]),
       (1, G["ARIN"][1], "open", G["ARIN"][0]), (1, G["YUNI"][1], None, G["YUNI"][0]), (1, G["HWANU"][1], "equip", G["HWANU"][0]),
-      (1, G["RAEKU"][1], None, G["RAEKU"][0]), (1, G["GAON"][1], "all", G["GAON"][0]), (1, G["KIRY"][1], None, G["KIRY"][0]),
-      (1, G["POPUP"][1], None, G["POPUP"][0]), (1, G["HWANU2"][1], None, G["HWANU2"][0]), (1, G["MINKYUNG2"][1], None, G["MINKYUNG2"][0]),
+      (1, G["RAEKU"][1], None, G["RAEKU"][0]), (1, G["GAON"][1], None, G["GAON"][0]), (1, G["KIRY"][1], None, G["KIRY"][0]),
+      (1, G["POPUP"][1], "all", G["POPUP"][0]), (1, G["HWANU2"][1], None, G["HWANU2"][0]), (1, G["MINKYUNG2"][1], None, G["MINKYUNG2"][0]),
       (1, G["YUNI2"][1], None, G["YUNI2"][0]), (1, G["GAON2"][1], None, G["GAON2"][0]),
       (1, BEH["practice"], "behind", None), (1, BEH["practice2"], None, None), (1, BEH["feedback"], "fb", None), (1, BEH["order"], None, None),
       (1, BEH["yuni1"], "yuni1", None), (1, BEH["yuni2"], "yuni2", None), (1, BEH["busk1"], "stage", BUSK_LBL), (1, BEH["busk2"], None, BUSK_LBL)] \

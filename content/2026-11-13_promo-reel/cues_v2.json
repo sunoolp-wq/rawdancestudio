@@ -100,14 +100,6 @@
   "text": "T. RAEKU — CHOREOGRAPHY"
  },
  {
-  "type": "big",
-  "en": "FREE PASS",
-  "word": "전부",
-  "sub": "전문반은 전 클래스 프리패스",
-  "a": 19.15,
-  "b": 20.918
- },
- {
   "type": "lbl",
   "a": 19.1,
   "b": 20.938,
@@ -118,6 +110,14 @@
   "a": 20.958,
   "b": 22.796,
   "text": "T. KIRY — JAZZ"
+ },
+ {
+  "type": "big",
+  "en": "FREE PASS",
+  "word": "전부",
+  "sub": "팝업 수업까지 프리패스",
+  "a": 22.866,
+  "b": 24.633
  },
  {
   "type": "lbl",

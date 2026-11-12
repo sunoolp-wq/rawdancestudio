@@ -1,0 +1,221 @@
+[
+ {
+  "type": "ed",
+  "tag": "01 — PRO CLASS",
+  "h": "어디서 배우느냐가\n[실력]이 된다",
+  "a": 0.05,
+  "b": 2.342
+ },
+ {
+  "type": "big",
+  "word": "RAW",
+  "sub": "로우댄스학원 수원점",
+  "a": 2.432,
+  "b": 4.2
+ },
+ {
+  "type": "ed",
+  "tag": "02 — TEACHERS",
+  "h": "강사진 전원\n[현역 댄서]",
+  "a": 4.29,
+  "b": 6.057
+ },
+ {
+  "type": "lbl",
+  "a": 4.24,
+  "b": 6.077,
+  "text": "T. MINKYUNG — GIRLS HIPHOP"
+ },
+ {
+  "type": "ed",
+  "tag": "03 — PRO CLASS",
+  "h": "전문반이면\n[모든 수업 무제한]",
+  "a": 6.147,
+  "b": 7.915
+ },
+ {
+  "type": "lbl",
+  "a": 6.097,
+  "b": 7.935,
+  "text": "T. YELLS — PRO CLASS"
+ },
+ {
+  "type": "big",
+  "en": "STUDIO",
+  "word": "100평",
+  "sub": "4층 · 홀 3개 · 2026 오픈",
+  "a": 8.005,
+  "b": 9.772
+ },
+ {
+  "type": "lbl",
+  "a": 7.955,
+  "b": 9.792,
+  "text": "T. NOFF — HIP HOP"
+ },
+ {
+  "type": "lbl",
+  "a": 9.812,
+  "b": 11.65,
+  "text": "T. HEEONE — HEELSCHOREO"
+ },
+ {
+  "type": "big",
+  "en": "PRACTICE ROOM",
+  "word": "항시 개방",
+  "sub": "연습실",
+  "a": 11.72,
+  "b": 13.488
+ },
+ {
+  "type": "lbl",
+  "a": 11.67,
+  "b": 13.508,
+  "text": "T. ARIN — GIRLISH"
+ },
+ {
+  "type": "lbl",
+  "a": 13.528,
+  "b": 15.365,
+  "text": "T. YUNI — K-POP"
+ },
+ {
+  "type": "big",
+  "en": "EQUIPMENT",
+  "word": "최신 장비",
+  "sub": "촬영 장비 · LED 조명",
+  "a": 15.435,
+  "b": 17.203
+ },
+ {
+  "type": "lbl",
+  "a": 15.385,
+  "b": 17.223,
+  "text": "T. HWAN.U — CHOREOGRAPHY"
+ },
+ {
+  "type": "lbl",
+  "a": 17.243,
+  "b": 19.08,
+  "text": "T. RAEKU — CHOREOGRAPHY"
+ },
+ {
+  "type": "big",
+  "en": "FREE PASS",
+  "word": "전부",
+  "sub": "전문반은 전 클래스 프리패스",
+  "a": 19.15,
+  "b": 20.918
+ },
+ {
+  "type": "lbl",
+  "a": 19.1,
+  "b": 20.938,
+  "text": "T. GAON — BASIC"
+ },
+ {
+  "type": "lbl",
+  "a": 20.958,
+  "b": 22.796,
+  "text": "T. KIRY — JAZZ"
+ },
+ {
+  "type": "lbl",
+  "a": 22.816,
+  "b": 24.653,
+  "text": "POP-UP CLASS"
+ },
+ {
+  "type": "lbl",
+  "a": 24.673,
+  "b": 26.511,
+  "text": "T. HWAN.U — CHOREOGRAPHY"
+ },
+ {
+  "type": "lbl",
+  "a": 26.531,
+  "b": 28.368,
+  "text": "T. MINKYUNG — GIRLS HIPHOP"
+ },
+ {
+  "type": "lbl",
+  "a": 28.388,
+  "b": 30.226,
+  "text": "T. YUNI — K-POP"
+ },
+ {
+  "type": "lbl",
+  "a": 30.246,
+  "b": 32.084,
+  "text": "T. GAON — BASIC"
+ },
+ {
+  "type": "ed",
+  "tag": "07 — BEHIND",
+  "h": "수업이 끝나도\n[연습]은 계속",
+  "a": 32.154,
+  "b": 33.921
+ },
+ {
+  "type": "ed",
+  "tag": "08 — FEEDBACK",
+  "h": "쌤 피드백은\n[바로바로]",
+  "a": 35.869,
+  "b": 37.636
+ },
+ {
+  "type": "ed",
+  "tag": "09 — T. YUNI",
+  "h": "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반",
+  "a": 39.584,
+  "b": 41.352
+ },
+ {
+  "type": "ed",
+  "tag": "10 — T. YUNI",
+  "h": "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]",
+  "a": 41.442,
+  "b": 43.209
+ },
+ {
+  "type": "big",
+  "en": "STAGE",
+  "word": "무대",
+  "sub": "월말평가 · 버스킹 · 콘서트",
+  "a": 43.299,
+  "b": 45.067
+ },
+ {
+  "type": "lbl",
+  "a": 43.249,
+  "b": 45.087,
+  "text": "RAW 파주운정점 버스킹 · 수원점 전문반 게스트"
+ },
+ {
+  "type": "lbl",
+  "a": 45.107,
+  "b": 46.944,
+  "text": "RAW 파주운정점 버스킹 · 수원점 전문반 게스트"
+ },
+ {
+  "type": "big",
+  "pre": "배울 거면",
+  "word": "제대로",
+  "a": 52.587,
+  "b": 53.426
+ },
+ {
+  "type": "ed",
+  "end": true,
+  "tag": "RAW DANCE SUWON",
+  "h": "로우댄스학원 수원점\n[전문반]",
+  "info": [
+   "**중·고등** · 예고·예대 입시 · 기획사 준비",
+   "상담 인스타 DM @rawdance_suwon",
+   "카톡 '로우댄스수원점학원' · 수원 팔달구 매산로 136, 4층"
+  ],
+  "tiny": "교습비는 캡션 참고 · 학원 등록번호 제8189호",
+  "a": 54.445,
+  "b": 58.16
+ }
+]

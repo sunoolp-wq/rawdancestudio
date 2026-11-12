@@ -6,6 +6,8 @@ plan.json: {"fps": [24000,1001], "segments": [{"t0":0, "t1":2.382, "mode":"full|
 - tall: 9:16 고정 자르기 (cx = 가로 중심 0~1)
 - wide: 4:5 고정 자르기를 가운데에 + 흐린 배경
 - yolo: 선생님 따라가기 (tools/class-reel/follow_yolo.py, cx = 처음 선생님 위치)
+- vert: 이미 세로(9:16)인 원본 그대로
+- speed: 0.75 처럼 주면 느리게 (원본 구간 = 길이×speed)
 원본 소리는 넣지 않는다 (음악은 마지막에 한 번에)."""
 import argparse, json, os, subprocess, sys
 
@@ -25,20 +27,24 @@ def bg(cx):  # 9:16 같은 영상을 흐리고 어둡게
 for i, s in enumerate(P["segments"]):
     if a.only and str(i) not in a.only.split(","): continue
     n = frames(s); out = os.path.join(a.out, f"{i:02d}.mp4"); src = os.path.join(a.src, s["src"]); cx = s.get("cx", 0.5)
+    sp = s.get("speed", 1.0); slow = f",setpts=PTS/{sp}" if sp != 1.0 else ""
     if s["mode"] == "yolo":
         tmp = os.path.join(a.out, f"{i:02d}_y.mp4")
         subprocess.run([PY, os.path.join(ROOT, "tools/class-reel/follow_yolo.py"), "--video", src, "--start", str(s["ss"]),
-                        "--dur", f"{n / FPS + 0.4:.3f}", "--pick-x", str(cx), "--pick-t", str(s.get("pick_t", 0.3)),
+                        "--dur", f"{n / FPS * sp + 0.4:.3f}", "--pick-x", str(cx), "--pick-t", str(s.get("pick_t", 0.3)),
                         "--shape", s.get("shape", "tall"), "--denoise", "0", "--crf", "15", "--out", tmp], check=True)
-        cmd = ["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", tmp, "-frames:v", str(n), "-vf", "scale=1080:1920,setsar=1"] + ENC + [out]
+        cmd = ["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", tmp, "-frames:v", str(n), "-vf", f"scale=1080:1920,setsar=1{slow},fps={RATE}"] + ENC + [out]
     else:
-        if s["mode"] == "tall":
+        if s["mode"] == "vert":
+            vf = f"[0:v]scale=1080:1920,setsar=1[v]"
+        elif s["mode"] == "tall":
             vf = f"[0:v]crop=ih*9/16:ih:max(0\\,min(iw-ih*9/16\\,iw*{cx}-ih*9/32)):0,scale=1080:1920,setsar=1[v]"
         elif s["mode"] == "wide":
             vf = (f"[0:v]split[a][b];[a]{bg(cx)}[g];[b]crop=ih*4/5:ih:max(0\\,min(iw-ih*4/5\\,iw*{cx}-ih*2/5)):0,scale=1080:1350[f];"
                   f"[g][f]overlay=0:285,setsar=1[v]")
         else:  # full
             vf = f"[0:v]split[a][b];[a]{bg(cx)}[g];[b]scale=1080:608[f];[g][f]overlay=0:656,setsar=1[v]"
+        vf = vf.replace("[v]", f"{slow},fps={RATE}[v]") if True else vf
         cmd = ["ffmpeg", "-nostdin", "-v", "error", "-y", "-ss", str(s["ss"]), "-i", src, "-frames:v", str(n),
                "-filter_complex", vf, "-map", "[v]"] + ENC + [out]
     subprocess.run(cmd, check=True)

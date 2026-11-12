@@ -6,18 +6,65 @@
         "$pid": {
           ".write": "auth != null && $pid.beginsWith(auth.uid)",
           ".validate": "!newData.exists() || newData.hasChildren(['v', 'n', 'x', 'z', 't'])",
-          "v": { ".validate": "newData.isNumber()" },
-          "n": { ".validate": "newData.isString() && newData.val().length <= 16" },
-          "h": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 7" },
-          "x": { ".validate": "newData.isNumber() && newData.val() > -40 && newData.val() < 40" },
-          "z": { ".validate": "newData.isNumber() && newData.val() > -40 && newData.val() < 40" },
-          "r": { ".validate": "newData.isNumber()" },
-          "w": { ".validate": "newData.isNumber()" },
-          "a": { ".validate": "newData.isString() && newData.val().length <= 8" },
-          "k": { ".validate": "newData.isString() && newData.val().length <= 12" },
-          "fm": { ".validate": "newData.isString() && newData.val().length <= 8" },
-          "t": { ".validate": "newData.isNumber() && newData.val() <= now" },
-          "$other": { ".validate": false }
+          "v": {
+            ".validate": "newData.isNumber()"
+          },
+          "n": {
+            ".validate": "newData.isString() && newData.val().length <= 16"
+          },
+          "h": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 7"
+          },
+          "x": {
+            ".validate": "newData.isNumber() && newData.val() > -40 && newData.val() < 40"
+          },
+          "z": {
+            ".validate": "newData.isNumber() && newData.val() > -40 && newData.val() < 40"
+          },
+          "r": {
+            ".validate": "newData.isNumber()"
+          },
+          "w": {
+            ".validate": "newData.isNumber()"
+          },
+          "a": {
+            ".validate": "newData.isString() && newData.val().length <= 8"
+          },
+          "k": {
+            ".validate": "newData.isString() && newData.val().length <= 12"
+          },
+          "fm": {
+            ".validate": "newData.isString() && newData.val().length <= 8"
+          },
+          "t": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "notes": {
+        ".read": "auth != null && ((query.orderByChild == 'ok' && query.equalTo == true && query.limitToLast <= 16) || (auth.token.email == 'ADMIN_EMAIL' && auth.token.email_verified == true))",
+        ".indexOn": [
+          "ok"
+        ],
+        "$uid": {
+          ".read": "auth != null && ($uid == auth.uid || (auth.token.email == 'ADMIN_EMAIL' && auth.token.email_verified == true))",
+          ".write": "auth != null && (($uid == auth.uid && (!newData.exists() || newData.child('ok').val() == false)) || (auth.token.email == 'ADMIN_EMAIL' && auth.token.email_verified == true))",
+          ".validate": "newData.hasChildren(['s', 't', 'ok'])",
+          "s": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+          },
+          "t": {
+            ".validate": "newData.isNumber() && newData.val() <= now"
+          },
+          "ok": {
+            ".validate": "newData.isBoolean()"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       }
     }

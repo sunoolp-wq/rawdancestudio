@@ -57,6 +57,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);overflow:hid
 .card textarea{width:100%;box-sizing:border-box;margin-top:14px;background:#0e0d12;color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:16px;resize:none;height:84px}
 .card textarea:focus{outline:2px solid var(--acc)}
 .btns{display:flex;gap:8px;margin-top:14px}
+.card .opt button{border:0;border-radius:10px;background:rgba(255,255,255,.1);color:var(--fg);font:inherit;font-weight:800;cursor:pointer}
 .btns button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:900;font-size:15px;cursor:pointer}
 .pri{background:var(--acc);color:#0e0d12}.sec{background:rgba(255,255,255,.08);color:var(--fg)}
 .card img{width:100%;border-radius:14px;margin-top:12px;display:block;-webkit-user-select:auto;user-select:auto}
@@ -279,12 +280,14 @@ me.position.set(PX(444), 0, PZ(705)); me.rotation.y = Math.PI;
 
 // 소원 쪽지: 로비 위쪽 벽 (짐 놓는 데와 탈의실 사이)
 const notesG = new THREE.Group(); scene.add(notesG);
-function addNote(text, i) { const c = ['#fff1a8', '#ffd1e3', '#cfe8ff', '#d9ffd6'][i % 4];
+function addNote(text, i, pending) { const c = ['#fff1a8', '#ffd1e3', '#cfe8ff', '#d9ffd6'][i % 4];
   const t = tex((g, w, h) => { g.fillStyle = c; g.fillRect(0, 0, w, h); g.fillStyle = 'rgba(0,0,0,.06)'; g.fillRect(0, 0, w, 26); g.fillStyle = '#26232f'; g.font = '700 30px "Noto Sans KR", sans-serif'; g.textBaseline = 'top';
-    let line = '', lines = []; [...text].forEach(ch => { if (g.measureText(line + ch).width > w - 40) { lines.push(line); line = ch; } else line += ch; }); lines.push(line); lines.slice(0, 5).forEach((l, k) => g.fillText(l, 20, 44 + k * 40)); }, 256, 256);
-  const n = new THREE.Mesh(new THREE.PlaneGeometry(.5, .5), new THREE.MeshBasicMaterial({ map: t })); const col = i % 4, row = Math.floor(i / 4) % 4;
-  n.position.set(PX(345) + col * .62 + (Math.random() - .5) * .08, 2.3 - row * .6, PZ(58) + .09); n.rotation.z = (Math.random() - .5) * .2; notesG.add(n); }
-let notes = store.get('raw_notes', []); notes.forEach((t, i) => addNote(t, i));
+    let line = '', lines = []; [...text].forEach(ch => { if (g.measureText(line + ch).width > w - 40) { lines.push(line); line = ch; } else line += ch; }); lines.push(line); lines.slice(0, 5).forEach((l, k) => g.fillText(l, 20, 44 + k * 40));
+    if (pending) { g.fillStyle = 'rgba(109,88,224,.92)'; g.fillRect(0, h - 44, w, 44); g.fillStyle = '#fff'; g.font = '900 24px "Noto Sans KR", sans-serif'; g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillText('원장님 확인 중', w / 2, h - 22); } }, 256, 256);
+  const n = new THREE.Mesh(new THREE.PlaneGeometry(.58, .58), new THREE.MeshBasicMaterial({ map: t })); const col = i % 4, row = Math.floor(i / 4) % 4, j = Math.sin(i * 12.9898) * 43758.5453 % 1;
+  n.position.set(PX(345) + col * .68 + j * .04, 2.45 - row * .64, PZ(58) + .09); n.rotation.z = j * .1; notesG.add(n); }
+function renderWall(list) { while (notesG.children.length) { const n = notesG.children.pop(); n.material.map.dispose(); n.material.dispose(); n.geometry.dispose(); } list.slice(0, 16).forEach((it, i) => addNote(it.s, i, it.pending)); }
+let notes = store.get('raw_notes', []); renderWall(notes.map(s => ({ s })));
 label('소원 쪽지', PX(406), PZ(58) + .09, 0, 2.85, '#f5be46');
 
 // ── 카메라 ──
@@ -422,6 +425,7 @@ const POI = [
   { x: 917, y: 205, r: 70, label: '✊ 원장실 노크', fn: () => { if (ac()) [0, .18, .36].forEach(d => drum('knock', AC.currentTime + d)); toast('똑똑똑… 원장님은 수업 중이에요'); } },
   { x: 312, y: 465, r: 70, label: '🔒 C홀 (전문반 전용)', fn: () => toast('C홀은 전문반 친구들만 들어갈 수 있어요') },
   { x: 656, y: 178 + M(3.2), r: M(2), label: '💁 인포데스크 문의', fn: () => $('info').click() },
+  { x: 400, y: 150, r: M(2.2), label: '📝 쪽지 벽 보기', fn: lookWall },
   { x: 444, y: 745, r: 70, label: '🚪 학원 나가기', fn: () => toast('또 놀러 와요! 진짜 연습실은 [RAW 수원] 버튼에') },
 ];
 function updateRoom() { const [x, y] = toPx(me.position), r = roomAt(x, y);
@@ -456,9 +460,33 @@ function updateOthers(dt, t) { others.forEach(o => { const g = o.R.g, dx = o.tx 
     if (o.act) o.aT += dt; const done = o.act && DUR[o.act] && o.aT > DUR[o.act] + 1 && o.act !== 'sit';
     animRig(o.R, t + g.position.x, (o.walk || d > .15) && !o.act, done ? '' : o.act, o.aT, o.fm); }); }
 function showOnline() { const n = others.size + 1, e = $('online'); e.hidden = !room; e.textContent = ` · 👥 지금 ${n}명`; }
+let shared = null;
+// 쪽지: 원장님이 공개한 것(ok) + 내가 쓴 것(확인 중)만 벽에
+function initSharedNotes() { let approved = [], mine = null;
+  const draw = () => { const list = approved.filter(n => n.k !== shared.uid).sort((a, b) => b.t - a.t); if (mine) list.unshift({ s: mine.s, pending: !mine.ok }); renderWall(list); };
+  shared.db.ref('raw/notes').orderByChild('ok').equalTo(true).limitToLast(16).on('value', sn => { approved = []; sn.forEach(c => { const v = c.val() || {}; if (typeof v.s === 'string') approved.push({ k: c.key, s: v.s.slice(0, 40), t: +v.t || 0 }); }); draw(); }, () => {});
+  shared.db.ref('raw/notes/' + shared.uid).on('value', sn => { const v = sn.val(); mine = v && typeof v.s === 'string' ? { s: v.s.slice(0, 40), ok: v.ok === true } : null; shared.mine = !!mine; draw(); }, () => {}); }
+// 원장님 승인 화면: 주소 끝에 #admin → 구글 로그인 → 공개/내리기/삭제
+function openAdmin() { const fb = window.firebase, u = shared.user;
+  if (u.isAnonymous) { open(`<h2>🔐 쪽지 확인 (원장님)</h2><p>원장님 구글 계정으로 로그인하면 애들이 쓴 쪽지를 보고 공개할 수 있어요.</p><div class="btns"><button class="sec" id="ac" type="button">닫기</button><button class="pri" id="al" type="button">구글로 로그인</button></div>`);
+    $('ac').onclick = close; $('al').onclick = () => { const pv = new fb.auth.GoogleAuthProvider(); fb.auth().signInWithPopup(pv).then(() => location.reload(), e => { if (e && /popup/.test(e.code || '')) fb.auth().signInWithRedirect(pv); else toast('로그인이 안 됐어요: ' + ((e && e.code) || '')); }); }; return; }
+  open(`<h2>🔐 쪽지 확인</h2><p id="am">불러오는 중…</p><div id="alist" class="row" style="max-height:52vh;overflow:auto"></div><div class="btns"><button class="sec" id="ao" type="button">로그아웃</button><button class="pri" id="ac" type="button">닫기</button></div>`);
+  $('ac').onclick = close; $('ao').onclick = () => fb.auth().signOut().then(() => location.reload());
+  const ref = shared.db.ref('raw/notes'); if (window.__adminOff) window.__adminOff();
+  const cb = ref.on('value', sn => { const box = $('alist'); if (!box) return; box.textContent = ''; const items = []; sn.forEach(c => { items.push([c.key, c.val() || {}]); });
+    items.sort((a, b) => (a[1].ok === b[1].ok ? (b[1].t || 0) - (a[1].t || 0) : a[1].ok ? 1 : -1));
+    $('am').textContent = items.length ? `확인 기다리는 쪽지 ${items.filter(x => !x[1].ok).length}장 · 공개 중 ${items.filter(x => x[1].ok).length}장` : '아직 쪽지가 없어요';
+    items.forEach(([k, v]) => { const row = document.createElement('div'); row.className = 'opt'; row.style.cursor = 'default';
+      const txt = document.createElement('span'); txt.style.flex = '1'; const b = document.createElement('b'); b.textContent = String(v.s || ''); const sm = document.createElement('small'); sm.textContent = (v.ok ? '✅ 공개 중' : '⏳ 확인 기다림') + (v.t ? ' · ' + new Date(v.t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''); txt.append(b, sm);
+      const bt = (label, fn) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'sec'; x.textContent = label; x.style.cssText = 'padding:8px 10px;font-size:13px;white-space:nowrap'; x.onclick = fn; return x; };
+      row.append(txt, bt(v.ok ? '내리기' : '공개', () => ref.child(k).update({ ok: !v.ok }).catch(() => toast('바꾸지 못했어요'))), bt('삭제', () => { if (confirm('이 쪽지를 지울까요?')) ref.child(k).remove().catch(() => toast('지우지 못했어요')); }));
+      box.append(row); }); },
+    () => { if ($('am')) $('am').textContent = '원장님 계정이 아니라서 열 수 없어요. 로그아웃 후 원장님 구글 계정으로 다시 로그인해 주세요.'; }); window.__adminOff = () => ref.off('value', cb); }
+addEventListener('hashchange', () => { if (location.hash === '#admin' && shared) openAdmin(); });
 // 학원 홈페이지 버전(로그인 없이 공개): Firebase 실시간 DB로 같은 모양의 room을 만든다
 async function firebaseRoom(cfg) {
-  const fb = window.firebase; fb.initializeApp(cfg); await fb.auth().signInAnonymously(); const uid = fb.auth().currentUser.uid;
+  const fb = window.firebase; fb.initializeApp(cfg); const auth = fb.auth();
+  let u = await new Promise(r => { const off = auth.onAuthStateChanged(x => { off(); r(x); }); }); if (!u) u = (await auth.signInAnonymously()).user; const uid = u.uid;
   const myPeer = uid + '_' + Math.random().toString(36).slice(2, 7), db = fb.database(), base = db.ref('raw/peers'), mine = base.child(myPeer), peers = new Map(), hs = [];
   let last = null;
   const mk = (key, v) => Object.freeze({ peer: key, by: null, isMe: key.startsWith(uid), sameTab: key === myPeer, kind: 'viewer', guest: false, presence: Object.freeze(v || {}), updatedAt: Date.now() });
@@ -471,6 +499,7 @@ async function firebaseRoom(cfg) {
   const put = st => { last = Object.assign({}, st, { t: fb.database.ServerValue.TIMESTAMP }); return mine.set(last); };
   setInterval(() => { if (last) put(last).catch(() => {}); }, 60 * 1000); // 가만히 있어도 1분마다 "아직 있어요"
   addEventListener('pagehide', () => { mine.remove(); });
+  shared = { db, uid, user: u }; initSharedNotes(); if (location.hash === '#admin') openAdmin();
   return { minGap: 220, presence: st => put(st), onPeers: (h, onErr) => { hs.push(h); setTimeout(() => h({ peers: [...peers.values()], joined: [...peers.values()], left: [], updated: [] }), 0); return () => {}; } };
 }
 (async () => { try {
@@ -511,9 +540,19 @@ const modal = $('modal'), card = $('mcard');
 function open(html) { card.innerHTML = html; modal.hidden = false; const f = card.querySelector('textarea,button'); if (f) f.focus(); }
 function close() { modal.hidden = true; canvas.focus(); }
 modal.addEventListener('click', e => { if (e.target === modal) close(); }); addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
-$('note').onclick = () => { open(`<h2>📝 소원 쪽지 붙이기</h2><p>로비 벽에 춤 목표나 소원을 붙여요. 지금은 이 기기에서만 보여요.</p><textarea id="nt" maxlength="40" placeholder="예) 예고 합격 · 다리 찢기 성공 · 턴 3바퀴"></textarea>
-  <div class="btns"><button class="sec" id="nc" type="button">닫기</button><button class="pri" id="ns" type="button">붙이기</button></div>`);
-  $('nc').onclick = close; $('ns').onclick = () => { const v = $('nt').value.trim(); if (!v) { $('nt').focus(); return; } notes.push(v); store.set('raw_notes', notes.slice(-16)); addNote(v, notes.length - 1); close(); goTo(toV(406, 240)); yaw = 0; toast('로비 벽에 쪽지를 붙였어요'); }; };
+function lookWall() { goTo(toV(470, 215)); yaw = .45; pitch = .26; dist = 6.5; }
+const BAD = /시발|씨발|ㅅㅂ|ㅆㅂ|병신|ㅂㅅ|좆|존나|졸라|개새|새끼|닥쳐|꺼져|지랄|ㅈㄹ|엿먹|fuck|shit/i;
+$('note').onclick = () => { const sh = !!shared;
+  open(`<h2>📝 소원 쪽지 붙이기</h2><p>${sh ? '로비 벽에 춤 목표나 소원을 붙여요. <b>원장님이 확인하면</b> 친구들한테도 보여요. 한 사람당 1장이고, 새로 쓰면 바뀌어요.' : '로비 벽에 춤 목표나 소원을 붙여요. 지금은 이 기기에서만 보여요.'}</p><textarea id="nt" maxlength="40" placeholder="예) 예고 합격 · 다리 찢기 성공 · 턴 3바퀴"></textarea>
+  <div class="btns">${sh && shared.mine ? '<button class="sec" id="nd" type="button">내 쪽지 떼기</button>' : ''}<button class="sec" id="nc" type="button">닫기</button><button class="pri" id="ns" type="button">붙이기</button></div>`);
+  $('nc').onclick = close;
+  if ($('nd')) $('nd').onclick = () => { shared.db.ref('raw/notes/' + shared.uid).remove().then(() => toast('쪽지를 뗐어요'), () => toast('지금은 뗄 수 없어요. 잠시 뒤에 다시 해 봐요')); close(); };
+  $('ns').onclick = () => { const v = $('nt').value.replace(/\s+/g, ' ').trim(); if (!v) { $('nt').focus(); return; }
+    if (BAD.test(v.replace(/\s/g, ''))) { toast('그 말은 쪽지에 쓸 수 없어요'); return; }
+    if (sh) { shared.db.ref('raw/notes/' + shared.uid).set({ s: v.slice(0, 40), t: window.firebase.database.ServerValue.TIMESTAMP, ok: false })
+        .then(() => toast('붙였어요! 원장님이 확인하면 친구들한테도 보여요'), () => toast('지금은 붙일 수 없어요. 잠시 뒤에 다시 해 봐요')); }
+    else { notes.push(v); store.set('raw_notes', notes.slice(-16)); renderWall(notes.slice(-16).reverse().map(s => ({ s }))); toast('로비 벽에 쪽지를 붙였어요'); }
+    close(); lookWall(); }; };
 $('water').onclick = () => { open(`<h2>💧 물 한 병 건네기</h2><p>연습하다 목마른 사람에게 물 한 병.</p><div class="row">
   <button class="opt" id="w1" type="button"><i>🙋</i><span><b>나에게</b><small>정수기로 가서 마셔요</small></span></button>
   <button class="opt" id="w2" type="button"><i>💌</i><span><b>친구에게</b><small>보낼 메시지를 만들어요</small></span></button>
@@ -527,7 +566,7 @@ $('photo').onclick = () => { renderer.render(scene, camera); let url = ''; try {
 $('info').onclick = () => { open(`<span class="badge">REAL STUDIO</span><h2>진짜 RAW 연습실 구경 오기</h2><p>로우댄스학원 수원점에서 직접 춰 봐요.</p>
   <div class="info"><div><span>주소</span><b>수원시 팔달구 매산로 136, 4층</b></div><div><span>전화</span><b>031-225-6600</b></div><div><span>카카오채널</span><b>로우댄스수원점학원</b></div><div><span>인스타그램</span><b><a href="https://www.instagram.com/rawdance_suwon/" target="_blank" rel="noopener">@rawdance_suwon</a></b></div></div>
   <div class="btns"><button class="pri" id="ic" type="button">연습실로 돌아가기</button></div>`); $('ic').onclick = close; };
-if (location.hash === '#test') window.__raw = { goTo, toV, me, get room() { return curRoom; }, startAct, halls, mirrors, setYaw: v => yaw = v, setDist: v => dist = v };
+if (location.hash === '#test') window.__raw = { goTo, toV, me, get room() { return curRoom; }, startAct, halls, mirrors, setYaw: v => yaw = v, setPitch: v => pitch = v, setDist: v => dist = v };
 setTimeout(() => toast(`${nick}님, RAW에 오신 걸 환영해요 · 왼쪽 A홀, 오른쪽 B홀`), 700);
 })();
 </script>

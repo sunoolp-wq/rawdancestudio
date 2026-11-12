@@ -427,7 +427,7 @@ $('light').onclick = () => { const h = halls[curRoom]; if (!h) return; setHall(c
 const ACTS = ['stretch', 'eight', 'free', 'clap', 'drink', 'sit'], others = new Map(); let room = null, lastSent = '', sentAt = 0, actSeq = 0, actKey = '', firstPeersAt = 0;
 function myState() { const p = me.position; return { v: 1, n: nick, h: hoodI, x: +p.x.toFixed(2), z: +p.z.toFixed(2), r: +me.rotation.y.toFixed(2), w: path.length ? 1 : 0, a: act || '', k: act ? actKey : '', fm: freeMoves.join('') }; }
 function sendPresence(now) { if (!room) return; const st = myState(), js = JSON.stringify(st);
-  if (js === lastSent || now - sentAt < 90) return; lastSent = js; sentAt = now; room.presence(st).catch(() => {}); }
+  if (js === lastSent || now - sentAt < (room.minGap || 90)) return; lastSent = js; sentAt = now; room.presence(st).catch(() => {}); }
 function cleanName(v) { return String(v || '').replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u206f]/g, '').trim().slice(0, 16) || '친구'; }
 function syncPeer(pe) { const ps = pe.presence || {}; if (ps.v !== 1 || typeof ps.x !== 'number' || typeof ps.z !== 'number') return;
   let o = others.get(pe.peer); const name = cleanName(ps.n), h = Number.isInteger(ps.h) && ps.h >= 0 && ps.h < HOODS.length ? ps.h : 0;
@@ -446,7 +446,27 @@ function updateOthers(dt, t) { others.forEach(o => { const g = o.R.g, dx = o.tx 
     if (o.act) o.aT += dt; const done = o.act && DUR[o.act] && o.aT > DUR[o.act] + 1 && o.act !== 'sit';
     animRig(o.R, t + g.position.x, (o.walk || d > .15) && !o.act, done ? '' : o.act, o.aT, o.fm); }); }
 function showOnline() { const n = others.size + 1, e = $('online'); e.hidden = !room; e.textContent = ` · 👥 지금 ${n}명`; }
-(async () => { try { if (!window.claude || !window.claude.use) return; room = await window.claude.use('room'); if (!room) return;
+// 학원 홈페이지 버전(로그인 없이 공개): Firebase 실시간 DB로 같은 모양의 room을 만든다
+async function firebaseRoom(cfg) {
+  const fb = window.firebase; fb.initializeApp(cfg); await fb.auth().signInAnonymously(); const uid = fb.auth().currentUser.uid;
+  const myPeer = uid + '_' + Math.random().toString(36).slice(2, 7), db = fb.database(), base = db.ref('raw/peers'), mine = base.child(myPeer), peers = new Map(), hs = [];
+  let last = null;
+  const mk = (key, v) => Object.freeze({ peer: key, by: null, isMe: key.startsWith(uid), sameTab: key === myPeer, kind: 'viewer', guest: false, presence: Object.freeze(v || {}), updatedAt: Date.now() });
+  const fire = (joined = [], left = [], updated = []) => { const ch = { peers: [...peers.values()], joined, left, updated }; hs.forEach(h => { try { h(ch); } catch (e) {} }); };
+  const fresh = v => v && typeof v.t === 'number' && Date.now() - v.t < 10 * 60 * 1000; // 10분 넘게 소식 없는 자리는 무시
+  base.on('child_added', sn => { const v = sn.val(); if (!fresh(v)) return; const p = mk(sn.key, v); peers.set(sn.key, p); fire([p]); });
+  base.on('child_changed', sn => { const v = sn.val(), had = peers.has(sn.key); if (!fresh(v)) return; const p = mk(sn.key, v); peers.set(sn.key, p); had ? fire([], [], [p]) : fire([p]); });
+  base.on('child_removed', sn => { const p = peers.get(sn.key); if (p) { peers.delete(sn.key); fire([], [p]); } });
+  db.ref('.info/connected').on('value', sn => { if (sn.val() === true) { mine.onDisconnect().remove(); if (last) mine.set(last).catch(() => {}); } });
+  const put = st => { last = Object.assign({}, st, { t: fb.database.ServerValue.TIMESTAMP }); return mine.set(last); };
+  setInterval(() => { if (last) put(last).catch(() => {}); }, 60 * 1000); // 가만히 있어도 1분마다 "아직 있어요"
+  addEventListener('pagehide', () => { mine.remove(); });
+  return { minGap: 220, presence: st => put(st), onPeers: (h, onErr) => { hs.push(h); setTimeout(() => h({ peers: [...peers.values()], joined: [...peers.values()], left: [], updated: [] }), 0); return () => {}; } };
+}
+(async () => { try {
+  if (window.RAW_FB && window.firebase) room = await firebaseRoom(window.RAW_FB);
+  else if (window.claude && window.claude.use) room = await window.claude.use('room');
+  if (!room) return;
   room.onPeers(ch => { if (!firstPeersAt) firstPeersAt = performance.now();
     ch.left.forEach(pe => { const o = others.get(pe.peer); if (o && performance.now() - firstPeersAt > 2500) toast(`${o.name}님이 나갔어요`); dropPeer(pe.peer); });
     [...ch.joined, ...ch.updated].forEach(pe => { if (pe.sameTab || pe.kind !== 'viewer') return; syncPeer(pe); }); showOnline(); }, () => { room = null; showOnline(); });

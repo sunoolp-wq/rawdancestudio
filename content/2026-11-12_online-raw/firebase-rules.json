@@ -1,0 +1,25 @@
+{
+  "rules": {
+    "raw": {
+      "peers": {
+        ".read": "auth != null",
+        "$pid": {
+          ".write": "auth != null && $pid.beginsWith(auth.uid)",
+          ".validate": "!newData.exists() || newData.hasChildren(['v', 'n', 'x', 'z', 't'])",
+          "v": { ".validate": "newData.isNumber()" },
+          "n": { ".validate": "newData.isString() && newData.val().length <= 16" },
+          "h": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 7" },
+          "x": { ".validate": "newData.isNumber() && newData.val() > -40 && newData.val() < 40" },
+          "z": { ".validate": "newData.isNumber() && newData.val() > -40 && newData.val() < 40" },
+          "r": { ".validate": "newData.isNumber()" },
+          "w": { ".validate": "newData.isNumber()" },
+          "a": { ".validate": "newData.isString() && newData.val().length <= 8" },
+          "k": { ".validate": "newData.isString() && newData.val().length <= 12" },
+          "fm": { ".validate": "newData.isString() && newData.val().length <= 8" },
+          "t": { ".validate": "newData.isNumber() && newData.val() <= now" },
+          "$other": { ".validate": false }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+/* 광고 릴스 자막 (TRACKPAD 느낌): 위 작은 영어 1줄(GoGo Poster) + 큰 한글(Noto Sans KR 900), 보라 포인트.
+   글자마다 무작위 순서로 탁탁 켜짐(가끔 회색 1프레임) → 자간이 천천히 벌어짐 → 끝에 무작위로 꺼짐 */
+html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden}
+#box{position:absolute;left:60px;right:60px;top:0;text-align:center}
+.k{font-family:"GoGo Poster 2020";font-style:italic;font-size:62px;line-height:1;color:#b9a6ff;letter-spacing:.06em;margin-bottom:22px;
+   text-shadow:0 3px 18px rgba(0,0,0,.55)}
+.m{font-family:"Noto Sans KR";font-weight:900;font-size:98px;line-height:1.16;color:#f4f2ee;word-break:keep-all;
+   text-shadow:0 4px 26px rgba(0,0,0,.6),0 0 2px rgba(0,0,0,.4)}
+.m em{font-style:normal;color:#b9a6ff}
+.s{font-family:"Noto Sans KR";font-weight:700;font-size:38px;line-height:1.5;color:#e9e6f0;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+.t{font-family:"Noto Sans KR";font-weight:500;font-size:27px;color:rgba(233,230,240,.8);margin-top:26px}
+.big{font-family:"GoGo Poster 2020";font-style:italic;font-size:92px;white-space:nowrap;line-height:1;color:#f4f2ee;text-shadow:0 4px 26px rgba(0,0,0,.6)}
+.c{display:inline-block;white-space:pre}
+</style></head><body><div id="shade" style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,7,12,0) 38%,rgba(8,7,12,.72) 62%,rgba(8,7,12,.82));opacity:0"></div><div id="box"></div>
+<script>
+// cue: {a, b, k, m, y, end?}  m 안의 [단어] = 보라 강조, \n = 줄바꿈
+let CUES = [], FPS = 24000 / 1001;
+const box = document.getElementById('box');
+function rnd(seed) { let x = Math.sin(seed * 9301 + 49297) * 233280; return x - Math.floor(x); }
+function spans(text, cls, seedBase) {   // 글자 하나씩 span (켜지는 순서 무작위)
+  let html = '', i = 0, acc = false;
+  for (const ch of text) {
+    if (ch === '[') { acc = true; continue; } if (ch === ']') { acc = false; continue; }
+    if (ch === '\n') { html += '<br>'; continue; }
+    const r = rnd(seedBase + i++);
+    html += `<span class="c" data-r="${r.toFixed(4)}" style="${acc ? 'color:#b9a6ff' : ''}">${ch === ' ' ? ' ' : ch}</span>`;
+  }
+  return html;
+}
+window.setup = cues => { CUES = cues; };
+let cur = -1;
+window.render = t => {
+  const i = CUES.findIndex(c => t >= c.a && t < c.b);
+  if (i !== cur) {
+    cur = i; box.innerHTML = '';
+    if (i < 0) return;
+    const c = CUES[i];
+    if (c.end) {
+      box.innerHTML = `<div class="big">${spans('RAW DANCE SUWON', '', 900)}</div>
+        <div class="m" style="font-size:104px;margin-top:10px">${spans(c.m, '', 950)}</div>
+        <div class="s" style="margin-top:34px">${c.lines.map((l, j) => spans(l, '', 1000 + j * 50)).join('<br>')}</div>
+        <div class="t">${spans(c.tiny, '', 1300)}</div>`;
+    } else {
+      box.innerHTML = (c.k ? `<div class="k">${spans(c.k, '', i * 100)}</div>` : '') + `<div class="m">${spans(c.m, '', i * 100 + 50)}</div>`;
+    }
+    box.style.top = (c.y || 1180) + 'px'; document.getElementById('shade').style.opacity = 0;
+    if (c.fs) box.querySelectorAll('.m').forEach(m => m.style.fontSize = c.fs + 'px');
+  }
+  if (cur < 0) return;
+  { const c0 = CUES[cur]; if (c0.end) document.getElementById('shade').style.opacity = Math.min(1, (t - c0.a) / 0.4); }
+  const c = CUES[cur], lt = t - c.a, left = c.b - t, IN = c.end ? 0.5 : 0.3, OUT = c.end ? 0 : 0.2;
+  box.querySelectorAll('.c').forEach(s => {
+    const r = +s.dataset.r, on = lt >= r * IN, off = OUT && left <= OUT * (1 - r) ;
+    const flash = on && lt < r * IN + 1 / FPS && r > 0.82;   // 가끔 1프레임 회색
+    s.style.opacity = on && !off ? 1 : 0; s.style.filter = flash ? 'grayscale(1) brightness(.6)' : '';
+  });
+  const sp = Math.min(1, lt / Math.max(0.6, c.b - c.a)) * 0.035 - 0.01;   // 자간 천천히 벌어짐
+  box.querySelectorAll('.m').forEach(m => m.style.letterSpacing = sp.toFixed(4) + 'em');
+};
+</script></body></html>

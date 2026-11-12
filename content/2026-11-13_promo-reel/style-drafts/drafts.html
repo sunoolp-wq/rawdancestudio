@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+/* 광고 릴스 자막 시안 6종 × 장면 3개 (훅 / 장점 / 엔딩). ?s=1..6&scene=hook|usp|end&bg=이미지 */
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}
+#bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.L{position:absolute;inset:0}
+.scrimB{position:absolute;left:0;right:0;bottom:0;height:62%;background:linear-gradient(to bottom,rgba(6,5,10,0),rgba(6,5,10,.55) 45%,rgba(6,5,10,.85))}
+.scrimT{position:absolute;left:0;right:0;top:0;height:40%;background:linear-gradient(to top,rgba(6,5,10,0),rgba(6,5,10,.6))}
+/* 1 에디토리얼 */
+.s1 .wrap{position:absolute;left:84px;right:84px;bottom:420px}
+.s1 .tag{font:600 26px Montserrat;letter-spacing:.32em;color:#b9a6ff;display:flex;align-items:center;gap:18px}
+.s1 .tag:after{content:"";flex:1;height:2px;background:rgba(244,242,238,.35)}
+.s1 .h{font:400 84px "Gothic A1 ExtraBold";line-height:1.18;color:#f4f2ee;margin-top:26px;letter-spacing:-.01em}
+.s1 .sub{font:400 34px "Gothic A1 Light";color:rgba(244,242,238,.8);margin-top:18px}
+.s1 .info{margin-top:34px;font:400 30px "Gothic A1 Light";color:#e9e6f0;line-height:1.9;border-top:2px solid rgba(244,242,238,.25);padding-top:22px}
+.s1 .info b{font-weight:800;color:#f4f2ee}
+/* 2 빅 타이포 */
+.s2 .big{position:absolute;left:0;right:0;text-align:center;font:400 330px "Black Han Sans";line-height:.9;color:#f4f2ee;letter-spacing:-.02em;text-shadow:0 8px 40px rgba(0,0,0,.55)}
+.s2 .small{position:absolute;left:0;right:0;text-align:center;font:700 40px "IBM Plex Sans KR";color:#fff;letter-spacing:.08em}
+.s2 .en{position:absolute;left:0;right:0;text-align:center;font:400 54px "Bebas Neue";letter-spacing:.5em;color:#b9a6ff;margin-right:-.5em}
+/* 3 시네마 */
+.s3 .bar{position:absolute;left:0;right:0;height:150px;background:#000}
+.s3 .wrap{position:absolute;left:60px;right:60px;bottom:360px;text-align:center}
+.s3 .h{font:400 66px "NanumMyeongjoExtraBold";color:#f4f2ee;letter-spacing:.06em;line-height:1.4}
+.s3 .en{font:500 26px Montserrat;letter-spacing:.6em;color:rgba(244,242,238,.75);margin-bottom:26px;margin-right:-.6em}
+.s3 .info{font:400 30px "Gothic A1 Light";color:rgba(244,242,238,.85);margin-top:34px;line-height:1.8;letter-spacing:.04em}
+/* 4 스트릿 라벨 */
+.s4 .wrap{position:absolute;left:70px;right:70px;bottom:470px}
+.s4 .box{display:inline-block;font:400 92px "Black Han Sans";padding:10px 26px 4px;line-height:1.05}
+.s4 .w{background:#f4f2ee;color:#121116;transform:rotate(-3deg)}
+.s4 .p{background:#8e74ff;color:#fff;transform:rotate(2deg);margin-top:14px;margin-left:60px}
+.s4 .en{display:inline-block;font:400 44px "Bebas Neue";letter-spacing:.2em;color:#121116;background:#f5be46;padding:6px 18px 2px;transform:rotate(-2deg);margin-bottom:18px}
+.s4 .info{margin-top:30px;font:700 30px "IBM Plex Sans KR";color:#fff;line-height:1.75;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+/* 5 LED 네온 */
+.s5 .wrap{position:absolute;left:40px;right:40px;top:300px;text-align:center}
+.s5 .en{font:italic 900 110px Montserrat;color:#fff;letter-spacing:.02em;text-shadow:0 0 6px #fff,0 0 18px rgba(255,255,255,.9),0 0 46px #8e74ff,0 0 90px #8e74ff}
+.s5 .h{font:700 64px "IBM Plex Sans KR";color:#fff;margin-top:22px;line-height:1.3;text-shadow:0 0 4px #fff,0 0 22px rgba(185,166,255,.95),0 0 50px rgba(142,116,255,.8)}
+.s5 .info{font:700 30px "IBM Plex Sans KR";color:#fff;margin-top:30px;line-height:1.8;text-shadow:0 0 14px rgba(142,116,255,.9),0 2px 8px rgba(0,0,0,.8)}
+/* 6 촬영 화면(HUD) */
+.s6 .c{position:absolute;width:90px;height:90px;border-color:rgba(244,242,238,.85);border-style:solid;border-width:0}
+.s6 .tl{left:60px;top:220px;border-left-width:5px;border-top-width:5px}.s6 .tr{right:60px;top:220px;border-right-width:5px;border-top-width:5px}
+.s6 .bl{left:60px;bottom:330px;border-left-width:5px;border-bottom-width:5px}.s6 .br{right:60px;bottom:330px;border-right-width:5px;border-bottom-width:5px}
+.s6 .rec{position:absolute;left:90px;top:250px;font:600 30px Montserrat;color:#fff;letter-spacing:.12em}
+.s6 .rec i{display:inline-block;width:20px;height:20px;border-radius:50%;background:#ff3b4a;margin-right:14px;vertical-align:1px}
+.s6 .tc{position:absolute;right:90px;top:250px;font:500 30px Montserrat;color:#fff;letter-spacing:.12em}
+.s6 .wrap{position:absolute;left:96px;right:96px;bottom:400px}
+.s6 .idx{font:600 28px Montserrat;color:#b9a6ff;letter-spacing:.2em}
+.s6 .h{font:400 80px "Gothic A1 ExtraBold";color:#fff;line-height:1.18;margin-top:16px;text-shadow:0 2px 18px rgba(0,0,0,.5)}
+.s6 .info{font:400 30px "Gothic A1 Light";color:#fff;margin-top:24px;line-height:1.8}
+</style></head><body><div id="bg"></div><div id="o" class="L"></div>
+<script>
+const q = new URLSearchParams(location.search), s = +q.get('s'), sc = q.get('scene');
+document.getElementById('bg').style.backgroundImage = `url(${q.get('bg')})`;
+const T = {
+  hook: { en: 'PRO CLASS', h: '연습은<br>이 열기 속에서', big: '열기', small: '연습은 이 열기 속에서', idx: '01 / 08', cine: '실력은,<br>환경이 만든다', label: ['연습은', '이 열기 속에서'] },
+  usp: { en: 'FREE PASS', h: '모든 수업<br>무제한 프리패스', big: '무제한', small: '모든 수업 프리패스', idx: '03 / 08', cine: '모든 수업,<br>무제한으로', label: ['모든 수업', '무제한 프리패스'] },
+  end: { en: 'RAW DANCE SUWON', h: '전문반', big: '전문반', small: 'RAW DANCE SUWON', idx: 'PRO CLASS', cine: '로우댄스학원 수원점<br>전문반', label: ['RAW DANCE SUWON', '전문반'] }
+}[sc];
+const INFO = '중·고등 · 예고·예대 입시 · 기획사 준비<br>상담 카톡 \'로우댄스수원점학원\' · 031-225-6600<br>수원 팔달구 매산로 136, 4층';
+const o = document.getElementById('o'); o.className = 'L s' + s;
+const end = sc === 'end';
+if (s === 1) o.innerHTML = `<div class="scrimB"></div><div class="wrap"><div class="tag">${end ? 'RAW DANCE SUWON' : (sc === 'hook' ? '01' : '03') + ' — ' + T.en}</div><div class="h">${T.h}</div>${end ? `<div class="info">${INFO.replace('중·고등', '<b>중·고등</b>')}</div>` : ''}</div>`;
+if (s === 2) o.innerHTML = end
+  ? `<div class="scrimB"></div><div class="en" style="top:860px">RAW DANCE SUWON</div><div class="big" style="top:960px">전문반</div><div class="small" style="top:1290px;font-size:30px;line-height:1.8;font-weight:500">${INFO}</div>`
+  : `<div class="en" style="top:700px">${T.en}</div><div class="big" style="top:790px">${T.big}</div><div class="small" style="top:1110px">${T.small}</div>`;
+if (s === 3) o.innerHTML = `<div class="bar" style="top:0"></div><div class="bar" style="bottom:0"></div><div class="scrimB" style="height:45%"></div><div class="wrap"><div class="en">${T.en}</div><div class="h">${T.cine}</div>${end ? `<div class="info">${INFO}</div>` : ''}</div>`;
+if (s === 4) o.innerHTML = `<div class="scrimB" style="height:40%"></div><div class="wrap"><div class="en">${T.en}</div><br><div class="box w">${T.label[0]}</div><br><div class="box p">${T.label[1]}</div>${end ? `<div class="info">${INFO}</div>` : ''}</div>`;
+if (s === 5) o.innerHTML = `<div class="${end ? 'scrimB' : 'scrimT'}" style="height:48%"></div><div class="wrap" style="${end ? 'top:1080px' : ''}"><div class="en">${end ? 'RAW DANCE' : T.en}</div><div class="h">${end ? '수원점 전문반' : T.h}</div>${end ? `<div class="info">${INFO}</div>` : ''}</div>`;
+if (s === 6) o.innerHTML = `<div class="scrimB" style="height:50%"></div><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+  <div class="rec"><i></i>REC</div><div class="tc">${sc === 'hook' ? '00:00:02:10' : sc === 'usp' ? '00:00:09:04' : '00:00:34:00'}</div>
+  <div class="wrap"><div class="idx">${end ? 'RAW DANCE SUWON · PRO CLASS' : T.idx + ' · ' + T.en}</div><div class="h">${T.h}</div>${end ? `<div class="info">${INFO}</div>` : ''}</div>`;
+</script></body></html>

@@ -2,7 +2,7 @@
 // 사용: node render.js 배경폴더(bg_hook.jpg, bg_usp.jpg, bg_end.jpg) [drafts2.html] [7,8,9,10,11,12] [all2.jpg]
 const { launch } = require('../../../tools/pw.js'); const path = require('path'); const { execFileSync } = require('child_process');
 const BG = process.argv[2], OUT = __dirname, HTML = process.argv[3] || 'drafts.html', IDS = (process.argv[4] || '1,2,3,4,5,6').split(',').map(Number), ALL = process.argv[5] || 'all.jpg';
-const NAMES = ['', '1 에디토리얼', '2 빅 타이포', '3 시네마', '4 스트릿 라벨', '5 LED 네온', '6 촬영 화면(HUD)', '7 크롬 Y2K', '8 반복 아웃라인 포스터', '9 영상 품은 글자', '10 채팅 말풍선', '11 숏폼 자막', '12 글리치'];
+const NAMES = ['', '1 에디토리얼', '2 빅 타이포', '3 시네마', '4 스트릿 라벨', '5 LED 네온', '6 촬영 화면(HUD)', '7 크롬 Y2K', '8 반복 아웃라인 포스터', '9 영상 품은 글자', '10 채팅 말풍선', '11 숏폼 자막', '12 글리치', '13 매거진 커버', '14 티켓(패스)', '15 중계 그래픽', '16 손글씨 메모', '17 아이폰 알림', '18 키노트 블랙 카드'];
 (async () => {
   const b = await launch(); const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   for (const s of IDS) {

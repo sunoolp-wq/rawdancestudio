@@ -1,0 +1,88 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+/* 자막 시안 3차 6종 (13~18). ?s=13..18&scene=hook|usp|end&bg=이미지 */
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}
+#bg{position:absolute;inset:0;background-size:1080px 1920px}
+.L{position:absolute;inset:0}
+.scrimB{position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(to bottom,rgba(6,5,10,0),rgba(6,5,10,.6) 45%,rgba(6,5,10,.88))}
+.scrimT{position:absolute;left:0;right:0;top:0;height:38%;background:linear-gradient(to top,rgba(6,5,10,0),rgba(6,5,10,.7))}
+.info{font:500 30px "Noto Sans KR";color:#f4f2ee;line-height:1.8;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+/* 13 매거진 커버 */
+.s13 .mast{position:absolute;left:0;right:0;top:120px;text-align:center;font:italic 900 300px "Playfair Display";color:#f4f2ee;line-height:.9;letter-spacing:-.03em;mix-blend-mode:normal;text-shadow:0 6px 30px rgba(0,0,0,.35)}
+.s13 .issue{position:absolute;left:70px;right:70px;top:430px;display:flex;justify-content:space-between;font:600 24px Montserrat;letter-spacing:.3em;color:#f4f2ee}
+.s13 .cl{position:absolute;left:70px;width:440px;font:900 58px "Noto Sans KR";color:#fff;line-height:1.15;text-shadow:0 3px 16px rgba(0,0,0,.6)}
+.s13 .cl small{display:block;font:600 24px Montserrat;letter-spacing:.25em;color:#b9a6ff;margin-bottom:12px}
+.s13 .cr{position:absolute;right:70px;width:360px;text-align:right;font:700 34px "Noto Sans KR";color:#fff;line-height:1.35;text-shadow:0 3px 16px rgba(0,0,0,.6)}
+/* 14 티켓(패스) */
+.s14 .tk{position:absolute;left:90px;right:90px;bottom:430px;height:330px;display:flex;filter:drop-shadow(0 18px 40px rgba(0,0,0,.5));transform:rotate(-3deg)}
+.s14 .a{flex:1;background:#f4f2ee;border-radius:26px 0 0 26px;padding:34px 40px;position:relative}
+.s14 .b{width:220px;background:#8e74ff;border-radius:0 26px 26px 0;border-left:6px dashed #f4f2ee;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+.s14 .k{font:700 24px Montserrat;letter-spacing:.3em;color:#8e74ff}
+.s14 .h{font:900 64px "Noto Sans KR";color:#121116;line-height:1.12;margin-top:14px}
+.s14 .b .n{font:400 80px "Bebas Neue";line-height:1}
+.s14 .b .t{font:700 22px Montserrat;letter-spacing:.2em;margin-top:6px}
+/* 15 중계 그래픽 (로워서드) */
+.s15 .bar{position:absolute;left:0;bottom:400px;display:flex;align-items:stretch;height:150px;filter:drop-shadow(0 10px 30px rgba(0,0,0,.4))}
+.s15 .tag{background:#8e74ff;color:#fff;font:400 72px "Bebas Neue";white-space:nowrap;letter-spacing:.06em;padding:0 34px 0 70px;display:flex;align-items:center}
+.s15 .main{background:#f4f2ee;color:#121116;font:900 46px "Noto Sans KR";white-space:nowrap;padding:0 40px;display:flex;align-items:center;clip-path:polygon(0 0,100% 0,92% 100%,0 100%);padding-right:90px}
+.s15 .sub{position:absolute;left:70px;bottom:330px;background:#121116;color:#f4f2ee;font:600 26px Montserrat;letter-spacing:.2em;padding:14px 24px}
+.s15 .live{position:absolute;right:60px;top:220px;background:#ff2a3d;color:#fff;font:400 40px "Bebas Neue";letter-spacing:.15em;padding:8px 20px 4px}
+/* 16 손글씨 메모 */
+.s16 .pen{position:absolute;font:400 104px "Nanum Pen Script";color:#fff;line-height:1;text-shadow:0 3px 12px rgba(0,0,0,.6)}
+.s16 svg{position:absolute;inset:0}
+.s16 .y{color:#f5be46}
+/* 17 아이폰 알림 */
+.s17 .nt{position:absolute;left:40px;right:40px;border-radius:44px;background:rgba(245,245,250,.78);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);padding:30px 34px;display:flex;gap:26px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.s17 .ic{width:96px;height:96px;border-radius:24px;background:#121116 url() center/70% no-repeat;flex:none;display:flex;align-items:center;justify-content:center;font:italic 900 34px Montserrat;color:#fff}
+.s17 .tx{flex:1;min-width:0}
+.s17 .top{display:flex;justify-content:space-between;font:600 28px "Noto Sans KR";color:#3a3842}
+.s17 .t1{font:800 40px "Noto Sans KR";color:#121116;margin-top:6px}
+.s17 .t2{font:500 36px "Noto Sans KR";color:#2a2830;margin-top:4px;line-height:1.35}
+/* 18 키노트 블랙 카드 */
+.s18 .card{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.s18 .k{font:600 28px Montserrat;letter-spacing:.5em;color:#8e74ff;margin-right:-.5em}
+.s18 .h{font:300 96px "Gothic A1 Light";color:#f4f2ee;line-height:1.25;margin-top:30px;letter-spacing:-.01em}
+.s18 .h b{font-family:"Gothic A1 ExtraBold";font-weight:400}
+.s18 .pip{position:absolute;left:340px;top:1330px;width:400px;height:240px;border-radius:24px;background-size:1080px 1920px;background-position:-340px -900px;opacity:.9}
+</style></head><body><div id="bg"></div><div id="o" class="L"></div>
+<script>
+const q = new URLSearchParams(location.search), s = +q.get('s'), sc = q.get('scene'), BG = q.get('bg');
+document.getElementById('bg').style.backgroundImage = `url(${BG})`;
+const end = sc === 'end';
+const T = {
+  hook: { en: 'PRO CLASS', ko: '연습은<br>이 열기 속에서', one: '연습은 이 열기 속에서', word: '열기' },
+  usp: { en: 'FREE PASS', ko: '모든 수업<br>무제한 프리패스', one: '모든 수업 무제한 프리패스', word: '무제한' },
+  end: { en: 'RAW DANCE SUWON', ko: '수원점 전문반', one: '로우댄스학원 수원점 전문반', word: '전문반' }
+}[sc];
+const INFO = '중·고등 · 예고·예대 입시 · 기획사 준비<br>상담 카톡 \'로우댄스수원점학원\' · 031-225-6600<br>수원 팔달구 매산로 136, 4층';
+const o = document.getElementById('o'); o.className = 'L s' + s;
+if (s === 13) o.innerHTML = `<div class="scrimT"></div><div class="scrimB" style="height:45%"></div><div class="mast">RAW</div>
+  <div class="issue"><span>SUWON</span><span>${end ? 'PRO CLASS' : 'ISSUE ' + (sc === 'hook' ? '01' : '03')}</span></div>
+  <div class="cl" style="bottom:${end ? 560 : 430}px"><small>${T.en}</small>${T.ko}</div>
+  ${end ? `<div class="info" style="position:absolute;left:70px;right:70px;bottom:360px">${INFO}</div>` : `<div class="cr" style="top:${sc === 'hook' ? 760 : 700}px">${sc === 'hook' ? '예고·예대<br>기획사 준비생<br>모여라' : '연습실<br>항시 개방'}</div>`}`;
+if (s === 14) o.innerHTML = `<div class="scrimB" style="height:45%"></div><div class="tk"><div class="a"><div class="k">${end ? 'RAW DANCE SUWON' : 'ADMIT ONE · ' + T.en}</div><div class="h">${end ? '전문반<br>상담 받기' : T.ko}</div></div>
+  <div class="b"><div class="n">${end ? 'PRO' : sc === 'hook' ? '01' : 'ALL'}</div><div class="t">${end ? 'CLASS' : sc === 'hook' ? 'PRO CLASS' : 'CLASSES'}</div></div></div>
+  ${end ? `<div class="info" style="position:absolute;left:70px;right:70px;bottom:230px;text-align:center">${INFO}</div>` : ''}`;
+if (s === 15) o.innerHTML = `<div class="scrimB" style="height:40%"></div><div class="live">● LIVE</div><div class="sub">${end ? '중·고등 · 예고·예대 입시 · 기획사 준비' : 'RAW DANCE SUWON · PRO CLASS'}</div>
+  <div class="bar"><div class="tag">${end ? 'RAW' : T.en}</div><div class="main">${end ? '수원점 전문반' : T.one}</div></div>
+  ${end ? `<div class="info" style="position:absolute;left:70px;right:70px;bottom:190px">상담 카톡 '로우댄스수원점학원' · 031-225-6600<br>수원 팔달구 매산로 136, 4층</div>` : ''}`;
+if (s === 16) {
+  const notes = {
+    hook: `<div class="pen" style="left:90px;top:1180px">연습은</div><div class="pen" style="left:150px;top:1290px">이 <span class="y">열기</span> 속에서</div>
+      <svg viewBox="0 0 1080 1920"><path d="M560 1180 C 640 1100, 640 980, 560 900" stroke="#f5be46" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M540 925 L560 895 L585 920" stroke="#f5be46" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <ellipse cx="420" cy="780" rx="170" ry="210" stroke="#fff" stroke-width="6" fill="none" transform="rotate(-8 420 780)"/></svg><div class="pen" style="left:610px;top:1000px;font-size:76px">우리 쌤!</div>`,
+    usp: `<div class="pen" style="left:80px;top:1200px">모든 수업</div><div class="pen" style="left:130px;top:1310px"><span class="y">무제한</span> 프리패스</div>
+      <svg viewBox="0 0 1080 1920"><path d="M120 1430 C 400 1455, 700 1440, 960 1425" stroke="#f5be46" stroke-width="9" fill="none" stroke-linecap="round"/></svg>`,
+    end: `<div class="pen" style="left:0;right:0;text-align:center;top:1060px">로우 수원점 <span class="y">전문반</span></div>
+      <svg viewBox="0 0 1080 1920"><path d="M260 1180 C 500 1200, 700 1190, 830 1170" stroke="#f5be46" stroke-width="8" fill="none" stroke-linecap="round"/></svg>
+      <div class="info" style="position:absolute;left:70px;right:70px;top:1250px;text-align:center">${INFO}</div>` }[sc];
+  o.innerHTML = `<div class="scrimB" style="height:50%"></div>` + notes; }
+if (s === 17) { const N = {
+    hook: [['RAW 수원점', '지금', '예고·예대 · 기획사 준비생', '연습은 이 열기 속에서 🔥']],
+    usp: [['RAW 수원점', '지금', '전문반 혜택 🎟', '모든 수업 무제한 프리패스'], ['RAW 수원점', '1분 전', '연습실', '항시 개방 중 🔓']],
+    end: [['RAW 수원점', '지금', '전문반 상담 가능', "카톡 '로우댄스수원점학원' · 031-225-6600"]] }[sc];
+  o.innerHTML = `<div class="scrimB" style="height:50%"></div>` + N.map((n, i) => `<div class="nt" style="top:${(end ? 1080 : 1180) + i * 230}px;${i ? 'transform:scale(.96);opacity:.92' : ''}"><div class="ic">RAW</div><div class="tx"><div class="top"><span>${n[0]}</span><span>${n[1]}</span></div><div class="t1">${n[2]}</div><div class="t2">${n[3]}</div></div></div>`).join('')
+    + (end ? `<div class="info" style="position:absolute;left:70px;right:70px;top:1340px;text-align:center">중·고등 · 예고·예대 입시 · 기획사 준비<br>수원 팔달구 매산로 136, 4층</div>` : ''); }
+if (s === 18) o.innerHTML = `<div class="card"><div class="k">${T.en}</div><div class="h">${sc === 'hook' ? '연습은<br><b>이 열기 속에서</b>' : sc === 'usp' ? '모든 수업,<br><b>무제한.</b>' : '로우댄스학원 수원점<br><b>전문반</b>'}</div>
+  ${end ? `<div class="info" style="margin-top:60px;text-align:center;color:rgba(244,242,238,.75)">${INFO}</div>` : ''}</div>${end ? '' : `<div class="pip" style="background-image:url(${BG})"></div>`}`;
+</script></body></html>

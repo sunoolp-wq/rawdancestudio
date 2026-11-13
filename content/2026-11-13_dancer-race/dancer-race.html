@@ -148,7 +148,7 @@ textarea:disabled{opacity:.55}
       <ul class="moves">
         <li><b>마라탕</b><span>먹다가 늦고, 쌤한테 혼나서 또 늦어요</span></li>
         <li><b>엽떡</b><span>먹다가 늦고, 매워서 헥헥</span></li>
-        <li><b>한정선</b><span>먹느라 정신없어서 늦어요</span></li>
+        <li><b>한정선</b><span>모찌떡 쫀득쫀득 먹느라 늦어요</span></li>
       </ul>
       <div class="lab">달리다가 랜덤 무브</div>
       <ul class="moves">
@@ -460,7 +460,7 @@ function tagTex(name, color, rank, photo){   // 뒤에서 봐도 누군지 알�
   }, 384, 76);
 }
 const BUB_LABEL = {moon:'문워크!', turn:'턴…', wave:'웨이브!', freeze:'프리즈', trip:'꽈당!', launch:'슝~!', bounce:'통!', knock:'으악!', dizzy:'어질어질', duck:'슬라이딩!', pit:'허우적', hop:'',
-  eat_mala:'마라탕 후루룩', eat_yup:'엽떡 냠냠', eat_han:'한정선 냠냠', scold:'죄송해요ㅠ', spicy:'맵다!!', full:'배불러~', teacher:'지각이야!'};
+  eat_mala:'마라탕 후루룩', eat_yup:'엽떡 냠냠', eat_han:'모찌 쫀득쫀득', scold:'죄송해요ㅠ', spicy:'맵다!!', full:'배불러~', teacher:'지각이야!'};
 const BUB = {};
 function bubTex(k){ return BUB[k] || (BUB[k] = tex((g, w, h) => { g.fillStyle = '#b9a6ff'; rr(g, 4, 4, w - 8, h - 22, 30); g.fill();
   g.beginPath(); g.moveTo(w / 2 - 14, h - 19); g.lineTo(w / 2, h - 4); g.lineTo(w / 2 + 14, h - 19); g.fill();
@@ -506,7 +506,7 @@ function applyFace(d){
 const FOOD = {
   mala: {name:'마라탕', eat:1.7, then:{type:'scold', dur:1.4}, say:n => `${n} 길에서 마라탕 발견… 후루룩`},
   yup:  {name:'엽떡',   eat:1.5, then:{type:'spicy', dur:.9},  say:n => `${n} 바닥에 떨어진 엽떡을…?! 냠냠`},
-  han:  {name:'한정선', eat:1.8, then:{type:'full', dur:.7},   say:n => `${n} 한정선 먹느라 정신없음`},
+  han:  {name:'한정선', eat:1.8, then:{type:'full', dur:.7},   say:n => `${n} 한정선 모찌떡 먹느라 정신없음`},
 };
 const FOOD_Z = (() => { const z = []; for (let i = 0; i < OBS.length; i++) { const a = (OBS[i].z2 || OBS[i].z) + 2.2, b = (OBS[i + 1] ? OBS[i + 1].z : L) - 1.8; if (b - a > .5) z.push(+((a + b) / 2).toFixed(1)); } return z; })();   // 장애물 사이 빈 구간 가운데 (마지막은 결승 바로 앞)
 let foods = [], foodG = null, snacksOn = true;
@@ -524,11 +524,10 @@ function foodMesh(kind){
     A(new THREE.BoxGeometry(.54, .02, .38), mat('#d3261a', {roughness:.3, emissive:col('#3a0500')}), 0, .145, 0);
     for (let i = 0; i < 12; i++) { const t = A(new THREE.CylinderGeometry(.035, .035, .17, 10), mat('#e88a70', {roughness:.4}), -.2 + (i % 4) * .13, .17, -.12 + Math.floor(i / 4) * .12); t.rotation.z = Math.PI / 2; t.rotation.y = (i * 1.7) % 1; }
     A(new THREE.BoxGeometry(.12, .02, .08), mat('#e8c27a'), .12, .18, .1); A(new THREE.BoxGeometry(.1, .02, .1), mat('#e8c27a'), -.15, .18, -.02);
-  } else {   // 한정선: 포장 상자 (이름 스티커)
-    A(new THREE.BoxGeometry(.54, .3, .4), mat('#f6f3ec', {roughness:.6}), 0, .15, 0);
-    A(new THREE.BoxGeometry(.56, .03, .42), mat('#b9a6ff', {roughness:.6}), 0, .3, 0);
-    const lab = A(new THREE.PlaneGeometry(.46, .15), new THREE.MeshBasicMaterial({transparent:true, map:tex((c, w, h) => { c.fillStyle = '#120f1a'; c.font = '400 70px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('한정선', w / 2, h / 2 + 3); }, 300, 100)}), 0, .16, -.202);
-    lab.rotation.y = Math.PI;
+  } else {   // 한정선: 모찌떡 (종이 트레이에 동글동글 모찌 + 가루)
+    A(new THREE.BoxGeometry(.58, .06, .42), mat('#efe3c8', {roughness:.9}), 0, .03, 0);
+    const MC = ['#fbf7f0', '#f7c6d4', '#cfe3b4', '#f6e3a3', '#fbf7f0', '#f7c6d4'];
+    MC.forEach((c, i) => { const m = A(new THREE.SphereGeometry(.1, 18, 12), mat(c, {roughness:.95}), -.17 + (i % 3) * .17, .13, -.09 + Math.floor(i / 3) * .18); m.scale.set(1, .78, 1); });
   }
   const sign = new THREE.Sprite(new THREE.SpriteMaterial({map:tex((c, w, h) => { c.fillStyle = '#ffd166'; rr(c, 4, 4, w - 8, h - 8, 26); c.fill(); c.fillStyle = '#120f1a'; c.font = '400 44px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(FOOD[kind].name, w / 2, h / 2 + 2); }, 220, 70)}));
   sign.scale.set(.85, .27, 1); sign.position.y = .78; g.add(sign); g.userData.sign = sign;
@@ -638,16 +637,14 @@ function resize(){
 let camAuto = true, shot = null, shotT = 0, camCut = true;
 const camP = new THREE.Vector3(), camL = new THREE.Vector3(), tP = new THREE.Vector3(), tL = new THREE.Vector3();
 const HOT = ['eat', 'knock', 'launch', 'trip', 'scold'];
-function pickShot(){
+function pickShot(){   // 항상 뒤에서 (원장님 2026-11-13: 옆 시점 X, 너무 왔다갔다 X)
   const un = D.filter(d => !d.done); if (!un.length) return null;
   const hot = un.filter(d => d.act && HOT.includes(d.act.type) && d.act.t < .45 && (!shot || d !== shot.d));
-  const side = Math.random() < .5 ? -1 : 1;
-  if (hot.length) { const d = hot[Math.floor(Math.random() * hot.length)], ty = d.act.type;
-    return {d, side, dur:ty === 'eat' ? 3.6 : 2.6, kind:ty === 'eat' || ty === 'scold' ? 'front' : ty === 'trip' ? 'chase' : 'side'}; }
+  if (hot.length) return {d:hot[Math.floor(Math.random() * hot.length)], dur:5 + Math.random() * 2};
   const byZ = [...un].sort((a, b) => b.z - a.z), r = Math.random();
-  let d = r < .35 ? byZ[0] : r < .55 ? byZ[byZ.length - 1] : un[Math.floor(Math.random() * un.length)];
+  let d = r < .45 ? byZ[0] : r < .65 ? byZ[byZ.length - 1] : un[Math.floor(Math.random() * un.length)];
   if (shot && d === shot.d && un.length > 1) d = un.filter(x => x !== shot.d)[Math.floor(Math.random() * (un.length - 1))];
-  return {d, side, dur:2.6 + Math.random() * 1.6, kind:['chase', 'chase', 'side', 'front', 'high'][Math.floor(Math.random() * 5)]};
+  return {d, dur:6.5 + Math.random() * 2.5};
 }
 function wideCam(){
   let target = 0, tail = 0;
@@ -668,27 +665,21 @@ function updateCam(dt, t){
     const halfW = D.length * laneW / 2 + .6, hf = 2 * Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect);
     const dist = Math.max(4.5, Math.min(30, halfW / Math.tan(hf / 2) * 1.1));
     tP.set(0, 2.1, L + 1.6 - dist); tL.set(0, 1.1, L + 1.6);
-    if (shot) { shot = null; camCut = true; }
-  } else if (!camAuto || state !== 'race' || raceT < 1.6) { wideCam(); if (shot) { shot = null; camCut = true; } }
+    shot = null;
+  } else if (!camAuto || state !== 'race' || raceT < 2.5) { wideCam(); shot = null; }
   else {
     shotT += dt;
     const fresh = D.some(d => !d.done && d.act && HOT.includes(d.act.type) && d.act.t < .2 && (!shot || d !== shot.d));
-    if (!shot || shotT > shot.dur || (shot.d.done && shotT > 1) || (fresh && shotT > 1.2)) { const nx = pickShot(); if (nx) { shot = nx; shotT = 0; camCut = true; } }
+    if (!shot || shotT > shot.dur || (shot.d.done && shotT > 1) || (fresh && shotT > 4)) { const nx = pickShot(); if (nx) { shot = nx; shotT = 0; } }   // 컷 대신 부드럽게 옮겨 감
     if (shot) {
-      const d = shot.d, x = lx(d.i, D.length), y = Math.max(0, d.y * .8), z = d.z + d.extra, s = shot.side;
-      let k = shot.kind === 'side' && d.act && (d.act.type === 'launch' || d.act.type === 'knock') ? 'sideWide' : shot.kind;
-      if (k === 'side' && OBS.some(o => o.type === 'roller' && Math.abs(o.z - z) < 3.2)) k = 'chase';   // 롤러 옆에선 판이 화면을 가려서 뒤에서
-      if (k === 'chase') { tP.set(x + s * .35, 2.75 + y * .5, z - 3.1); tL.set(x, .65 + y, z + 2.2); }   // 옆 레인 학생에 가리지 않게 위에서 내려다봄
-      else if (k === 'side') { tP.set(x + s * 3.4, 1.5, z - .4); tL.set(x, .85 + y, z + 1.1); }
-      else if (k === 'sideWide') { tP.set(x + s * 5.2, 2.3, z + .6); tL.set(x, 1.2 + y * .7, z + 1.8); }
-      else if (k === 'front') { tP.set(x + s * .9, 1.55, z + 3.3); tL.set(x, .9, z); }
-      else { tP.set(x, 3.9, z - 2.4); tL.set(x, 0, z + 2.6); }
+      const d = shot.d, x = lx(d.i, D.length), y = Math.max(0, d.y * .8), z = d.z + d.extra;
+      tP.set(x, 2.75 + y * .5, z - 3.2); tL.set(x, .65 + y, z + 2.4);   // 뒤에서 살짝 내려다보는 3인칭
       tP.x = Math.max(-hw, Math.min(hw, tP.x)); tP.y = Math.min(4.2, tP.y);
       label = d.name;
     }
   }
   if (camCut) { camP.copy(tP); camL.copy(tL); camCut = false; }   // 컷은 바로 넘김
-  else { const f = 1 - Math.exp(-dt * 5); camP.lerp(tP, f); camL.lerp(tL, f); }
+  else { const f = 1 - Math.exp(-dt * 2.6); camP.lerp(tP, f); camL.lerp(tL, f); }
   camera.position.copy(camP); camera.lookAt(camL);
   const cl = $('#camLbl'); if (cl.dataset.n !== label) { cl.dataset.n = label; cl.textContent = label ? 'CAM · ' + label : ''; cl.hidden = !label; }
 }

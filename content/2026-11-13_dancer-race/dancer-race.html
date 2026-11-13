@@ -139,7 +139,15 @@ textarea:disabled{opacity:.55}
         <label><input type="radio" name="len" id="len20" value="20"><span>길게<small>20 SEC</small></span></label>
       </div>
 
-      <div class="lab">레이스 중 랜덤 무브</div>
+      <div class="lab">장애물 코스</div>
+      <ul class="moves">
+        <li><b>허들</b><span>넘거나, 걸려서 꽈당</span></li>
+        <li><b>점프대</b><span>잘 타면 슝 날아가고, 아니면 통통</span></li>
+        <li><b>회전 롤러</b><span>슬라이딩 통과, 아니면 튕겨 나가서 어질어질</span></li>
+        <li><b>볼풀</b><span>허우적거리며 천천히</span></li>
+        <li><b>허들</b><span>결승 직전 한 번 더</span></li>
+      </ul>
+      <div class="lab">달리다가 랜덤 무브</div>
       <ul class="moves">
         <li><b>문워크</b><span>뒤로 쭉 밀려요</span></li>
         <li><b>턴</b><span>빙글 돌다가 멈칫, 잠깐 제자리</span></li>
@@ -299,111 +307,156 @@ function sfx(kind){
   if (kind === 'first') blip(t, 1047, .25, .3);
   else if (kind === 'finish') blip(t, 784, .08, .15);
   else if (kind === 'fanfare') [523, 659, 784, 1047].forEach((f, i) => blip(t + i * .11, f, .22, .25));
+  else if (kind === 'bonk') { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(70, t + .2);
+    g.gain.setValueAtTime(.5, t); g.gain.exponentialRampToValueAtTime(.001, t + .25); o.connect(g).connect(master); o.start(t); o.stop(t + .27); }
+  else if (kind === 'boing' || kind === 'boing2') { const big = kind === 'boing', o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(big ? 1100 : 600, t + (big ? .35 : .18));
+    g.gain.setValueAtTime(.35, t); g.gain.exponentialRampToValueAtTime(.001, t + (big ? .45 : .22)); o.connect(g).connect(master); o.start(t); o.stop(t + .5); }
 }
 
 /* ── 3D 무대 ── */
-const L = 22;          // 레이스 거리 (m): A홀 긴 쪽
-let laneW = 1.3, renderer = null, scene, camera, stageG = null, ledM = [], focusZ = 0;
+// 장애물 코스 (모든 레인에 같은 위치): 허들 → 점프대 → 회전 롤러 → 볼풀 → 허들 → 결승(거울 벽)
+const L = 24;
+const OBS = [
+  {type:'hurdle', z:4.5, k:0}, {type:'pad', z:8.5}, {type:'roller', z:13.5}, {type:'pit', z:16.3, z2:19}, {type:'hurdle', z:21, k:1},
+];
+const PIT = OBS[3];
+let laneW = 1.3, renderer = null, scene, camera, stageG = null, ledM = [], focusZ = 0, rollerG = null, hurdles = [[], []], pads = [];
 const col = h => new THREE.Color(h).convertSRGBToLinear();
 const mat = (h, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color:col(h), roughness:.8}, o));
 function tex(draw, w, h){ const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
   const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
 function rr(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
-function disposeTree(o){ o.traverse(x => { if (x.geometry) x.geometry.dispose(); if (x.material) { if (x.material.map) x.material.map.dispose(); x.material.dispose(); } }); }
+function disposeTree(o){ o.traverse(x => { if (x.geometry) x.geometry.dispose(); if (x.material) { (Array.isArray(x.material) ? x.material : [x.material]).forEach(m => { if (m.map) m.map.dispose(); m.dispose(); }); } }); }
+const lx = (i, n) => (i - (n - 1) / 2) * laneW;
 
 try {
   renderer = new THREE.WebGLRenderer({canvas:$('#cv'), antialias:true});
   renderer.outputEncoding = THREE.sRGBEncoding; renderer.setClearColor(0x0d0b13);
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x0c0b10, 34, 80);
-  camera = new THREE.PerspectiveCamera(48, 1, .1, 220);
-  scene.add(new THREE.HemisphereLight(0xdcd6ff, 0x16141c, .75));
-  const key = new THREE.DirectionalLight(0xffffff, .55); key.position.set(-3, 12, 26); scene.add(key);
+  camera = new THREE.PerspectiveCamera(50, 1, .1, 220);
+  scene.add(new THREE.HemisphereLight(0xdcd6ff, 0x16141c, .8));
+  const key = new THREE.DirectionalLight(0xffffff, .55); key.position.set(-3, 12, -12); scene.add(key);
 } catch(e) { renderer = null; $('#nogl').hidden = false; }
 
-// 무대: 학원 A홀 안 (콘크리트 바닥 + 댄스 테이프 레인, 왼쪽 벽 전신 거울, 오른쪽 벽 RAW LED 간판, 출발 쪽 벽 RAW 스티커, 천장 스팟 빛 점 · 벽 위 LED 줄)
-// 카메라는 결승 쪽에서 출발 쪽을 바라봄 → 학생들이 카메라 쪽으로 달려와서 얼굴이 보임
+// 학원 A홀: 콘크리트 바닥 + 댄스 테이프 레인, 결승 쪽 벽 전신 거울(달려오는 얼굴이 비침) + 그 위 RAW LED 간판, 오른쪽 벽 RAW 스티커, 천장 스팟 빛 점 · 벽 위 LED 줄
 const LED = ['#ff2a3d', '#8e74ff', '#2f7bff', '#ff4fb3', '#2fe08a', '#ffffff'];
 let ledCi = 0, hallLights = [], mirrorReal = null;
 function rawLogo(kind){ return tex((g, w, h) => { g.clearRect(0, 0, w, h); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = 'italic 900 210px Montserrat, "Arial Black", sans-serif';
   if (kind === 'led') { g.shadowColor = '#fff'; g.shadowBlur = 46; g.fillStyle = '#fff'; for (let i = 0; i < 3; i++) g.fillText('RAW', w / 2, h / 2); g.shadowBlur = 0; g.fillStyle = '#141318'; g.fillText('RAW', w / 2, h / 2); }
   else { g.fillStyle = 'rgba(232,230,236,.92)'; g.fillText('RAW', w / 2, h / 2); } }, 1024, 320); }
-function floorText(text, font, color, wdt, z){
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(wdt, wdt / 4), new THREE.MeshBasicMaterial({transparent:true, depthWrite:false, map:tex((g, w, h) => { g.fillStyle = color; g.font = font; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, w / 2, h / 2 + 6); }, 1024, 256)}));
-  m.rotation.x = -Math.PI / 2; m.position.set(0, .009, z); stageG.add(m); }
+function floorText(text, color, wdt, z){   // 뒤(카메라 쪽)에서 똑바로 읽히게
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(wdt, wdt / 4), new THREE.MeshBasicMaterial({transparent:true, depthWrite:false, map:tex((g, w, h) => { g.fillStyle = color; g.font = '400 150px "Bebas Neue", Impact, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, w / 2, h / 2 + 6); }, 1024, 256)}));
+  m.rotation.set(-Math.PI / 2, 0, Math.PI); m.position.set(0, .009, z); stageG.add(m); }
 function setLed(ci){ ledCi = ci; const c = col(LED[ci]); ledM.forEach(m => m.color.copy(c)); hallLights.forEach(l => l.color.copy(c)); }
 function buildStage(n){
   if (!renderer) return;
   if (stageG) { scene.remove(stageG); disposeTree(stageG); }
-  stageG = new THREE.Group(); scene.add(stageG); ledM = []; hallLights = []; mirrorReal = null;
+  stageG = new THREE.Group(); scene.add(stageG); ledM = []; hallLights = []; mirrorReal = null; hurdles = [[], []]; pads = [];
   laneW = n > 12 ? 1.0 : 1.3;
-  const RW = n * laneW, W = Math.max(8, RW + 3.2), hw = W / 2, Z0 = -2.6, Z1 = L + 60, ZL = Z1 - Z0, ZC = (Z0 + Z1) / 2, HH = 3.4;
-  const add = (geo, m, x, y, z) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); stageG.add(o); return o; };
+  const RW = n * laneW, W = Math.max(8, RW + 3.2), hw = W / 2, Z0 = -40, Z1 = L + 4.5, ZL = Z1 - Z0, ZC = (Z0 + Z1) / 2, HH = 4.6;
+  const add = (geo, m, x, y, z, parent = stageG) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); parent.add(o); return o; };
   const fl = add(new THREE.PlaneGeometry(W, ZL), mat('#7b7a80', {roughness:.55, metalness:.08}), 0, 0, ZC); fl.rotation.x = -Math.PI / 2;
-  const wallM = mat('#16151a', {roughness:.85});
-  add(new THREE.BoxGeometry(W + .4, HH, .2), wallM, 0, HH / 2, Z0 - .1);
-  [-1, 1].forEach(s => add(new THREE.BoxGeometry(.2, HH, ZL), wallM, s * (hw + .1), HH / 2, ZC));
-  // 천장 + 스팟 조명 기구
   const ceil = add(new THREE.PlaneGeometry(W + .4, ZL), mat('#1c1b22', {roughness:.9}), 0, HH, ZC); ceil.rotation.x = Math.PI / 2;
+  const wallM = mat('#16151a', {roughness:.85});
+  [-1, 1].forEach(s => add(new THREE.BoxGeometry(.2, HH, ZL), wallM, s * (hw + .1), HH / 2, ZC));
+  add(new THREE.BoxGeometry(W + .4, HH, .2), wallM, 0, HH / 2, Z1 + .1);
+  add(new THREE.BoxGeometry(W + .4, HH, .2), wallM, 0, HH / 2, Z0 - .1);
   const canM = mat('#0b0a0e', {roughness:.4, metalness:.6}), canG = new THREE.CylinderGeometry(.12, .16, .22, 14);
-  [-1, 1].forEach(sx => { for (let z = -1; z < L + 14; z += 3.2) add(canG, canM, sx * W / 3.4, HH - .11, z); });
-  // 댄스 테이프 레인 + 출발·결승 테이프
+  [-1, 1].forEach(sx => { for (let z = -8; z < Z1; z += 3.2) add(canG, canM, sx * W / 3.4, HH - .11, z); });
+  // 테이프 레인 · 출발 · 결승
   const tapeM = new THREE.MeshBasicMaterial({color:col('#f4f2ee'), transparent:true, opacity:.5});
   for (let i = 0; i <= n; i++) { const t = add(new THREE.PlaneGeometry(.05, L + 1.2), tapeM, (i - n / 2) * laneW, .007, L / 2); t.rotation.x = -Math.PI / 2; }
   const st = add(new THREE.PlaneGeometry(RW, .09), new THREE.MeshBasicMaterial({color:col('#f4f2ee')}), 0, .008, 0); st.rotation.x = -Math.PI / 2;
   const cols = Math.max(8, Math.round(RW / .25));
   const chk = tex((g, w, h) => { const s = w / cols; for (let r = 0; r < 2; r++) for (let c = 0; c < cols; c++) { g.fillStyle = (r + c) % 2 ? '#141120' : '#f4f2ee'; g.fillRect(c * s, r * s, s + 1, s + 1); } }, cols * 16, 32);
   const fn = add(new THREE.PlaneGeometry(RW, RW * 2 / cols), new THREE.MeshBasicMaterial({map:chk}), 0, .008, L); fn.rotation.x = -Math.PI / 2;
-  floorText('S T A R T', '400 150px "Bebas Neue", Impact, sans-serif', 'rgba(244,242,238,.5)', Math.min(RW, 5), -1);
-  floorText('F I N I S H', '400 150px "Bebas Neue", Impact, sans-serif', 'rgba(185,166,255,.75)', Math.min(RW, 6), L + 1.3);
-  // 출발 쪽 벽 RAW 스티커 + 스피커, 오른쪽 벽 LED 간판
-  const lg = add(new THREE.PlaneGeometry(Math.min(W * .6, 5.2), Math.min(W * .6, 5.2) * 320 / 1024), new THREE.MeshBasicMaterial({map:rawLogo('sticker'), transparent:true}), 0, 2.15, Z0 + .01);
-  const spM = mat('#0b0a0e', {roughness:.5});
-  [-1, 1].forEach(s => add(new THREE.BoxGeometry(.5, .75, .4), spM, s * (hw - .5), 2.75, Z0 + .22));
-  const led = add(new THREE.PlaneGeometry(3.4, 3.4 * 320 / 1024), new THREE.MeshBasicMaterial({map:rawLogo('led'), transparent:true}), hw - .01, 2.35, L * .42); led.rotation.y = -Math.PI / 2;
-  const aLab = add(new THREE.PlaneGeometry(1.4, .35), new THREE.MeshBasicMaterial({transparent:true, map:tex((g, w, h) => { g.fillStyle = '#b9a6ff'; g.font = '700 46px "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('A홀 · 메인홀', w / 2, h / 2); }, 400, 100)}), hw - .01, 1.65, L * .42); aLab.rotation.y = -Math.PI / 2;
-  // 왼쪽 벽 전신 거울 (실제로 비춤, 안 되면 금속 판)
-  const mLen = L + 14, mGeo = new THREE.PlaneGeometry(mLen, 2.4), mz = Z0 + .4 + mLen / 2;
-  let mir;
+  floorText('S T A R T', 'rgba(244,242,238,.55)', Math.min(RW, 5), 1.1);
+  floorText('F I N I S H', 'rgba(185,166,255,.8)', Math.min(RW, 6), L + 1.5);
+  // 결승 쪽 벽: 전신 거울 (실제로 비춤, 안 되면 금속 판) + RAW LED 간판 + 스피커
+  const mGeo = new THREE.PlaneGeometry(W - .8, 2.8); let mir;
   if (THREE.Reflector) { const box = $('#trackbox'), q = Math.min(1.5, window.devicePixelRatio || 1) * .75;
     mir = new THREE.Reflector(mGeo, {textureWidth:Math.round(box.clientWidth * q), textureHeight:Math.round(box.clientHeight * q), color:0x9aa3ad, clipBias:.003}); mirrorReal = mir; }
   else mir = new THREE.Mesh(mGeo, mat('#8b93a6', {roughness:.1, metalness:.9}));
-  mir.position.set(-hw + .02, 1.35, mz); mir.rotation.y = Math.PI / 2; stageG.add(mir);
-  add(new THREE.BoxGeometry(.03, 2.5, mLen + .1), mat('#0b0a0e'), -hw + .005, 1.35, mz);
-  // 조명: 천장 스팟이 떨어뜨리는 빛 점, 벽 위 LED 줄, 색 조명
+  mir.position.set(0, 1.5, Z1 - .02); mir.rotation.y = Math.PI; stageG.add(mir);
+  add(new THREE.BoxGeometry(W - .7, 2.9, .03), mat('#0b0a0e'), 0, 1.5, Z1 - .005);
+  const lw = Math.min(W * .5, 4.2), led = add(new THREE.PlaneGeometry(lw, lw * 320 / 1024), new THREE.MeshBasicMaterial({map:rawLogo('led'), transparent:true}), 0, 3.75, Z1 - .02); led.rotation.y = Math.PI;
+  const spM = mat('#0b0a0e', {roughness:.5});
+  [-1, 1].forEach(s => add(new THREE.BoxGeometry(.5, .75, .4), spM, s * (hw - .6), 3.7, Z1 - .25));
+  // 오른쪽 벽 RAW 스티커 + 홀 이름
+  const sk = add(new THREE.PlaneGeometry(4.2, 4.2 * 320 / 1024), new THREE.MeshBasicMaterial({map:rawLogo('sticker'), transparent:true}), hw - .01, 2.9, L * .35); sk.rotation.y = -Math.PI / 2;
+  const aLab = add(new THREE.PlaneGeometry(1.6, .4), new THREE.MeshBasicMaterial({transparent:true, map:tex((g, w, h) => { g.fillStyle = '#b9a6ff'; g.font = '700 46px "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('A홀 · 메인홀', w / 2, h / 2); }, 400, 100)}), hw - .01, 2.05, L * .35); aLab.rotation.y = -Math.PI / 2;
+  // 조명: 바닥 빛 점, 벽 위 LED 줄, 색 조명
   const glow = new THREE.CircleGeometry(.13, 16), nx = Math.max(3, Math.round(W / 1.6));
-  for (let i = 0; i < nx; i++) for (let z = -1.6; z < L + 12; z += 1.6) { const m = new THREE.MeshBasicMaterial({color:col(LED[0]), transparent:true, opacity:.85, depthWrite:false}); ledM.push(m);
+  for (let i = 0; i < nx; i++) for (let z = -8; z < Z1; z += 1.6) { if (z > PIT.z - .3 && z < PIT.z2 + .3) continue;
+    const m = new THREE.MeshBasicMaterial({color:col(LED[0]), transparent:true, opacity:.85, depthWrite:false}); ledM.push(m);
     const s = add(glow, m, -hw + (i + .5) * W / nx, .012, z); s.rotation.x = -Math.PI / 2; }
   [-1, 1].forEach(s => { const m = new THREE.MeshBasicMaterial({color:col(LED[0])}); ledM.push(m); add(new THREE.BoxGeometry(.06, .06, ZL), m, s * (hw - .04), HH - .05, ZC); });
-  const sm = new THREE.MeshBasicMaterial({color:col(LED[0])}); ledM.push(sm); add(new THREE.BoxGeometry(W, .06, .06), sm, 0, HH - .05, Z0 + .04);
-  [2, L * .5, L - 1].forEach(z => { const p = new THREE.PointLight(col(LED[0]), 1.1, 14, 1.2); p.position.set(0, 2.8, z); stageG.add(p); hallLights.push(p); });
+  const sm = new THREE.MeshBasicMaterial({color:col(LED[0])}); ledM.push(sm); add(new THREE.BoxGeometry(W, .06, .06), sm, 0, HH - .05, Z1 - .04);
+  [0, L * .5, L - 1].forEach(z => { const p = new THREE.PointLight(col(LED[0]), 1.1, 16, 1.2); p.position.set(0, 3.8, z); stageG.add(p); hallLights.push(p); });
+
+  // ── 장애물 ──
+  const stripe = tex((g, w, h) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#f4f2ee' : '#8e74ff'; g.fillRect(i * w / 8, 0, w / 8 + 1, h); } }, 128, 16);
+  const barM = new THREE.MeshStandardMaterial({map:stripe, roughness:.5}), postM = mat('#d9dde3', {roughness:.2, metalness:.8});
+  [0, 1].forEach(k => { const z = OBS[k ? 4 : 0].z;
+    for (let i = 0; i < n; i++) { const g = new THREE.Group(); g.position.set(lx(i, n), 0, z); stageG.add(g); hurdles[k].push(g);
+      [-1, 1].forEach(s => { add(new THREE.CylinderGeometry(.03, .03, .6, 8), postM, s * laneW * .42, .3, 0, g); add(new THREE.BoxGeometry(.06, .04, .4), postM, s * laneW * .42, .02, 0, g); });
+      add(new THREE.BoxGeometry(laneW * .86, .09, .09), barM, 0, .6, 0, g); } });
+  const padFrame = mat('#141218', {roughness:.5}), padMat = mat('#b9a6ff', {roughness:.4, emissive:col('#3a2a7a')});
+  for (let i = 0; i < n; i++) { add(new THREE.CylinderGeometry(.48, .52, .2, 28), padFrame, lx(i, n), .1, OBS[1].z);
+    const m = add(new THREE.CylinderGeometry(.4, .4, .05, 28), padMat, lx(i, n), .2, OBS[1].z); pads.push(m); }
+  rollerG = new THREE.Group(); rollerG.position.set(0, .95, OBS[2].z); stageG.add(rollerG);
+  const ax = add(new THREE.CylinderGeometry(.2, .2, RW + .3, 20), mat('#2a2834', {roughness:.4, metalness:.5}), 0, 0, 0, rollerG); ax.rotation.z = Math.PI / 2;
+  for (let j = 0; j < 4; j++) { const pg = new THREE.Group(); pg.rotation.x = j * Math.PI / 2; rollerG.add(pg);
+    add(new THREE.BoxGeometry(RW, .1, .72), mat(j % 2 ? '#f4f2ee' : '#ff6b8b', {roughness:.6}), 0, 0, .56, pg); }
+  [-1, 1].forEach(s => { add(new THREE.BoxGeometry(.22, 1.3, .22), mat('#2a2834'), s * (RW / 2 + .3), .65, OBS[2].z); });
+  // 볼풀
+  const pz1 = PIT.z, pz2 = PIT.z2, rimM = mat('#8e74ff', {roughness:.7}), px = RW / 2 + .15;
+  add(new THREE.BoxGeometry(RW + .5, .45, .18), rimM, 0, .225, pz1); add(new THREE.BoxGeometry(RW + .5, .45, .18), rimM, 0, .225, pz2);
+  [-1, 1].forEach(s => add(new THREE.BoxGeometry(.18, .45, pz2 - pz1), rimM, s * px, .225, (pz1 + pz2) / 2));
+  const nb = Math.min(2200, Math.round(RW * (pz2 - pz1) * 30)), balls = new THREE.InstancedMesh(new THREE.SphereGeometry(.12, 10, 8), new THREE.MeshStandardMaterial({roughness:.35}), nb);
+  const BC = ['#ff6b8b', '#ffd166', '#7fb4ff', '#7ce0c3', '#f4f2ee', '#b9a6ff'].map(col), mtx = new THREE.Matrix4();
+  for (let b = 0; b < nb; b++) { mtx.makeTranslation((Math.random() - .5) * RW, .12 + Math.random() * .3, pz1 + .12 + Math.random() * (pz2 - pz1 - .24)); balls.setMatrixAt(b, mtx); balls.setColorAt(b, BC[b % BC.length]); }
+  stageG.add(balls);
   setLed(0);
+}
+function updateObstacles(dt){
+  if (!renderer || !rollerG) return;
+  rollerG.rotation.x += dt * 2.4;   // 아래쪽 판이 달려오는 쪽으로 밀어냄
+  hurdles.forEach(row => row.forEach(g => { if (g.userData.fall) g.rotation.x += (Math.PI / 2 - g.rotation.x) * Math.min(1, dt * 10); }));
+  pads.forEach(p => { const t = p.userData.t || 0; if (t > 0) { p.userData.t = t - dt; p.scale.y = .3 + .7 * (1 - Math.sin(Math.max(0, t) / .3 * Math.PI)); } else p.scale.y = 1; });
 }
 
 // 캐릭터 (온라인 RAW 연습실과 같은 모양): 후드 색 = 참가자 색
 function limb(len, r, m){ const g = new THREE.Group(), x = new THREE.Mesh(new THREE.CylinderGeometry(r, r * .9, len, 12), m); x.position.y = -len / 2; g.add(x); return g; }
-function tagTex(name, color, rank){
+function tagTex(name, color, rank, photo){   // 뒤에서 봐도 누군지 알게 이름표에 얼굴 사진
   return tex((g, w, h) => {
     g.fillStyle = 'rgba(18,15,26,.86)'; rr(g, 4, 4, w - 8, h - 8, 34); g.fill();
     g.strokeStyle = color; g.lineWidth = 5; rr(g, 4, 4, w - 8, h - 8, 34); g.stroke();
-    let x0 = w / 2, align = 'center';
-    if (rank) { g.fillStyle = rank === 1 ? color : '#2b2540'; g.beginPath(); g.arc(46, h / 2, 28, 0, 7); g.fill();
-      g.fillStyle = rank === 1 ? '#120f1a' : '#f4f2ee'; g.font = '400 40px "Bebas Neue", Impact, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(rank, 46, h / 2 + 2); x0 = 86; align = 'left'; }
-    g.fillStyle = '#f4f2ee'; g.font = '700 40px "IBM Plex Sans KR", system-ui, sans-serif'; g.textAlign = align; g.textBaseline = 'middle';
-    g.fillText(name, x0, h / 2 + 1, w - x0 - 20);
+    let x = 18;
+    if (rank) { g.fillStyle = rank === 1 ? color : '#2b2540'; g.beginPath(); g.arc(x + 26, h / 2, 26, 0, 7); g.fill();
+      g.fillStyle = rank === 1 ? '#120f1a' : '#f4f2ee'; g.font = '400 38px "Bebas Neue", Impact, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(rank, x + 26, h / 2 + 2); x += 60; }
+    if (photo) { g.save(); g.beginPath(); g.arc(x + 26, h / 2, 26, 0, 7); g.clip(); g.drawImage(photo.c, x, h / 2 - 26, 52, 52); g.restore();
+      g.strokeStyle = color; g.lineWidth = 3; g.beginPath(); g.arc(x + 26, h / 2, 26, 0, 7); g.stroke(); x += 62; }
+    g.fillStyle = '#f4f2ee'; g.font = '700 40px "IBM Plex Sans KR", system-ui, sans-serif'; g.textBaseline = 'middle';
+    if (x === 18) { g.textAlign = 'center'; g.fillText(name, w / 2, h / 2 + 1, w - 40); } else { g.textAlign = 'left'; g.fillText(name, x, h / 2 + 1, w - x - 20); }
   }, 384, 76);
 }
+const BUB_LABEL = {moon:'문워크!', turn:'턴…', wave:'웨이브!', freeze:'프리즈', trip:'꽈당!', launch:'슝~!', bounce:'통!', knock:'으악!', dizzy:'어질어질', duck:'슬라이딩!', pit:'허우적', hop:''};
 const BUB = {};
 function bubTex(k){ return BUB[k] || (BUB[k] = tex((g, w, h) => { g.fillStyle = '#b9a6ff'; rr(g, 4, 4, w - 8, h - 22, 30); g.fill();
   g.beginPath(); g.moveTo(w / 2 - 14, h - 19); g.lineTo(w / 2, h - 4); g.lineTo(w / 2 + 14, h - 19); g.fill();
-  g.fillStyle = '#120f1a'; g.font = '400 40px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(EVENTS[k].label, w / 2, (h - 18) / 2 + 3); }, 256, 84)); }
+  g.fillStyle = '#120f1a'; g.font = '400 40px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(BUB_LABEL[k], w / 2, (h - 18) / 2 + 3); }, 256, 84)); }
 function makeRig(color){
   const hoodM = mat(color, {roughness:.9}), skin = mat('#f2cba8', {roughness:.9}), dark = mat('#1b1a20');
   const g = new THREE.Group(), body = new THREE.Group(); body.position.y = 1; g.add(body);
   body.add(new THREE.Mesh(new THREE.CylinderGeometry(.34, .4, .72, 16), hoodM));
+  const hood = new THREE.Mesh(new THREE.SphereGeometry(.3, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), hoodM); hood.position.set(0, .3, -.22); hood.rotation.x = -1.2; body.add(hood);   // 등 쪽 후드 모자
   const headG = new THREE.Group(); headG.position.y = .78; body.add(headG);
   headG.add(new THREE.Mesh(new THREE.SphereGeometry(.46, 24, 18), skin));
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(.48, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2.1), dark); cap.position.y = .05; cap.rotation.x = -.15; headG.add(cap);
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(.475, 24, 14, 0, Math.PI * 2, 0, Math.PI * .62), mat('#17151c')); hair.rotation.x = .55; headG.add(hair);   // 뒤통수 머리카락
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(.49, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2.1), dark); cap.position.y = .05; cap.rotation.x = -.15; headG.add(cap);
   const brim = new THREE.Mesh(new THREE.CylinderGeometry(.26, .26, .04, 20, 1, false, 0, Math.PI), dark); brim.rotation.set(0, Math.PI / 2, 0); brim.position.set(0, .1, .36); headG.add(brim);
   const faceBits = [cap, brim];
   [-.15, .15].forEach(x => { const e = new THREE.Mesh(new THREE.SphereGeometry(.05, 10, 8), new THREE.MeshBasicMaterial({color:0x15131a})); e.position.set(x, -.02, .42); headG.add(e); faceBits.push(e); });
@@ -416,9 +469,9 @@ function makeRig(color){
   const tag = new THREE.Sprite(new THREE.SpriteMaterial({depthTest:false})); tag.scale.set(1.75, .35, 1); tag.position.y = 2.62; tag.renderOrder = 2; g.add(tag);
   const bub = new THREE.Sprite(new THREE.SpriteMaterial({depthTest:false})); bub.scale.set(1.35, .44, 1); bub.position.y = 3.15; bub.renderOrder = 3; bub.visible = false; g.add(bub);
   g.scale.setScalar(.8);
-  return {g, body, headG, armL, armR, legL, legR, tag, bub, faceBits, face:null};
+  return {g, body, headG, armL, armR, legL, legR, tag, bub, shadow, faceBits, face:null};
 }
-function setTag(d){ if (d.R.tag.material.map) d.R.tag.material.map.dispose(); d.R.tag.material.map = tagTex(d.name, d.color, d.rank); d.R.tag.material.needsUpdate = true; }
+function setTag(d){ if (!d.R) return; if (d.R.tag.material.map) d.R.tag.material.map.dispose(); d.R.tag.material.map = tagTex(d.name, d.color, d.rank, d.photo); d.R.tag.material.needsUpdate = true; }
 function applyFace(d){
   if (!d.R) return; const R = d.R;
   if (R.face) { R.headG.remove(R.face); disposeTree(R.face); R.face = null; }
@@ -429,88 +482,139 @@ function applyFace(d){
     const ring = new THREE.Mesh(new THREE.RingGeometry(.4, .46, 40), new THREE.MeshBasicMaterial({color:col(d.color)}));
     f.add(ring); f.position.set(0, .02, .47); R.headG.add(f); R.face = f;
   }
+  setTag(d);
 }
 
 function build(){
-  if (renderer) D.forEach(d => { scene.remove(d.R.g); disposeTree(d.R.g); });
-  D = names.map((n, i) => ({name:n, color:COLORS[i % COLORS.length], photo:photos[n] || null, p:0, mult:1, target:1, segT:0,
-    ev:null, evT:0, phase:Math.random() * 6, seed:Math.random() * 6, done:false, rank:0, extra:0, R:null}));
+  if (renderer) D.forEach(d => { if (d.R) { scene.remove(d.R.g); disposeTree(d.R.g); } });
+  D = names.map((n, i) => ({i, name:n, color:COLORS[i % COLORS.length], photo:photos[n] || null, z:0, y:0, mult:1, target:1, segT:0,
+    ev:null, evT:0, act:null, next:0, tries:0, pitK:.5, phase:Math.random() * 6, seed:Math.random() * 6, done:false, rank:0, extra:0, turned:0, R:null}));
   order = [];
   if (!renderer) return;
   buildStage(D.length);
-  D.forEach((d, i) => { d.R = makeRig(d.color); d.R.g.position.x = (i - (D.length - 1) / 2) * laneW; scene.add(d.R.g); setTag(d); applyFace(d); });
+  D.forEach(d => { d.R = makeRig(d.color); d.R.g.position.x = lx(d.i, D.length); scene.add(d.R.g); applyFace(d); });
   focusZ = 0; resize();
 }
 
+const inPit = d => !d.done && !d.act && d.z >= PIT.z && d.z < PIT.z2;
 function animD(d, t){
-  const {body, headG, armL, armR, legL, legR} = d.R;
+  const R = d.R, {body, headG, armL, armR, legL, legR} = R;
   body.position.y = 1; body.rotation.set(0, 0, 0); headG.rotation.set(0, 0, 0); [armL, armR, legL, legR].forEach(x => x.rotation.set(0, 0, 0));
-  const pose = state === 'race' || state === 'done' ? (d.done ? 'win' : (d.ev || 'run')) : 'idle';
-  const beat = Math.pow(1 - ((t * 2) % 1), 3), w = Math.sin(d.phase);
-  if (pose === 'idle') {   // 박자에 맞춰 바운스
+  const racing = state === 'race' || state === 'done', pit = racing && inPit(d);
+  const gy = d.y + (pit ? -.42 : 0);
+  R.g.position.set(lx(d.i, D.length), gy, d.z + d.extra);
+  R.g.rotation.y = d.done ? Math.PI * Math.min(1, d.turned) : 0;
+  R.shadow.position.y = (.012 - gy) / .8; R.shadow.visible = !pit; R.shadow.scale.setScalar(1 / (1 + d.y * .5));
+  const beat = Math.pow(1 - ((t * 2) % 1), 3), w = Math.sin(d.phase), a = d.act, k = a ? Math.min(1, a.t / a.dur) : 0;
+  let bub = null;
+  if (!racing) {   // 출발 전: 박자에 맞춰 바운스
     body.position.y = 1 - beat * .08; armL.rotation.z = -.15 - beat * .25; armR.rotation.z = .15 + beat * .25;
     legL.rotation.z = .08; legR.rotation.z = -.08; headG.rotation.z = Math.sin(t * Math.PI + d.seed) * .08;
-  } else if (pose === 'run') {
-    legL.rotation.x = w * .75; legR.rotation.x = -w * .75; armL.rotation.x = -w * .65; armR.rotation.x = w * .65;
-    body.position.y = 1 + Math.abs(Math.cos(d.phase)) * .1; body.rotation.x = .1;
-  } else if (pose === 'wave') {
-    legL.rotation.x = w * .9; legR.rotation.x = -w * .9; body.rotation.x = .18; body.position.y = 1 + Math.abs(Math.cos(d.phase)) * .1;
-    armL.rotation.z = -1.45 + Math.sin(t * 13) * .45; armR.rotation.z = 1.45 + Math.sin(t * 13 + 1.6) * .45; body.rotation.z = Math.sin(t * 13 + .8) * .12;
-  } else if (pose === 'moon') {   // 정면 보고 뒤로 미끄러짐
-    const m = Math.sin(d.phase * .8); legL.rotation.x = -.45 * Math.max(0, m); legR.rotation.x = -.45 * Math.max(0, -m);
-    body.position.y = 1 + Math.abs(m) * .05; body.rotation.x = -.12; armL.rotation.x = .3 * m; armR.rotation.x = -.3 * m; headG.rotation.x = -.1;
-  } else if (pose === 'turn') {
-    body.rotation.y = (1 - d.evT / EVENTS.turn.dur) * Math.PI * 4; armL.rotation.z = -1.3; armR.rotation.z = 1.3; legR.rotation.x = -.9; legR.rotation.z = -.3;
-  } else if (pose === 'freeze') {
-    body.position.y = .8; legL.rotation.x = -.9; legR.rotation.x = .35; armR.rotation.z = 2.7; armL.rotation.z = -.5; armL.rotation.x = -.6; body.rotation.z = .15; headG.rotation.z = -.2;
-  } else {   // 도착: 점프하며 만세
-    const j = Math.abs(Math.sin(t * 5 + d.seed)); body.position.y = 1 + j * .4; armL.rotation.z = -2.7 + Math.sin(t * 10) * .15; armR.rotation.z = 2.7 - Math.sin(t * 10) * .15;
-    legL.rotation.x = -j * .5; legR.rotation.x = -j * .5;
+  } else if (d.done) {
+    if (d.turned < 1) { legL.rotation.x = w * .6; legR.rotation.x = -w * .6; }
+    else { const j = Math.abs(Math.sin(t * 5 + d.seed)); body.position.y = 1 + j * .4; armL.rotation.z = -2.7 + Math.sin(t * 10) * .15; armR.rotation.z = 2.7 - Math.sin(t * 10) * .15; legL.rotation.x = -j * .5; legR.rotation.x = -j * .5; }
+  } else if (a) {
+    bub = BUB_LABEL[a.type] ? a.type : null;
+    if (a.type === 'hop') { legL.rotation.x = -1.2; legR.rotation.x = .5; armL.rotation.x = -1.6; armR.rotation.x = -.6; body.rotation.x = .25; }
+    else if (a.type === 'trip') { const f = k < .25 ? k / .25 : k < .7 ? 1 : 1 - (k - .7) / .3; body.rotation.x = f * Math.PI / 2; body.position.y = 1 - f * .6; armL.rotation.x = armR.rotation.x = -2.6 * f; legL.rotation.x = .3 * f; }
+    else if (a.type === 'launch') { const e = k * k * (3 - 2 * k); body.rotation.x = Math.PI * 2 * e; armL.rotation.z = -2.7; armR.rotation.z = 2.7; legL.rotation.x = legR.rotation.x = -.7 * Math.sin(k * Math.PI); }
+    else if (a.type === 'bounce') { armL.rotation.z = -2.5; armR.rotation.z = 2.5; legL.rotation.z = .25; legR.rotation.z = -.25; }
+    else if (a.type === 'knock') { body.rotation.x = -Math.PI * 2 * k; armL.rotation.z = -1.8 + Math.sin(t * 30) * .6; armR.rotation.z = 1.8 - Math.sin(t * 30) * .6; legL.rotation.x = Math.sin(t * 25) * .8; legR.rotation.x = -Math.sin(t * 25) * .8; }
+    else if (a.type === 'dizzy') { headG.rotation.z = Math.sin(t * 14) * .35; body.rotation.y = Math.sin(t * 7) * .5; body.rotation.z = Math.sin(t * 5) * .12; armL.rotation.z = -.9; armR.rotation.z = .9; }
+    else if (a.type === 'duck') { body.position.y = .62; body.rotation.x = -.55; legL.rotation.x = -1.35; legR.rotation.x = -1.1; armL.rotation.z = -1.3; armR.rotation.z = 1.3; }
+  } else if (pit) {
+    bub = 'pit'; armL.rotation.z = -2.3 + Math.sin(t * 9) * .4; armR.rotation.z = 2.3 + Math.sin(t * 9 + 1.4) * .4; legL.rotation.x = w * .4; legR.rotation.x = -w * .4; body.rotation.z = Math.sin(t * 6 + d.seed) * .15;
+  } else if (d.ev === 'moon') {
+    bub = 'moon'; const m = Math.sin(d.phase * .8); legL.rotation.x = -.45 * Math.max(0, m); legR.rotation.x = -.45 * Math.max(0, -m);
+    body.position.y = 1 + Math.abs(m) * .05; body.rotation.x = -.12; armL.rotation.x = .3 * m; armR.rotation.x = -.3 * m;
+  } else if (d.ev === 'turn') {
+    bub = 'turn'; body.rotation.y = (1 - d.evT / EVENTS.turn.dur) * Math.PI * 4; armL.rotation.z = -1.3; armR.rotation.z = 1.3; legR.rotation.x = -.9; legR.rotation.z = -.3;
+  } else if (d.ev === 'freeze') {
+    bub = 'freeze'; body.position.y = .8; legL.rotation.x = -.9; legR.rotation.x = .35; armR.rotation.z = 2.7; armL.rotation.z = -.5; armL.rotation.x = -.6; body.rotation.z = .15; headG.rotation.z = -.2;
+  } else {
+    const wave = d.ev === 'wave'; if (wave) bub = 'wave';
+    legL.rotation.x = w * (wave ? .9 : .75); legR.rotation.x = -w * (wave ? .9 : .75);
+    body.position.y = 1 + Math.abs(Math.cos(d.phase)) * .1; body.rotation.x = wave ? .18 : .1;
+    if (wave) { armL.rotation.z = -1.45 + Math.sin(t * 13) * .45; armR.rotation.z = 1.45 + Math.sin(t * 13 + 1.6) * .45; body.rotation.z = Math.sin(t * 13 + .8) * .12; }
+    else { armL.rotation.x = -w * .65; armR.rotation.x = w * .65; }
   }
-  d.R.g.position.z = d.p * L + d.extra;
-  d.R.bub.visible = !!d.ev;
-  if (d.ev && d.R.bub.material.map !== bubTex(d.ev)) { d.R.bub.material.map = bubTex(d.ev); d.R.bub.material.needsUpdate = true; }
+  R.bub.visible = !!bub;
+  if (bub && R.bub.material.map !== bubTex(bub)) { R.bub.material.map = bubTex(bub); R.bub.material.needsUpdate = true; }
 }
 function resize(){
   if (!renderer) return;
   const box = $('#trackbox'), w = box.clientWidth, h = box.clientHeight;
-  renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 60 : 46; camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 62 : 50; camera.updateProjectionMatrix();
 }
+// 3인칭: 무리 뒤에서 따라가며 뒤통수를 봄. 결승 쪽 거울에 달려오는 얼굴이 비침
 function updateCam(dt, t){
-  let target = 0;
-  if (state === 'race' || state === 'done') target = Math.min(L, Math.max(0, ...D.map(d => d.p * L)));
-  focusZ += (target - focusZ) * Math.min(1, dt * 2.2);
-  const halfW = D.length * laneW / 2 + 1, vf = camera.fov * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
-  const dist = Math.max(6, Math.min(45, halfW / Math.tan(hf / 2) * 1.05));
-  const sway = state === 'race' ? Math.sin(t * .4) * Math.min(1.2, dist * .05) : 0;
-  camera.position.set(sway, Math.min(2.85, 1.5 + dist * .22), focusZ + 1.4 + dist);
-  camera.lookAt(0, camera.aspect < 1 ? .45 : .95, focusZ - dist * .08);   // 세로 화면은 바닥 쪽으로 더 숙임
+  let target = 0, tail = 0;
+  if (state === 'race' || state === 'done') {
+    const un = D.filter(d => !d.done), lead = Math.min(L, Math.max(0, ...D.map(d => d.z)));
+    tail = un.length ? Math.min(...un.map(d => d.z)) : L;
+    target = Math.min(L - 3, tail * .6 + lead * .4);
+  }
+  focusZ += (target - focusZ) * Math.min(1, dt * 2);
+  const halfW = D.length * laneW / 2 + .6, vf = camera.fov * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
+  const dist = Math.max(6, Math.min(34, halfW / Math.tan(hf / 2) * 1.25));
+  const sway = state === 'race' ? Math.sin(t * .5) * Math.min(.8, dist * .05) : 0;
+  const cz = Math.min(focusZ - dist * .85, (state === 'race' ? tail : focusZ) - 2.2);   // 맨 뒤 학생도 화면에 들어오게
+  camera.position.set(sway, Math.min(4.2, 3 + dist * .12), cz);
+  camera.lookAt(0, camera.aspect < 1 ? .1 : .4, focusZ + 3.5);
 }
 
 /* ── 레이스 진행 ── */
 function say(msg){ if (skipping) return; $('#say').textContent = msg; }
+function startAct(d, a){ a.t = 0; a.z0 = d.z; d.act = a; d.ev = null; }
+function nearObs(z){ return OBS.some(o => z > o.z - 1.8 && z < (o.z2 || o.z) + 2.2); }
+function trigger(d, o){
+  if (o.type === 'hurdle') {
+    d.next++;
+    if (Math.random() < .25) { startAct(d, {type:'trip', dur:1.1, z1:d.z + .6}); const h = hurdles[o.k][d.i]; if (h) h.userData.fall = true; say(`${d.name} 허들에 걸려 꽈당!`); sfx('bonk'); }
+    else startAct(d, {type:'hop', dur:.42, z1:d.z + 1.3, h:.6});
+  } else if (o.type === 'pad') {
+    d.next++; if (pads[d.i]) pads[d.i].userData.t = .3;
+    if (Math.random() < .45) { startAct(d, {type:'launch', dur:1.0, z1:d.z + 4, h:2.6}); say(`${d.name} 점프대 타고 슝~ 날아가요!`); sfx('boing'); }
+    else { startAct(d, {type:'bounce', dur:.5, z1:d.z + 1.4, h:.8}); sfx('boing2'); }
+  } else if (o.type === 'roller') {
+    d.tries++; const pHit = [.45, .25, 0][Math.min(d.tries - 1, 2)];
+    if (Math.random() < pHit) { startAct(d, {type:'knock', dur:.6, z1:d.z - 2.2, h:.9, then:{type:'dizzy', dur:.6}}); say(`${d.name} 회전 롤러에 튕겨 나감!`); sfx('bonk'); }
+    else { d.next++; startAct(d, {type:'duck', dur:.5, z1:d.z + 1.6}); if (Math.random() < .4) say(`${d.name} 롤러 밑으로 슬라이딩 통과`); }
+  }
+}
 function step(dt){
-  raceT += dt; const base = 1.15 / lenSec;
+  raceT += dt; const base = 1.45 * L / lenSec;
   for (const d of D) {
-    if (d.done) { d.phase += dt * 6; d.extra = Math.min(1.6, d.extra + dt * 2.5); continue; }
+    if (d.done) { d.extra = Math.min(1.6, d.extra + dt * 2.5); if (d.extra >= 1.6) d.turned = Math.min(1, d.turned + dt * 2.5); d.phase += dt * 8; continue; }
     d.segT -= dt;
     if (d.segT <= 0) { d.target = .7 + Math.random() * .6; d.segT = .35 + Math.random() * .6; }
     d.mult += (d.target - d.mult) * Math.min(1, dt * 3);
-    if (d.ev) { d.evT -= dt; if (d.evT <= 0) d.ev = null; }
-    else if (raceT > 1 && d.p < .92 && Math.random() < dt * .3) {
-      const k = EV_KEYS[Math.floor(Math.random() * EV_KEYS.length)];
-      d.ev = k; d.evT = EVENTS[k].dur; say(EVENTS[k].say(d.name));
+    if (d.act) {
+      const a = d.act; a.t += dt; const k = Math.min(1, a.t / a.dur);
+      if (a.z1 !== undefined) d.z = Math.max(0, a.z0 + (a.z1 - a.z0) * (a.type === 'knock' ? 1 - (1 - k) * (1 - k) : k));
+      d.y = a.h ? 4 * a.h * k * (1 - k) : 0;
+      if (k >= 1) { d.act = null; d.y = 0; if (a.then) startAct(d, Object.assign({}, a.then)); }
+      d.phase += dt * 8;
+    } else {
+      if (d.ev) { d.evT -= dt; if (d.evT <= 0) d.ev = null; }
+      else if (raceT > 1 && d.z < L - 2.5 && !nearObs(d.z) && Math.random() < dt * .22) {
+        const k = EV_KEYS[Math.floor(Math.random() * EV_KEYS.length)];
+        d.ev = k; d.evT = EVENTS[k].dur; say(EVENTS[k].say(d.name));
+      }
+      let v = base * (d.ev ? EVENTS[d.ev].k : d.mult);
+      if (inPit(d)) v *= d.pitK;
+      d.z = Math.max(0, d.z + v * dt);
+      d.phase += dt * (5 + Math.abs(v) / base * 7);
+      const o = OBS[d.next];
+      if (o && o.type === 'pit') { if (d.z >= o.z) { d.next++; d.pitK = .32 + Math.random() * .3; d.ev = null; if (Math.random() < .5) say(`${d.name} 볼풀에서 허우적허우적`); } }
+      else if (o && d.z >= o.z - (o.type === 'hurdle' ? .65 : o.type === 'pad' ? .05 : .7)) trigger(d, o);
     }
-    const v = base * (d.ev ? EVENTS[d.ev].k : d.mult);
-    d.p = Math.max(0, d.p + v * dt);
-    d.phase += dt * (5 + Math.abs(v) / base * 7);
-    if (d.p >= 1) {
-      d.p = 1; d.done = true; d.ev = null; order.push(d); d.rank = order.length;
-      if (d.R) setTag(d);
+    if (d.z >= L) {
+      d.z = L; d.y = 0; d.act = null; d.ev = null; d.done = true; order.push(d); d.rank = order.length; setTag(d);
       if (d.rank === 1) { say(`${d.name} 1등 도착!`); sfx('first'); } else sfx('finish');
     }
   }
-  if (order.length === D.length) finish();
+  if (state === 'race' && order.length === D.length) finish();
 }
 async function lockWake(){ try { wake = await navigator.wakeLock?.request('screen'); } catch(e) { wake = null; } }
 function releaseWake(){ try { wake && wake.release(); } catch(e) {} wake = null; }
@@ -524,13 +628,13 @@ function start(){
 function finish(){
   state = 'done'; stopBeat(); releaseWake(); sfx('fanfare'); setUI();
   if (!skipping) say(`도착 완료! 1번은 ${order[0].name}`);
-  setTimeout(showResults, skipping ? 0 : 1600);
+  setTimeout(showResults, skipping ? 0 : 2200);
 }
 function skip(){
   if (state !== 'race' && state !== 'count') return;
   skipping = true; $('#count').hidden = true; if (state === 'count') state = 'race';
   let guard = 0; while (state === 'race' && guard++ < 200000) step(1 / 30);
-  D.forEach(d => d.extra = 1.6);
+  D.forEach(d => { d.extra = 1.6; d.turned = 1; });
   skipping = false; say(`건너뛰기 완료! 1번은 ${order[0].name}`);
 }
 function showCount(txt){
@@ -554,7 +658,7 @@ let boardT = 0;
 function updateBoard(){
   const b = $('#board'), show = state === 'race' || (state === 'done' && $('#results').hidden);
   b.hidden = !show; if (!show) return;
-  const list = [...D].sort((a, c) => (a.done && c.done) ? a.rank - c.rank : a.done ? -1 : c.done ? 1 : c.p - a.p).slice(0, $('#trackbox').clientWidth < 500 ? 3 : 5);
+  const list = [...D].sort((a, c) => (a.done && c.done) ? a.rank - c.rank : a.done ? -1 : c.done ? 1 : c.z - a.z).slice(0, $('#trackbox').clientWidth < 500 ? 3 : 5);
   b.innerHTML = '';
   list.forEach((d, i) => { const li = document.createElement('li'); if (d.done) li.className = 'fin'; li.style.setProperty('--c', d.color);
     const r = document.createElement('span'); r.className = 'r'; r.textContent = i + 1;
@@ -585,12 +689,14 @@ function loop(ts){
       else { showCount('GO'); state = 'race'; raceT = 0; say('출발!'); setUI(); setTimeout(() => { if (state !== 'count') $('#count').hidden = true; }, 450); }
     }
   } else if (state === 'race') step(dt);
+  else if (state === 'done') step(dt);
   else for (const d of D) d.phase += dt * 6;
   if ((boardT += dt) > .2) { boardT = 0; updateBoard(); }
   if (renderer) {
     const racing = state === 'race' || state === 'count', beat = racing ? Math.pow(1 - ((now * 2) % 1), 3) : .35;
     if (racing) { const ci = Math.floor(now / 2) % LED.length; if (ci !== ledCi) setLed(ci); } else if (ledCi !== 0) setLed(0);   // 레이스 중엔 4박마다 조명 색이 바뀜 (평소엔 A홀 빨간 조명)
     const lc = col(LED[ledCi]).multiplyScalar(.45 + .55 * beat); ledM.forEach(m => m.color.copy(lc)); hallLights.forEach(l => l.intensity = .7 + .8 * beat);
+    updateObstacles(dt);
     D.forEach(d => animD(d, now));
     updateCam(dt, now);
     renderer.render(scene, camera);

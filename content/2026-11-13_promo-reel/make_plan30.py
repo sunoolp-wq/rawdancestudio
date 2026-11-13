@@ -47,19 +47,17 @@ B30 = [   # 원장님 2026-11-13 (2차): 케이팝 → 베이직 → 장르들 �
 ]
 build("B30", BB, 0.0, (HEEONE_LIE, ed("01 — CLASS · PRACTICE · STAGE", "수업 · 연습 · 무대\n[전부] 여기서"), "T. HEEONE — HEELSCHOREO"), B30)
 
-# B30 음악 (원장님 2026-11-13: 16~17초 끊김 → 원곡의 비트→브레이크다운 넘어가는 자리를 그대로 씀)
-#   [1.138 → 비트 7마디 끝] + [원곡 16마디째(브레이크다운 직전 마디) → 브레이크다운 1~2마디] + [브레이크다운 7~8마디 → 드롭 48.10 →]
-#   이음새 2곳 모두 같은 성격 소리끼리(비트↔비트, 브레이크다운↔브레이크다운), 0.12초 크로스페이드. 마디 길이는 그대로라 영상 박자 위치 안 바뀜
+# B30 음악 (원장님 2026-11-13: 15~17초 끊김 → 비트 구간엔 이음새를 아예 없앰)
+#   원곡을 브레이크다운 시작(33.24)에서 거꾸로 [훅 2.382초 + 8마디] 앞부터 틀어서 비트→브레이크다운을 원곡 그대로 이어감
+#   [16.0 → 브레이크다운 1~2마디 끝] + [브레이크다운 7~8마디 → 드롭 48.10 →]  이음새는 브레이크다운끼리 1곳만 (0.12초 크로스페이드)
 def music_b30(src, out):
     BD = 33.24   # 원곡 브레이크다운 시작
-    A = (1.138, 1.138 + 2.382 + 7 * BB)
-    Bseg = (BD - BB, BD + 2 * BB)
+    A = (BD - 2.382 - 8 * BB, BD + 2 * BB)
     C = (48.10 - 2 * BB, 48.10 + 20)
     X = 0.12
     fc = (f"[0:a]atrim={A[0]}:{A[1] + X / 2},asetpts=PTS-STARTPTS[a];"
-          f"[0:a]atrim={Bseg[0] - X / 2}:{Bseg[1] + X / 2},asetpts=PTS-STARTPTS[b];"
           f"[0:a]atrim={C[0] - X / 2}:{C[1]},asetpts=PTS-STARTPTS[c];"
-          f"[a][b]acrossfade=d={X}:c1=tri:c2=tri[ab];[ab][c]acrossfade=d={X}:c1=tri:c2=tri[m]")
+          f"[a][c]acrossfade=d={X}:c1=tri:c2=tri[m]")
     subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", src, "-filter_complex", fc, "-map", "[m]", out], check=True)
 if __name__ == "__main__" and os.environ.get("MUSIC_SRC"):
     music_b30(os.environ["MUSIC_SRC"], os.environ["MUSIC_OUT"]); print("B30 음악:", os.environ["MUSIC_OUT"])

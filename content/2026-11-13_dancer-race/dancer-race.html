@@ -146,7 +146,7 @@ textarea:disabled{opacity:.55}
       </ul>
       <div class="row"><span class="lab">길에 떨어진 간식</span><label class="sw"><input type="checkbox" id="snacks" checked> 켜기</label></div>
       <ul class="moves">
-        <li><b>마라탕</b><span>먹다가 늦고, 쌤한테 혼나서 또 늦어요</span></li>
+        <li><b>마라탕</b><span>먹다가 늦고, 쌤한테 마라탕 잔소리까지 들어요</span></li>
         <li><b>엽떡</b><span>먹다가 늦고, 매워서 헥헥</span></li>
         <li><b>한정선</b><span>모찌떡 쫀득쫀득 먹느라 늦어요</span></li>
       </ul>
@@ -460,11 +460,12 @@ function tagTex(name, color, rank, photo){   // 뒤에서 봐도 누군지 알�
   }, 384, 76);
 }
 const BUB_LABEL = {moon:'문워크!', turn:'턴…', wave:'웨이브!', freeze:'프리즈', trip:'꽈당!', launch:'슝~!', bounce:'통!', knock:'으악!', dizzy:'어질어질', duck:'슬라이딩!', pit:'허우적', hop:'',
-  eat_mala:'마라탕 후루룩', eat_yup:'엽떡 냠냠', eat_han:'모찌 쫀득쫀득', scold:'죄송해요ㅠ', spicy:'맵다!!', full:'배불러~', teacher:'지각이야!'};
+  eat_mala:'마라탕 후루룩', eat_yup:'엽떡 냠냠', eat_han:'모찌 쫀득쫀득', scold:'네에…ㅠ', spicy:'맵다!!', full:'배불러~', nag0:'마라탕 너무 짜!', nag1:'나트륨 폭탄이야!', nag2:'맵고 기름져서 배 아파~', nag3:'수업 전엔 가볍게!'};
 const BUB = {};
 function bubTex(k){ return BUB[k] || (BUB[k] = tex((g, w, h) => { g.fillStyle = '#b9a6ff'; rr(g, 4, 4, w - 8, h - 22, 30); g.fill();
   g.beginPath(); g.moveTo(w / 2 - 14, h - 19); g.lineTo(w / 2, h - 4); g.lineTo(w / 2 + 14, h - 19); g.fill();
-  g.fillStyle = '#120f1a'; g.font = '400 40px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(BUB_LABEL[k], w / 2, (h - 18) / 2 + 3, w - 30); }, 352, 84)); }
+  g.fillStyle = '#120f1a'; g.font = '400 40px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(BUB_LABEL[k], w / 2, (h - 18) / 2 + 3, w - 30); }, Math.max(352, BUB_LABEL[k].length * 40 + 60), 84)); }
+function setBub(sp, k){ const m = bubTex(k); if (sp.material.map !== m) { sp.material.map = m; sp.material.needsUpdate = true; sp.scale.x = 1.85 * m.image.width / 352; } }   // 긴 말풍선은 넓게
 function makeRig(color){
   const hoodM = mat(color, {roughness:.9}), skin = mat('#f2cba8', {roughness:.9}), dark = mat('#1b1a20');
   const g = new THREE.Group(), body = new THREE.Group(); body.position.y = 1; g.add(body);
@@ -504,7 +505,7 @@ function applyFace(d){
 
 /* ── 길에 떨어진 간식: 마라탕(먹고 → 쌤한테 혼남) · 엽떡(먹고 → 매워서 헥헥) · 한정선(먹고 → 배불러) ── */
 const FOOD = {
-  mala: {name:'마라탕', eat:1.7, then:{type:'scold', dur:1.4}, say:n => `${n} 길에서 마라탕 발견… 후루룩`},
+  mala: {name:'마라탕', eat:1.7, then:{type:'scold', dur:2.9}, say:n => `${n} 길에서 마라탕 발견… 후루룩`},
   yup:  {name:'엽떡',   eat:1.5, then:{type:'spicy', dur:.9},  say:n => `${n} 바닥에 떨어진 엽떡을…?! 냠냠`},
   han:  {name:'한정선', eat:1.8, then:{type:'full', dur:.7},   say:n => `${n} 한정선 모찌떡 먹느라 정신없음`},
 };
@@ -553,12 +554,14 @@ let teachers = [];
 function spawnTeacher(d){   // 마라탕 먹고 늦은 학생 옆에 쌤 등장
   if (!renderer || d.teacher) return;
   const T = makeRig('#1d1c22'); T.tag.material.map = tagTex('쌤', '#f4f2ee'); T.tag.material.needsUpdate = true;
-  T.bub.material.map = bubTex('teacher'); T.bub.visible = true;
+  setBub(T.bub, 'nag0'); T.bub.visible = true; T.born = performance.now() / 1000; T.nag = 0;
   T.g.position.set(lx(d.i, D.length) + laneW * .62, 0, d.z + .25); T.g.rotation.y = -Math.PI / 2; scene.add(T.g);
   d.teacher = T; teachers.push(T);
 }
 function dropTeacher(d){ if (!d.teacher) return; scene.remove(d.teacher.g); disposeTree(d.teacher.g); teachers = teachers.filter(x => x !== d.teacher); d.teacher = null; }
 function animTeacher(T, t){
+  const ni = Math.floor(Math.max(0, t - T.born) / .72) % 4;   // 잔소리 4줄을 번갈아
+  if (ni !== T.nag) { T.nag = ni; setBub(T.bub, 'nag' + ni); }
   const {body, headG, armL, armR, legL, legR} = T;
   body.position.y = 1 + Math.abs(Math.sin(t * 9)) * .04; headG.rotation.z = Math.sin(t * 9) * .08;
   armR.rotation.set(-1.6, 0, Math.sin(t * 16) * .3); armL.rotation.set(0, 0, -.7); legL.rotation.set(0, 0, .06); legR.rotation.set(0, 0, -.06);
@@ -625,7 +628,7 @@ function animD(d, t){
   if (d.teacher) animTeacher(d.teacher, t);
   R.tag.visible = !(shot && shot.d === d);   // 따라가는 학생 이름표는 화면을 가려서 숨기고 왼쪽 아래 CAM 이름으로
   R.bub.visible = !!bub;
-  if (bub && R.bub.material.map !== bubTex(bub)) { R.bub.material.map = bubTex(bub); R.bub.material.needsUpdate = true; }
+  if (bub) setBub(R.bub, bub);
 }
 function resize(){
   if (!renderer) return;
@@ -673,7 +676,7 @@ function updateCam(dt, t){
     if (!shot || shotT > shot.dur || (shot.d.done && shotT > 1) || (fresh && shotT > 4)) { const nx = pickShot(); if (nx) { shot = nx; shotT = 0; } }   // 컷 대신 부드럽게 옮겨 감
     if (shot) {
       const d = shot.d, x = lx(d.i, D.length), y = Math.max(0, d.y * .8), z = d.z + d.extra;
-      tP.set(x, 2.75 + y * .5, z - 3.2); tL.set(x, .65 + y, z + 2.4);   // 뒤에서 살짝 내려다보는 3인칭
+      tP.set(x, 3.1 + y * .5, z - 4.3); tL.set(x, .6 + y, z + 3);   // 뒤에서 살짝 내려다보는 3인칭
       tP.x = Math.max(-hw, Math.min(hw, tP.x)); tP.y = Math.min(4.2, tP.y);
       label = d.name;
     }
@@ -690,7 +693,7 @@ function say(msg){ if (skipping) return; $('#say').textContent = msg; }
 const G = 14;   // 만화 느낌 중력 (m/s²)
 const STOP = ['trip', 'eat', 'scold', 'dizzy', 'spicy'];
 function startAct(d, a){ a.t = 0; a.z0 = d.z; d.act = a; d.ev = null;
-  if (a.type === 'scold') { spawnTeacher(d); say(`${d.name} 마라탕 먹다 늦어서 쌤한테 혼나는 중`); }
+  if (a.type === 'scold') { spawnTeacher(d); say(`${d.name} 마라탕 먹다가 쌤한테 잔소리 듣는 중`); }
   if (a.type === 'spicy') say(`${d.name} 엽떡 너무 매워서 헥헥`);
 }
 function jump(d, type, vy, vz){ d.vy = vy; d.vz = vz; d.y = .001; startAct(d, {type, dur:2 * vy / G}); }

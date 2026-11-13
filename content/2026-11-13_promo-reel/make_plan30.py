@@ -26,15 +26,16 @@ build("A30", BA, 6.5, (BUSK_STILL, ed("01 — STAGE", "이 무대에\n[서기까
 # ── B30: 수업(장르 몰아치기) → 연습(YUNI) → 무대 (약 30초) ──
 BB = 4 * 60 / 129.19921875
 def g(word, en, sub=""): return big(word, sub, en)
-B30 = [   # 원장님 2026-11-13: 수업 소개 순서 케이팝 → 베이직(힙합 베이직) → 전문반 → 나머지 / "걸리쉬" 표기 / 15초 음악 끊김 → 8마디(한 프레이즈) 뒤에 넘어가게
+AUD_C = M("wide", "AUD.mp4", 7.0)   # 오디션반 카드용: 쌤·학생 같이 추는 구간 (설명 컷 15초·37초와 안 겹치게)
+B30 = [   # 원장님 2026-11-13 (2차): 케이팝 → 베이직 → 장르들 → 전문반 → 오디션반 → 오디션반 설명 → 무대 / "걸리쉬" 표기 / 15초 음악 이음새는 8마디 뒤
  (1, YUNI_K_D, big("RAW", "로우댄스학원 수원점")),
  (1, MINK_D, ed("02 — TEACHERS", "강사진 전원\n[현역 댄서]")),
  (h, YUNI, g("케이팝", "K-POP", "T. YUNI")), (h, GAON, g("힙합 베이직", "HIPHOP BASIC", "T. GAON")),
- (h, YELLS_D, g("전문반", "PRO CLASS", "T. YELLS")), (h, NOFF, g("힙합", "HIP HOP", "T. NOFF")),
- (h, HEEONE, g("힐코레오", "HEELSCHOREO", "T. HEEONE")), (h, ARIN, g("걸리쉬", "GIRLISH", "T. ARIN")),
- (h, HWANU_D, g("코레오", "CHOREOGRAPHY", "T. HWAN.U")), (h, KIRY, g("재즈", "JAZZ", "T. KIRY")),
- (h, WAACK_B, g("왁킹", "WAACKING", "T. J")), (h, MINK_G, g("걸스힙합", "GIRLS HIPHOP", "T. MINKYUNG")),
- (h, POPUP_D, g("팝업", "POP-UP CLASS")), (h, HWANU_G, g("전부", "FREE PASS", "전문반은 전 클래스 프리패스")),
+ (h, NOFF, g("힙합", "HIP HOP", "T. NOFF")), (h, HEEONE, g("힐코레오", "HEELSCHOREO", "T. HEEONE")),
+ (h, ARIN, g("걸리쉬", "GIRLISH", "T. ARIN")), (h, HWANU_D, g("코레오", "CHOREOGRAPHY", "T. HWAN.U")),
+ (h, KIRY, g("재즈", "JAZZ", "T. KIRY")), (h, WAACK_B, g("왁킹", "WAACKING", "T. J")),
+ (h, MINK_G, g("걸스힙합", "GIRLS HIPHOP", "T. MINKYUNG")), (h, POPUP_D, g("팝업", "POP-UP CLASS")),
+ (h, YELLS_D, g("전문반", "PRO CLASS", "T. YELLS · 전 클래스 프리패스")), (h, AUD_C, g("오디션반", "AUDITION CLASS", "T. YUNI"), AL),
  (1, AUD_B1, ed("03 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반"), AL),   # ← 음악: 8마디 끝나고 브레이크다운 끝 2마디
  (1, AUD_B2, ed("04 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), AL),
  (1, BUSK_GO2, big("무대", "월말평가 · 버스킹 · 콘서트", "STAGE"), BL),                      # ← 드롭

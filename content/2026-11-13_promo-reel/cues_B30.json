@@ -48,21 +48,12 @@
  },
  {
   "type": "big",
-  "word": "전문반",
-  "sub": "T. YELLS",
-  "en": "PRO CLASS",
-  "pre": "",
-  "a": 8.005,
-  "b": 8.844
- },
- {
-  "type": "big",
   "word": "힙합",
   "sub": "T. NOFF",
   "en": "HIP HOP",
   "pre": "",
-  "a": 8.934,
-  "b": 9.772
+  "a": 8.005,
+  "b": 8.844
  },
  {
   "type": "big",
@@ -70,8 +61,8 @@
   "sub": "T. HEEONE",
   "en": "HEELSCHOREO",
   "pre": "",
-  "a": 9.862,
-  "b": 10.701
+  "a": 8.934,
+  "b": 9.772
  },
  {
   "type": "big",
@@ -79,8 +70,8 @@
   "sub": "T. ARIN",
   "en": "GIRLISH",
   "pre": "",
-  "a": 10.791,
-  "b": 11.63
+  "a": 9.862,
+  "b": 10.701
  },
  {
   "type": "big",
@@ -88,8 +79,8 @@
   "sub": "T. HWAN.U",
   "en": "CHOREOGRAPHY",
   "pre": "",
-  "a": 11.72,
-  "b": 12.559
+  "a": 10.791,
+  "b": 11.63
  },
  {
   "type": "big",
@@ -97,8 +88,8 @@
   "sub": "T. KIRY",
   "en": "JAZZ",
   "pre": "",
-  "a": 12.649,
-  "b": 13.488
+  "a": 11.72,
+  "b": 12.559
  },
  {
   "type": "big",
@@ -106,8 +97,8 @@
   "sub": "T. J",
   "en": "WAACKING",
   "pre": "",
-  "a": 13.578,
-  "b": 14.416
+  "a": 12.649,
+  "b": 13.488
  },
  {
   "type": "big",
@@ -115,8 +106,8 @@
   "sub": "T. MINKYUNG",
   "en": "GIRLS HIPHOP",
   "pre": "",
-  "a": 14.506,
-  "b": 15.345
+  "a": 13.578,
+  "b": 14.416
  },
  {
   "type": "big",
@@ -124,17 +115,32 @@
   "sub": "",
   "en": "POP-UP CLASS",
   "pre": "",
+  "a": 14.506,
+  "b": 15.345
+ },
+ {
+  "type": "big",
+  "word": "전문반",
+  "sub": "T. YELLS · 전 클래스 프리패스",
+  "en": "PRO CLASS",
+  "pre": "",
   "a": 15.435,
   "b": 16.274
  },
  {
   "type": "big",
-  "word": "전부",
-  "sub": "전문반은 전 클래스 프리패스",
-  "en": "FREE PASS",
+  "word": "오디션반",
+  "sub": "T. YUNI",
+  "en": "AUDITION CLASS",
   "pre": "",
   "a": 16.364,
   "b": 17.203
+ },
+ {
+  "type": "lbl",
+  "a": 16.314,
+  "b": 17.223,
+  "text": "T. YUNI — AUDITION CLASS"
  },
  {
   "type": "ed",

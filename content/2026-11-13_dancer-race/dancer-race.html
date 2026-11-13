@@ -1,0 +1,539 @@
+<title>RAW 댄서 레이스</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+/* 레이아웃: 왼쪽 참가자 패널 + 오른쪽 무대(레인 캔버스). 폰에서는 무대가 위, 패널이 아래. 로우 릴스와 같은 보라 포인트의 어두운 무대 한 가지 룩 */
+:root{
+  color-scheme:dark;
+  --bg:#0d0b13; --stage:#110e19; --panel:#16131f; --line:#2b2540;
+  --fg:#f4f2ee; --muted:#a39db5; --accent:#b9a6ff; --hot:#ff6b8b; --ink:#120f1a;
+  --f-display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-en:"Bebas Neue","Arial Narrow",Impact,sans-serif;
+  --f-body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 22px}
+button,textarea,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{font-family:var(--f-en);letter-spacing:.32em;color:var(--accent);font-size:15px;line-height:1}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(32px,5vw,48px);margin:6px 0 0;line-height:1;letter-spacing:-.01em}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px;color:var(--fg)}
+.ghost:hover{border-color:var(--accent)}
+.ghost[aria-pressed="false"]{color:var(--muted)}
+
+.main{display:grid;grid-template-columns:290px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:760px){.main{grid-template-columns:minmax(0,1fr)} .stage{order:-1}}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lab{font-weight:700;font-size:15px}
+.chip{font-family:var(--f-en);font-size:18px;letter-spacing:.06em;color:var(--accent);font-variant-numeric:tabular-nums}
+textarea{width:100%;min-height:210px;resize:vertical;background:var(--stage);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;line-height:1.55}
+textarea:disabled{opacity:.55}
+.hint{color:var(--muted);font-size:13px;margin:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg label{flex:1;min-width:70px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px 6px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg small{display:block;font-family:var(--f-en);font-size:14px;letter-spacing:.08em;font-weight:400}
+.seg input:checked+span{border-color:var(--accent);color:var(--fg);background:rgba(185,166,255,.1)}
+.seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.ph{position:relative;display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:5px 6px;min-width:0}
+.ph label{display:flex;align-items:center;gap:8px;min-width:0;flex:1;cursor:pointer}
+.ph input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.ph:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.av{width:34px;height:34px;border-radius:50%;flex:none;background:var(--stage) center/cover no-repeat;border:2px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:18px;line-height:1}
+.av.has{border-style:solid;border-color:var(--c)}
+.ph .nm{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ph .x{background:none;border:0;color:var(--muted);font-size:16px;padding:2px 4px;flex:none}
+.ph .x:hover{color:var(--hot)}
+#resList .av{width:46px;height:46px;align-self:center}
+#resList li:first-child .av{width:76px;height:76px}
+.moves{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.moves li{display:grid;grid-template-columns:76px 1fr;gap:8px;align-items:baseline;font-size:14px}
+.moves b{font-family:var(--f-display);font-weight:400;font-size:16px;color:var(--accent)}
+.moves span{color:var(--muted)}
+
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ticker{display:flex;align-items:center;gap:10px;min-height:30px;min-width:0}
+.live{font-family:var(--f-en);font-size:15px;letter-spacing:.14em;color:var(--ink);background:var(--hot);border-radius:5px;padding:2px 7px 0;flex:none}
+.live.off{background:var(--line);color:var(--muted)}
+#say{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.trackbox{position:relative;border-radius:10px;overflow:hidden;background:var(--stage);min-height:320px}
+.scroll{max-height:min(64vh,660px);overflow-y:auto}
+canvas{display:block;width:100%}
+#count{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--f-en);font-size:clamp(110px,22vw,240px);line-height:1;color:var(--accent);text-shadow:0 0 40px rgba(185,166,255,.45)}
+#count.pop{animation:pop .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{transform:scale(1.35);opacity:.2}to{transform:scale(1);opacity:1}}
+
+#results{position:absolute;inset:0;overflow-y:auto;background:rgba(13,11,19,.94);padding:22px 20px 24px}
+#results h2{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,4.4vw,44px);margin:0;line-height:1.1}
+#results p{color:var(--muted);margin:4px 0 16px}
+#resList{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+#resList li{display:flex;align-items:baseline;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:0;animation:rise .4s both}
+#resList li:first-child{grid-column:1/-1;border-color:var(--c);background:rgba(185,166,255,.08)}
+#resList .rk{font-family:var(--f-en);font-size:44px;line-height:1;color:var(--c);font-variant-numeric:tabular-nums;min-width:1.2em}
+#resList .nm{font-family:var(--f-display);font-size:26px;line-height:1.15;overflow-wrap:anywhere;min-width:0}
+#resList li:first-child .rk{font-size:72px}
+#resList li:first-child .nm{font-size:clamp(34px,6vw,54px)}
+@keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.resbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+#copyBox{width:100%;min-height:120px;margin-top:10px}
+
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.primary{background:var(--accent);color:var(--ink);border:0;border-radius:12px;padding:13px 26px;font-family:var(--f-display);font-size:22px;line-height:1.1}
+.primary:disabled{opacity:.4;cursor:not-allowed}
+.bar .hint{flex:1;min-width:160px}
+
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--ink);font-weight:700;padding:10px 18px;border-radius:999px;z-index:20}
+
+@media (prefers-reduced-motion:reduce){
+  #count.pop,#resList li{animation:none}
+}
+</style>
+
+<div class="app">
+  <header>
+    <div>
+      <div class="eyebrow">RAW DANCE SUWON</div>
+      <h1>댄서 레이스</h1>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="soundBtn" type="button" aria-pressed="true">소리 켜짐</button>
+      <button class="ghost" id="fsBtn" type="button">전체화면</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="panel" aria-label="참가자 설정">
+      <div class="row"><label class="lab" for="names">참가자</label><span class="chip" id="cnt">0명</span></div>
+      <textarea id="names" spellcheck="false" placeholder="한 줄에 한 명씩"></textarea>
+      <p class="hint">한 줄에 한 명씩 넣어요. 쉼표로 이어 써도 돼요. 처음 열면 예시 이름이 들어 있으니 지우고 오늘 이름을 넣으세요.</p>
+
+      <div class="lab">얼굴 사진 (선택)</div>
+      <div class="roster" id="roster"></div>
+      <p class="hint">동그라미를 누르면 사진을 고르거나 바로 찍을 수 있어요. 얼굴 가까이 찍은 사진이 잘 나와요. 사진은 이 기기 화면에서만 쓰이고, 저장되거나 어디에도 올라가지 않아요. 새로고침하면 사라져요.</p>
+
+      <div class="lab" id="lenLab">레이스 길이</div>
+      <div class="seg" role="radiogroup" aria-labelledby="lenLab">
+        <label><input type="radio" name="len" id="len8" value="8"><span>짧게<small>8 SEC</small></span></label>
+        <label><input type="radio" name="len" id="len13" value="13" checked><span>보통<small>13 SEC</small></span></label>
+        <label><input type="radio" name="len" id="len20" value="20"><span>길게<small>20 SEC</small></span></label>
+      </div>
+
+      <div class="lab">레이스 중 랜덤 무브</div>
+      <ul class="moves">
+        <li><b>문워크</b><span>뒤로 쭉 밀려요</span></li>
+        <li><b>턴</b><span>돌다가 멈칫, 잠깐 제자리</span></li>
+        <li><b>웨이브</b><span>웨이브 타고 확 가속</span></li>
+        <li><b>프리즈</b><span>포즈 잡고 잠깐 정지</span></li>
+      </ul>
+    </aside>
+
+    <section class="stage" aria-label="무대">
+      <div class="ticker"><span class="live off" id="live">STANDBY</span><span id="say">5·6·7·8 카운트 뒤에 출발해요</span></div>
+      <div class="trackbox">
+        <div class="scroll"><canvas id="cv" aria-label="댄서 레이스 무대"></canvas></div>
+        <div id="count" aria-live="polite" hidden></div>
+        <div id="results" hidden>
+          <h2>오늘 순서</h2>
+          <p>먼저 들어온 댄서가 1번이에요.</p>
+          <ol id="resList"></ol>
+          <div class="resbtns">
+            <button class="primary" id="againBtn" type="button">다시 레이스</button>
+            <button class="ghost" id="copyBtn" type="button">순서 복사</button>
+            <button class="ghost" id="closeBtn" type="button">무대 보기</button>
+          </div>
+          <textarea id="copyBox" readonly hidden aria-label="복사할 순서"></textarea>
+        </div>
+      </div>
+      <div class="bar">
+        <button class="primary" id="startBtn" type="button">5·6·7·8 출발</button>
+        <button class="ghost" id="skipBtn" type="button" hidden>건너뛰고 결과</button>
+        <button class="ghost" id="showBtn" type="button" hidden>결과 다시 보기</button>
+        <p class="hint" id="barHint">결과는 들어온 순서 그대로 순번이 돼요.</p>
+      </div>
+    </section>
+  </div>
+</div>
+<div id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const COLORS = ['#b9a6ff','#ff7aa2','#7ce0c3','#ffd166','#7fb4ff','#ff9f5a','#e38cff','#9be15d','#5ee7ff','#f4f2ee'];
+const EVENTS = {
+  moon:   {label:'문워크', k:-0.6, dur:1.1,  say:n=>`${n} 문워크! 뒤로 밀려요`},
+  turn:   {label:'턴…',    k:0,    dur:0.9,  say:n=>`${n} 턴 돌다가 멈칫`},
+  wave:   {label:'웨이브!', k:2.2,  dur:0.9,  say:n=>`${n} 웨이브 타고 가속`},
+  freeze: {label:'프리즈', k:0,    dur:0.75, say:n=>`${n} 프리즈 포즈로 정지`},
+};
+const EV_KEYS = Object.keys(EVENTS);
+const SAMPLE = '지우\n서연\n하준\n민서\n도윤\n예린';
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+};
+
+let names = [], D = [], state = 'idle', raceT = 0, order = [], lenSec = 13;
+let countStart = 0, countK = -1, skipping = false, lastTs = 0, wake = null;
+
+/* ── 참가자 ── */
+function parseNames(text){
+  const seen = {}, out = [];
+  text.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).slice(0, 40).forEach(n => {
+    seen[n] = (seen[n] || 0) + 1;
+    out.push(seen[n] > 1 ? `${n}(${seen[n]})` : n);
+  });
+  return out;
+}
+function build(){
+  D = names.map((n,i) => ({name:n, color:COLORS[i % COLORS.length], photo:photos[n] || null, p:0, mult:1, target:1, segT:0,
+    ev:null, evT:0, phase:Math.random()*6, done:false, rank:0}));
+  order = [];
+}
+
+/* ── 얼굴 사진: 메모리에만 둠 (저장·전송 없음) ── */
+const photos = {};
+function loadPhoto(file, name){
+  if (!file) return;
+  const url = URL.createObjectURL(file), img = new Image();
+  img.onload = () => {
+    const w = img.naturalWidth, h = img.naturalHeight, s = Math.min(w, h);
+    const c = document.createElement('canvas'); c.width = c.height = 160;
+    c.getContext('2d').drawImage(img, (w - s) / 2, (h - s) * .3, s, s, 0, 0, 160, 160);   // 세로 사진은 위쪽(얼굴 쪽)으로 자름
+    URL.revokeObjectURL(url);
+    photos[name] = {c, url:c.toDataURL('image/jpeg', .85)};
+    D.forEach(d => { if (d.name === name) d.photo = photos[name]; });
+    renderRoster();
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast('이 사진은 열 수 없어요'); };
+  img.src = url;
+}
+function avatar(name, color){
+  const a = document.createElement('span'); a.className = 'av'; a.style.setProperty('--c', color);
+  if (photos[name]) { a.classList.add('has'); a.style.backgroundImage = `url(${photos[name].url})`; }
+  else a.textContent = '+';
+  return a;
+}
+function renderRoster(){
+  const box = $('#roster'); box.innerHTML = '';
+  names.forEach((n, i) => {
+    const row = document.createElement('div'); row.className = 'ph';
+    const lab = document.createElement('label');
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.id = 'ph-' + i;
+    inp.setAttribute('aria-label', `${n} 사진 넣기`);
+    inp.addEventListener('change', () => { loadPhoto(inp.files[0], n); inp.value = ''; });
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = n;
+    lab.append(inp, avatar(n, COLORS[i % COLORS.length]), nm); row.appendChild(lab);
+    if (photos[n]) {
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'x'; x.textContent = '×';
+      x.setAttribute('aria-label', `${n} 사진 빼기`);
+      x.addEventListener('click', () => { delete photos[n]; D.forEach(d => { if (d.name === n) d.photo = null; }); renderRoster(); });
+      row.appendChild(x);
+    }
+    box.appendChild(row);
+  });
+}
+function syncNames(){
+  names = parseNames($('#names').value);
+  store.set('rawRaceNames', $('#names').value);
+  $('#cnt').textContent = names.length + '명';
+  renderRoster();
+  if (state === 'idle' || state === 'done') { state = 'idle'; build(); layout(); setUI(); $('#results').hidden = true; }
+}
+
+/* ── 소리 (버튼 누른 뒤에만) ── */
+let ac = null, master = null, soundOn = true, beatTimer = null, nextBeat = 0, beatN = 0, noiseBuf = null;
+const BPM = 120;
+function ensureAC(){
+  if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.gain.value = soundOn ? 0.7 : 0; master.connect(ac.destination); } catch(e) { ac = null; } }
+  if (ac && ac.state === 'suspended') ac.resume();
+  return ac;
+}
+function kick(t){ const o = ac.createOscillator(), g = ac.createGain();
+  o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + .18);
+  g.gain.setValueAtTime(.9, t); g.gain.exponentialRampToValueAtTime(.001, t + .32);
+  o.connect(g).connect(master); o.start(t); o.stop(t + .35); }
+function noise(t, dur, freq, type, vol){
+  if (!noiseBuf) { noiseBuf = ac.createBuffer(1, ac.sampleRate * .5, ac.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random()*2 - 1; }
+  const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+  s.buffer = noiseBuf; f.type = type; f.frequency.value = freq;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  s.connect(f).connect(g).connect(master); s.start(t); s.stop(t + dur + .02); }
+function blip(t, freq, dur = .12, vol = .25){ const o = ac.createOscillator(), g = ac.createGain();
+  o.type = 'square'; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  o.connect(g).connect(master); o.start(t); o.stop(t + dur + .02); }
+function sched(){
+  const spb = 60 / BPM;
+  while (nextBeat < ac.currentTime + .12) {
+    const t = nextBeat, n = beatN;
+    kick(t);
+    if (n < 4) blip(t, n === 3 ? 988 : 740);
+    else { if (n % 2) noise(t, .14, 1600, 'bandpass', .55); noise(t + spb/2, .05, 7000, 'highpass', .2); }
+    nextBeat += spb; beatN++;
+  }
+}
+function startBeat(){ if (!ensureAC()) return; stopBeat(); nextBeat = ac.currentTime + .06; beatN = 0; beatTimer = setInterval(sched, 25); }
+function stopBeat(){ clearInterval(beatTimer); beatTimer = null; }
+function sfx(kind){
+  if (!ac || skipping) return; const t = ac.currentTime + .01;
+  if (kind === 'first') blip(t, 1047, .25, .3);
+  else if (kind === 'finish') blip(t, 784, .08, .15);
+  else if (kind === 'fanfare') [523, 659, 784, 1047].forEach((f, i) => blip(t + i * .11, f, .22, .25));
+}
+
+/* ── 무대 그리기 ── */
+const cv = $('#cv'), ctx = cv.getContext('2d');
+let W = 0, H = 0, laneH = 48, x0 = 90, x1 = 0, dpr = 1;
+const PT = 26, PB = 12;
+function layout(){
+  W = cv.parentElement.clientWidth || 600;
+  const n = Math.max(1, D.length);
+  const avail = Math.max(240, Math.min(window.innerHeight * .62, 640));
+  laneH = Math.max(30, Math.min(68, Math.floor((avail - PT - PB) / n)));
+  H = PT + n * laneH + PB;
+  x0 = Math.max(64, Math.min(120, W * .22)); x1 = W - 40;
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + 'px';
+}
+function limb(ax, ay, a1, a2, L1, L2){
+  const bx = ax + Math.sin(a1) * L1, by = ay + Math.cos(a1) * L1;
+  const cx = bx + Math.sin(a1 + a2) * L2, cy = by + Math.cos(a1 + a2) * L2;
+  ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.lineTo(cx, cy); ctx.stroke();
+}
+function drawDancer(d, cx, by, h, t){
+  const pose = state === 'race' || state === 'done' ? (d.done ? 'win' : (d.ev || 'run')) : 'idle';
+  const ph = d.phase, s = Math.sin(ph);
+  ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(cx, by + 1, h * .2, h * .05, 0, 0, Math.PI * 2); ctx.fill();
+  if (pose === 'wave' || pose === 'moon') {   // 속도선
+    ctx.strokeStyle = d.color; ctx.globalAlpha = .45; ctx.lineWidth = Math.max(1.5, h * .04);
+    const dir = pose === 'wave' ? -1 : 1;
+    for (let k = 0; k < 3; k++) { const yy = by - h * (.3 + k * .2), x = cx + dir * h * .32;
+      ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + dir * h * (.25 + .12 * ((k + Math.floor(t * 12)) % 2)), yy); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+  }
+  ctx.save(); ctx.translate(cx, by);
+  if (pose === 'turn') { const c = Math.cos(d.evT * 16); ctx.scale(Math.abs(c) < .08 ? .08 * Math.sign(c || 1) : c, 1); }
+  ctx.strokeStyle = d.color; ctx.fillStyle = d.color;
+  ctx.lineWidth = Math.max(2, h * .085); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  let lean = 0, bounce = 0, legs, arms;
+  const L = h * .23, A1 = h * .17, A2 = h * .16;
+  if (pose === 'idle') {
+    bounce = Math.abs(Math.sin((t + d.phase * .05) * Math.PI * 2)) * h * .03;
+    legs = [[.13, 0], [-.13, 0]]; arms = [[.25, -.35], [-.25, .35]];
+  } else if (pose === 'run' || pose === 'wave') {
+    lean = pose === 'wave' ? .22 : .12; bounce = Math.abs(Math.cos(ph)) * h * .04;
+    legs = [[.55 * s, -Math.max(0, -s) * .9], [-.55 * s, -Math.max(0, s) * .9]];
+    arms = pose === 'wave'
+      ? [[1.5, .7 * Math.sin(t * 14)], [-1.5, .7 * Math.sin(t * 14 + 1.6)]]
+      : [[-.7 * s, .9], [.7 * s, .9]];
+  } else if (pose === 'moon') {
+    lean = -.1; const m = Math.sin(ph * .8);
+    legs = [[.15 * m - .05, m > 0 ? -.7 * m : 0], [-.15 * m - .05, m < 0 ? .7 * m : 0]];
+    arms = [[-.25 * m, .5], [.25 * m, .5]];
+  } else if (pose === 'turn') {
+    legs = [[0, 0], [.6, -1.4]]; arms = [[1.45, 0], [-1.45, 0]];
+  } else if (pose === 'freeze') {
+    lean = .08; legs = [[-.05, 0], [1.2, -1.05]]; arms = [[2.6, 0], [-2.6, 0]];
+  } else { // win
+    bounce = Math.abs(Math.sin(t * Math.PI * 2)) * h * .06;
+    legs = [[.22, 0], [-.22, 0]]; arms = [[2.7 + .15 * Math.sin(t * 8), 0], [-2.7 - .15 * Math.sin(t * 8), 0]];
+  }
+  const hipY = -h * .46 - bounce;
+  legs.forEach(l => limb(0, hipY, l[0], l[1], L, L));
+  const TL = h * .3, nx = Math.sin(lean) * TL, ny = hipY - Math.cos(lean) * TL;
+  ctx.beginPath(); ctx.moveTo(0, hipY); ctx.lineTo(nx, ny); ctx.stroke();
+  const sx = nx - Math.sin(lean) * h * .04, sy = ny + Math.cos(lean) * h * .04;
+  arms.forEach(a => limb(sx, sy, a[0], a[1], A1, A2));
+  // 머리: 사진이 있으면 얼굴, 없으면 색 동그라미 (사진이 잘 보이게 머리를 크게)
+  const r = d.photo ? h * .2 : h * .14, hx = nx + Math.sin(lean) * (r + h * .02), hy = ny - Math.cos(lean) * (r + h * .02);
+  ctx.beginPath(); ctx.arc(hx, hy, r, 0, Math.PI * 2);
+  if (d.photo) {
+    ctx.save(); ctx.clip(); ctx.drawImage(d.photo.c, hx - r, hy - r, r * 2, r * 2); ctx.restore();
+    ctx.lineWidth = Math.max(1.5, h * .05); ctx.beginPath(); ctx.arc(hx, hy, r, 0, Math.PI * 2); ctx.stroke();
+  } else ctx.fill();
+  ctx.restore();
+}
+function pill(text, x, y, color, fs){
+  ctx.font = `700 ${fs}px "IBM Plex Sans KR", system-ui, sans-serif`;
+  const w = ctx.measureText(text).width + 12, hh = fs + 8;
+  if (x + w > W - 4) x = W - 4 - w;
+  ctx.fillStyle = 'rgba(13,11,19,.92)'; ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, hh, hh / 2) : ctx.rect(x, y, w, hh); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f4f2ee'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillText(text, x + 6, y + hh / 2 + 1);
+}
+function draw(t){
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#110e19'; ctx.fillRect(0, 0, W, H);
+  const n = D.length, yEnd = PT + n * laneH;
+  for (let i = 0; i < n; i++) if (i % 2 === 0) { ctx.fillStyle = 'rgba(185,166,255,.035)'; ctx.fillRect(0, PT + i * laneH, W, laneH); }
+  ctx.strokeStyle = 'rgba(244,242,238,.07)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= n; i++) { const y = PT + i * laneH + .5; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  // 결승선 쪽 조명: 박자(120BPM)에 맞춰 반짝
+  const beat = state === 'race' || state === 'count' ? Math.pow(1 - ((t * 2) % 1), 3) : .25;
+  const g = ctx.createLinearGradient(x1 - 70, 0, x1, 0);
+  g.addColorStop(0, 'rgba(185,166,255,0)'); g.addColorStop(1, `rgba(185,166,255,${.06 + .16 * beat})`);
+  ctx.fillStyle = g; ctx.fillRect(x1 - 70, PT, 70, n * laneH);
+  // 출발선
+  ctx.strokeStyle = 'rgba(244,242,238,.25)'; ctx.setLineDash([4, 5]);
+  ctx.beginPath(); ctx.moveTo(x0 + .5, PT); ctx.lineTo(x0 + .5, yEnd); ctx.stroke(); ctx.setLineDash([]);
+  // 결승선 체크무늬
+  const sq = Math.max(5, Math.min(8, laneH / 5));
+  for (let y = PT, r = 0; y < yEnd; y += sq, r++) for (let c = 0; c < 2; c++) {
+    ctx.fillStyle = (r + c) % 2 ? '#110e19' : 'rgba(244,242,238,.85)'; ctx.fillRect(x1 + c * sq, y, sq, Math.min(sq, yEnd - y));
+  }
+  ctx.font = '400 15px "Bebas Neue", Impact, sans-serif'; ctx.fillStyle = '#a39db5'; ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'center'; ctx.fillText('START', x0, PT - 8); ctx.fillText('FINISH', Math.min(W - 22, x1 + sq), PT - 8);
+  // 댄서
+  const fs = Math.max(11, Math.min(16, laneH * .3)), bubbles = [];
+  D.forEach((d, i) => {
+    const top = PT + i * laneH, by = top + laneH * .88, h = laneH * .78;
+    const cx = x0 + h * .2 + d.p * (x1 - x0 - h * .55);
+    ctx.font = `600 ${fs}px "IBM Plex Sans KR", system-ui, sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = d.done ? d.color : '#f4f2ee';
+    ctx.fillText(d.name, cx - h * .3, top + laneH * .55, Math.max(40, x0 - 8));
+    drawDancer(d, cx, by, h, t);
+    if (d.ev) bubbles.push([EVENTS[d.ev].label, cx + h * .2, top + 2, d.color]);
+    if (d.done) {
+      const r = Math.min(13, laneH * .34), bx = W - 17, byy = top + laneH / 2;
+      ctx.fillStyle = d.rank === 1 ? d.color : '#2b2540'; ctx.beginPath(); ctx.arc(bx, byy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = d.rank === 1 ? '#120f1a' : '#f4f2ee'; ctx.textAlign = 'center';
+      ctx.font = `400 ${Math.round(r * 1.35)}px "Bebas Neue", Impact, sans-serif`; ctx.fillText(String(d.rank), bx, byy + 1);
+    }
+  });
+  bubbles.forEach(b => pill(b[0], b[1], b[2], b[3], Math.max(11, Math.min(14, laneH * .26))));
+}
+
+/* ── 레이스 진행 ── */
+function say(msg){ if (skipping) return; $('#say').textContent = msg; }
+function step(dt){
+  raceT += dt; const base = 1.15 / lenSec;
+  for (const d of D) {
+    if (d.done) { d.phase += dt * 6; continue; }
+    d.segT -= dt;
+    if (d.segT <= 0) { d.target = .7 + Math.random() * .6; d.segT = .35 + Math.random() * .6; }
+    d.mult += (d.target - d.mult) * Math.min(1, dt * 3);
+    if (d.ev) { d.evT -= dt; if (d.evT <= 0) d.ev = null; }
+    else if (raceT > 1 && d.p < .92 && Math.random() < dt * .3) {
+      const k = EV_KEYS[Math.floor(Math.random() * EV_KEYS.length)];
+      d.ev = k; d.evT = EVENTS[k].dur; say(EVENTS[k].say(d.name));
+    }
+    const v = base * (d.ev ? EVENTS[d.ev].k : d.mult);
+    d.p = Math.max(0, d.p + v * dt);
+    d.phase += dt * (4 + Math.abs(v) / base * 6);
+    if (d.p >= 1) {
+      d.p = 1; d.done = true; d.ev = null; order.push(d); d.rank = order.length;
+      if (d.rank === 1) { say(`${d.name} 1등 도착!`); sfx('first'); } else sfx('finish');
+    }
+  }
+  if (order.length === D.length) finish();
+}
+async function lockWake(){ try { wake = await navigator.wakeLock?.request('screen'); } catch(e) { wake = null; } }
+function releaseWake(){ try { wake && wake.release(); } catch(e) {} wake = null; }
+function start(){
+  if (names.length < 2) return;
+  build(); layout(); state = 'count'; countK = -1; raceT = 0;
+  countStart = performance.now() / 1000 + .06;
+  $('#results').hidden = true; $('#copyBox').hidden = true;
+  say('5, 6, 7, 8…'); startBeat(); lockWake(); setUI();
+}
+function finish(){
+  state = 'done'; stopBeat(); releaseWake(); sfx('fanfare'); setUI();
+  if (!skipping) say(`도착 완료! 1번은 ${order[0].name}`);
+  setTimeout(showResults, skipping ? 0 : 900);
+}
+function skip(){
+  if (state !== 'race' && state !== 'count') return;
+  skipping = true; $('#count').hidden = true; if (state === 'count') state = 'race';
+  let guard = 0; while (state === 'race' && guard++ < 200000) step(1 / 30);
+  skipping = false; say(`건너뛰기 완료! 1번은 ${order[0].name}`);
+}
+function showCount(txt){
+  const el = $('#count'); el.textContent = txt; el.hidden = false;
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+}
+function showResults(){
+  if (state !== 'done') return;
+  const ol = $('#resList'); ol.innerHTML = '';
+  order.forEach((d, i) => {
+    const li = document.createElement('li');
+    li.style.setProperty('--c', d.color); li.style.animationDelay = (i * .07) + 's';
+    const rk = document.createElement('span'); rk.className = 'rk'; rk.textContent = i + 1;
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = d.name;
+    if (d.photo) li.append(rk, avatar(d.name, d.color), nm); else li.append(rk, nm);
+    ol.appendChild(li);
+  });
+  $('#results').hidden = false; $('#results').scrollTop = 0; setUI();
+}
+function setUI(){
+  const racing = state === 'count' || state === 'race';
+  $('#startBtn').disabled = racing || names.length < 2;
+  $('#startBtn').textContent = state === 'done' ? '다시 레이스' : '5·6·7·8 출발';
+  $('#skipBtn').hidden = !racing;
+  $('#showBtn').hidden = !(state === 'done' && $('#results').hidden);
+  $('#names').disabled = racing;
+  $('#live').textContent = racing ? 'LIVE' : state === 'done' ? 'FINISH' : 'STANDBY';
+  $('#live').classList.toggle('off', !racing);
+  $('#barHint').textContent = names.length < 2 ? '이름을 2명 이상 넣어 주세요.' : '결과는 들어온 순서 그대로 순번이 돼요.';
+}
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 1800); }
+
+function loop(ts){
+  const now = ts / 1000, dt = Math.min(.05, now - (lastTs || now)); lastTs = now;
+  if (state === 'count') {
+    const k = Math.floor((now - countStart) / .5);
+    if (k !== countK && k >= 0) {
+      countK = k;
+      if (k < 4) showCount(String(5 + k));
+      else { showCount('GO'); state = 'race'; raceT = 0; say('출발!'); setUI(); setTimeout(() => { if (state !== 'count') $('#count').hidden = true; }, 450); }
+    }
+  } else if (state === 'race') step(dt);
+  else for (const d of D) d.phase += dt * 6;
+  draw(now);
+  requestAnimationFrame(loop);
+}
+
+/* ── 연결 ── */
+$('#names').value = store.get('rawRaceNames') ?? SAMPLE;
+const savedLen = store.get('rawRaceLen'); if (savedLen && $('#len' + savedLen)) $('#len' + savedLen).checked = true;
+lenSec = +document.querySelector('input[name="len"]:checked').value;
+document.querySelectorAll('input[name="len"]').forEach(r => r.addEventListener('change', () => { lenSec = +r.value; store.set('rawRaceLen', r.value); }));
+$('#names').addEventListener('input', () => { clearTimeout(syncNames.h); syncNames.h = setTimeout(syncNames, 200); });
+$('#startBtn').addEventListener('click', start);
+$('#againBtn').addEventListener('click', start);
+$('#skipBtn').addEventListener('click', skip);
+$('#closeBtn').addEventListener('click', () => { $('#results').hidden = true; setUI(); });
+$('#showBtn').addEventListener('click', showResults);
+$('#copyBtn').addEventListener('click', () => {
+  const txt = order.map((d, i) => `${i + 1}. ${d.name}`).join('\n');
+  const fallback = () => { const b = $('#copyBox'); b.value = txt; b.hidden = false; b.focus(); b.select(); toast('아래 글을 길게 눌러 복사하세요'); };
+  try { navigator.clipboard.writeText(txt).then(() => toast('순서를 복사했어요'), fallback); } catch(e) { fallback(); }
+});
+$('#soundBtn').addEventListener('click', () => {
+  soundOn = !soundOn; $('#soundBtn').setAttribute('aria-pressed', soundOn); $('#soundBtn').textContent = soundOn ? '소리 켜짐' : '소리 꺼짐';
+  if (master) master.gain.value = soundOn ? .7 : 0;
+});
+if (!document.documentElement.requestFullscreen) $('#fsBtn').hidden = true;
+$('#fsBtn').addEventListener('click', () => {
+  try { (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => toast('이 화면에서는 전체화면이 안 돼요')); }
+  catch(e) { toast('이 화면에서는 전체화면이 안 돼요'); }
+});
+new ResizeObserver(() => layout()).observe(cv.parentElement);
+window.addEventListener('resize', layout);
+syncNames();
+requestAnimationFrame(loop);
+})();
+</script>

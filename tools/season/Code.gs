@@ -7,6 +7,7 @@
  *  - 수업 출석: 시작 20분 전~시작 15분 후 정상, 그 뒤 수업 끝까지 지각(점수 절반, 🔥 유지). K-POP 제외. 휴강일 없음
  *  - 원장님 비밀번호로 누르면 시간 제한 없이 대신 처리 (기록 E열 '원장님 처리')
  *  - 연습은 수업 시간에 시작 불가, 연습 분에서 수업 시간 제외. 월말평가 준비는 기록만
+ *  - 자정 넘긴 연습: 다음 날 새벽 6시 전 [연습 끝]까지 '시작한 날' 연습으로 인정 (원장님 2026-11-13)
  *  - [순위] 탭: 태블릿 화면 순위를 그대로 저장 / [리포트] 탭: 매주 일요일 20시 학부모 문자 문구 자동 생성
  *  - 매일 23시 원장님께 오늘 요약 메일 (단톡 인증 확인할 운동·연습일지 목록) / 시트 메뉴 '새 시즌 시작'으로 기록 보관 후 시즌 전환
  * 설치: tools/season/README.md
@@ -52,11 +53,17 @@ function classesOn_(tt, dateS, skip) {
   return tt.slice(1).filter(r => String(r[0]).trim().charAt(0) === day && hm_(r[1]) != null && hm_(r[2]) != null && !skip_(r[3], skip))
     .map(r => ({ s: hm_(r[1]), e: hm_(r[2]), label: `${hhmm_(hm_(r[1]))} ${String(r[3]).trim()}`, range: `${hhmm_(hm_(r[1]))}~${hhmm_(hm_(r[2]))} ${String(r[3]).trim()}`, teacher: String(r[4] || '').trim() }));
 }
-// 연습 분 = 시작~끝에서 수업 시간과 겹치는 분을 뺀 것 (같은 날)
+// 자정 넘긴 연습 (원장님 2026-11-13: 22시에 시작해 0시 넘겨 끝내면 0분이 됨): 다음 날 새벽 6시 전 [연습 끝]까지는 '시작한 날' 연습으로 인정
+const CUT_ = 6 * 60;
+const abs_ = s => { const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return Date.UTC(y, m - 1, d) / 6e4 + mins_(s); }; // 날짜까지 포함한 분
+const pairOk_ = (st, en) => { const a = String(st).slice(0, 10), b = String(en).slice(0, 10); return b === a || (b === addDays_(a, 1) && mins_(en) < CUT_); };
+// 연습 분 = 시작~끝에서 수업 시간과 겹치는 분을 뺀 것 (자정을 넘기면 다음 날 수업 시간도 확인)
 function pracMin_(tt, startS, endS, skip) {
-  const a = mins_(startS), b = mins_(endS);
-  const over = classesOn_(tt, String(startS).slice(0, 10), skip).reduce((t, c) => t + Math.max(0, Math.min(b, c.e) - Math.max(a, c.s)), 0);
-  return { total: b - a, over, min: b - a - over };
+  const a = abs_(startS), b = abs_(endS), d0 = String(startS).slice(0, 10), d1 = String(endS).slice(0, 10);
+  let over = 0;
+  [d0, addDays_(d0, 1)].filter(d => d <= d1).forEach(d => { const z = abs_(d + ' 00:00');
+    classesOn_(tt, d, skip).forEach(c => { over += Math.max(0, Math.min(b, z + c.e) - Math.max(a, z + c.s)); }); });
+  return { total: b - a, over, min: Math.max(0, b - a - over) };
 }
 // 지금 출석: open = 시작 before분 전~시작 after분 후 (정상), late = 그 뒤~수업 끝 (지각), next = 다음 수업
 function classesAt_(tt, nowS, before, after, skip) {
@@ -76,10 +83,12 @@ function cfg_() {
   return k => { const e = Object.entries(o).find(([n]) => n.startsWith(k)); return e ? e[1] : ''; };
 }
 const num_ = (v, d) => v === '' || v == null || isNaN(+v) ? d : +v;
-// 오늘 개인연습 세션들 (연습 시작 → 연습 끝 '개인연습') 분 합계
-function pracToday_(rows, tt, skip) {
+// 그날(day) 시작한 개인연습 세션들 (연습 시작 → 연습 끝 '개인연습') 분 합계. 연습 끝은 다음 날 새벽 6시 전까지 인정
+function pracDay_(rows, day, tt, skip) {
   let open = null, sum = 0;
-  rows.forEach(x => { if (x.k === '연습 시작') open = x; else if (x.k === '연습 끝' && open) { if (x.note !== '월말평가 준비') sum += pracMin_(tt, open.t, x.t, skip).min; open = null; } });
+  rows.slice().sort((x, y) => x.t < y.t ? -1 : 1).forEach(x => {
+    if (x.k === '연습 시작') open = x;
+    else if (x.k === '연습 끝' && open) { if (open.t.slice(0, 10) === day && pairOk_(open.t, x.t) && x.note !== '월말평가 준비') sum += pracMin_(tt, open.t, x.t, skip).min; open = null; } });
   return sum;
 }
 
@@ -112,10 +121,13 @@ function checkIn(name, pin, kind, note) {
     if (E && today > E) return { ok: false, msg: '시즌이 끝났어요. 다음 시즌을 기다려 주세요!' };
     const holi = String(g('휴강일') || '').match(/\d{4}-\d{2}-\d{2}/g) || [], isHoli = holi.indexOf(today) >= 0;
     const TT = isHoli ? [[]] : read_(TAB.tt), skipS = g('출석 제외 수업') === '' ? 'K-POP' : g('출석 제외 수업');
-    const mine = read_(TAB.log).slice(1).filter(r => String(r[1]).trim() === name && String(r[0]).slice(0, 10) === today)
-      .map(r => ({ t: String(r[0]), k: String(r[2]).trim(), note: String(r[3] || '').trim() }));
-    const lastT = k => { const a = mine.filter(x => x.k === k); return a.length ? a[a.length - 1].t : ''; };
-    const openS = (a, b) => lastT(a) > lastT(b); // 시작만 있고 끝이 없음
+    const yest = addDays_(today, -1);
+    const recent = read_(TAB.log).slice(1).filter(r => String(r[1]).trim() === name && String(r[0]).slice(0, 10) >= yest && String(r[0]).slice(0, 10) <= today)
+      .map(r => ({ t: String(r[0]), k: String(r[2]).trim(), note: String(r[3] || '').trim() })).sort((a, b) => a.t < b.t ? -1 : 1);
+    const mine = recent.filter(x => x.t.slice(0, 10) === today);
+    const lastIn = k => { const a = recent.filter(x => x.k === k); return a.length ? a[a.length - 1].t : ''; };
+    // 지금 열려 있는 연습 (시작만 있고 끝이 없음). 어제 시작한 건 오늘 새벽 6시 전까지만
+    const openPrac = () => { const st = lastIn('연습 시작'); return st && st > lastIn('연습 끝') && pairOk_(st, nowS) ? st : ''; };
     let late = false;
     if (kind === '수업 출석') {
       const w = classesAt_(TT, nowS, num_(g('출석: 시작 몇 분 전부터'), 20), num_(g('출석: 시작 후 몇 분까지'), 15), skipS);
@@ -139,21 +151,23 @@ function checkIn(name, pin, kind, note) {
       const dup = read_(TAB.log).slice(1).some(r => String(r[1]).trim() === name && String(r[2]).trim() === kind && String(r[3]).slice(0, 10) === note);
       if (dup) return { ok: false, msg: `${note === today ? '오늘' : '어제'} ${kind}는 이미 체크했어요` };
     }
-    if (kind === '연습 시작' && openS('연습 시작', '연습 끝')) return { ok: false, msg: '이미 연습 중이에요. 끝나면 [연습 끝]' };
+    if (kind === '연습 시작' && openPrac()) return { ok: false, msg: '이미 연습 중이에요. 끝나면 [연습 끝]' };
     if (kind === '연습 시작' && !isMaster) {
       const m = mins_(nowS), c = classesOn_(TT, today, skipS).find(c => m >= c.s && m < c.e);
       if (c) return { ok: false, msg: `수업 시간에는 연습을 시작할 수 없어요 · ${c.range}` };
     }
-    if (kind === '연습 끝' && !openS('연습 시작', '연습 끝')) return { ok: false, msg: '[연습 시작]을 먼저 눌러야 해요' };
+    const pracSt = openPrac();
+    if (kind === '연습 끝' && !pracSt) return { ok: false, msg: lastIn('연습 시작') > lastIn('연습 끝') ? '어제 시작한 연습은 새벽 6시 전까지만 [연습 끝]을 누를 수 있어요' : '[연습 시작]을 먼저 눌러야 해요' };
     if (kind === '연습 끝' && PRAC_TYPES.indexOf(note) < 0) return { ok: false, msg: '개인연습인지 월말평가 준비인지 골라 주세요' };
     SpreadsheetApp.getActive().getSheetByName(TAB.log).appendRow([nowS, name, kind, note || '', isMaster ? '원장님 처리' : '']);
     let msg = '';
     if (kind === '연습 끝') {
-      const pm = pracMin_(TT, lastT('연습 시작'), nowS, skipS), need = num_(g('연습 인정 최소 분'), 30);
+      const stDay = pracSt.slice(0, 10), TTp = stDay === today ? TT : read_(TAB.tt);
+      const pm = pracMin_(TTp, pracSt, nowS, skipS), need = num_(g('연습 인정 최소 분'), 30);
       const ex = pm.over ? ` (수업 시간 ${pm.over}분 제외)` : '';
       if (note === '월말평가 준비') msg = `월말평가 준비 ${pm.min}분 기록${ex} · 점수 없음`;
-      else { const sum = pracToday_(mine.concat([{ t: nowS, k: '연습 끝', note }]), TT, skipS);
-        msg = `개인연습 ${pm.min}분${ex} · 오늘 합계 ${sum}분` + (sum >= need ? ' 🔥 인정!' : ` · ${need}분부터 인정`); }
+      else { const sum = pracDay_(recent.concat([{ t: nowS, k: '연습 끝', note }]), stDay, TTp, skipS);
+        msg = `개인연습 ${pm.min}분${ex} · ${stDay === today ? '오늘' : '어제(시작한 날)'} 합계 ${sum}분` + (sum >= need ? ' 🔥 인정!' : ` · ${need}분부터 인정`); }
     }
     if (DAILY.indexOf(kind) >= 0) msg = `${note === today ? '오늘' : '어제'} ${kind} ✓ · 단톡방에 인증 올려 주세요`;
     if (kind === '수업 출석') msg = note + (late ? ' · 점수 절반, 🔥는 유지' : '');
@@ -186,19 +200,19 @@ function weeklyReport() {
   const TT = read_(TAB.tt), skipS = g('출석 제외 수업') === '' ? 'K-POP' : g('출석 제외 수업'), need = num_(g('연습 인정 최소 분'), 30);
   const FW = num_(g('고정수업 요일'), 5), holi = String(g('휴강일') || '').match(/\d{4}-\d{2}-\d{2}/g) || [];
   const log = read_(TAB.log).slice(1).map(r => ({ t: String(r[0]), d: String(r[0]).slice(0, 10), n: String(r[1]).trim(), k: String(r[2]).trim(), note: String(r[3] || '').trim() }))
-    .filter(x => x.d >= first && x.d <= last).sort((a, b) => a.t < b.t ? -1 : 1);
+    .filter(x => x.d >= first && x.d <= addDays_(last, 1)).sort((a, b) => a.t < b.t ? -1 : 1);   // 하루 더: 일요일 밤 연습이 월요일 새벽에 끝난 것
   const rank = {}; read_(TAB.rank).slice(1).forEach(r => { if (r[1]) rank[String(r[1]).trim()] = r; });
   const stu = read_(TAB.stu).slice(1).filter(r => String(r[0]).trim() && String(r[3] || '').indexOf('휴원') < 0);
   let fri = null; for (let i = 0; i < 7; i++) { const d = addDays_(first, i); if (dow_(d) === FW) fri = d; }
   const total = stu.length, out = [];
   stu.forEach(r => {
-    const n = String(r[0]).trim(), mine = log.filter(x => x.n === n);
+    const n = String(r[0]).trim(), mineAll = log.filter(x => x.n === n), mine = mineAll.filter(x => x.d <= last);
     const cls = mine.filter(x => x.k === '수업 출석'), genre = cls.filter(x => !PRO_.test(x.note) && x.note).length;
     const proRow = fri ? cls.find(x => x.d === fri && (PRO_.test(x.note) || !x.note)) : null;
     const shield = fri && String(r[2] || '').indexOf(fri) >= 0;
     const friS = !fri ? '-' : holi.indexOf(fri) >= 0 ? '휴강' : fri > today ? '예정' : proRow ? (proRow.note.indexOf('지각') >= 0 ? '지각 출석' : '출석') : shield ? '보호권 사용' : '결석';
     const days = [...new Set(mine.map(x => x.d))];
-    const prac = days.filter(d => pracToday_(mine.filter(x => x.d === d), TT, skipS) >= need).length;
+    const prac = days.filter(d => pracDay_(mineAll, d, TT, skipS) >= need).length;
     const ex = new Set(mine.filter(x => x.k === '운동 완료').map(x => x.note.slice(0, 10))).size;
     const jr = new Set(mine.filter(x => x.k === '연습일지').map(x => x.note.slice(0, 10))).size;
     const rk = rank[n] || [];
@@ -235,7 +249,7 @@ function dailySummary() {
     '  → 인증이 없으면 시트 [기록] 탭에서 그 줄을 삭제하면 점수가 빠져요', '',
     `■ 지각 출석 ${late.length}건`, ...(late.length ? late.map(line) : ['- 없음']), '',
     `■ 원장님 처리 ${byMaster.length}건`, ...(byMaster.length ? byMaster.map(line) : ['- 없음']), '',
-    `■ 연습 끝을 안 누른 학생 (오늘 연습 불인정)`, ...(Object.keys(open).length ? Object.entries(open).map(([n, t]) => `- ${n} · ${t.slice(11, 16)} 시작`) : ['- 없음']), '',
+    `■ 아직 연습 끝을 안 누른 학생 (새벽 6시 전까지 누르면 인정, 그 뒤엔 불인정)`, ...(Object.keys(open).length ? Object.entries(open).map(([n, t]) => `- ${n} · ${t.slice(11, 16)} 시작`) : ['- 없음']), '',
     '■ 오늘 전체 기록', ...(log.length ? log.map(line) : ['- 없음'])].join('\n');
   MailApp.sendEmail(to, `[RAW SEASON] ${md(today)} 오늘 요약 · 인증 확인 ${verify.length}건`, body);
   return body;

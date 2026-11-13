@@ -211,11 +211,12 @@ function compute(raw) {
     ex.forEach(d => items.push({ d, t: '', what: '운동 루틴', tag: '운동', pts: PE })); jr.forEach(d => items.push({ d, t: '', what: '연습일지 (수업정리)', tag: '일지', pts: PJ }));
     // 개인연습: 하루 합계(수업 시간 제외)가 MIN분 이상이면 그날 1회 인정 (원장님 2026-11-10)
     const prac = new Set(), pday = {}; let open = null;
-    mine.forEach(x => { if (x.k === '연습 시작') open = x; else if (x.k === '연습 끝' && open && open.d === x.d) {
-      if (x.note !== '월말평가 준비') pday[x.d] = (pday[x.d] || 0) + pracMin(open.t, x.t); open = null; } });
+    // 자정 넘긴 연습: 다음 날 새벽 6시 전 [연습 끝]까지 시작한 날(open.d) 연습으로 (원장님 2026-11-13)
+    mine.forEach(x => { if (x.k === '연습 시작') open = x; else if (x.k === '연습 끝' && open) {
+      if (pairOk(open.t, x.t) && x.note !== '월말평가 준비') pday[open.d] = (pday[open.d] || 0) + pracMin(open.t, x.t); open = null; } });
     Object.entries(pday).forEach(([d, m]) => { if (m >= MIN) prac.add(d); items.push({ d, t: '', what: `개인연습 하루 합계 ${m}분`, tag: '연습', pts: m >= MIN ? PP : 0 }); });
     mine.filter(x => x.k === '연습 끝' && x.note === '월말평가 준비').forEach(x => items.push({ d: x.d, t: x.t.slice(11, 16), what: '월말평가 준비 (기록만)', tag: '연습', pts: 0 }));
-    const practicing = open && open.d === today ? open.t.slice(11, 16) : null;
+    const practicing = open && pairOk(open.t, now) ? open.t.slice(11, 16) : null;
     const fr = fris.map(f => f > today ? 'up' : cls.has(f) ? 'ok' : sh.includes(f) ? 'sh' : f === today && !proClosed ? 'today' : 'miss');
     const decided = fr.filter(s => s === 'ok' || s === 'sh' || s === 'miss');
     let streak = 0; for (let i = decided.length - 1; i >= 0 && decided[i] !== 'miss'; i--) streak++;
@@ -299,8 +300,15 @@ const hm = v => { const m = /(\d{1,2}):(\d{2})/.exec(String(v)); return m ? (+m[
 function isHoli(d) { const r = DATA && DATA.cfg.find(r => String(r[0]).trim().startsWith('휴강일')); return !!r && String(r[1] || '').indexOf(d) >= 0; }
 function classesOn(dateS) { if (isHoli(dateS)) return []; return (DATA.tt || []).slice(1).filter(r => String(r[0]).trim().charAt(0) === DAYS_[D(dateS).getDay()] && hm(r[1]) != null && hm(r[2]) != null && !skipCls(r[3]))
   .map(r => ({ s: hm(r[1]), e: hm(r[2]), label: `${String(r[1]).trim()}~${String(r[2]).trim()} ${String(r[3]).trim()}` })); }
-function pracMin(a, b) { const m = x => (+x.slice(11, 13)) * 60 + (+x.slice(14, 16)), A = m(a), B = m(b);
-  return B - A - classesOn(a.slice(0, 10)).reduce((t, c) => t + Math.max(0, Math.min(B, c.e) - Math.max(A, c.s)), 0); }
+const minOf = x => (+x.slice(11, 13)) * 60 + (+x.slice(14, 16));
+const absMin = x => { const [y, mo, d] = x.slice(0, 10).split('-').map(Number); return Date.UTC(y, mo - 1, d) / 6e4 + minOf(x); };
+const nextDay = d => { const [y, mo, dd] = d.split('-').map(Number); return new Date(Date.UTC(y, mo - 1, dd + 1)).toISOString().slice(0, 10); };
+// 연습 끝이 시작과 같은 날이거나 다음 날 새벽 6시 전이면 한 세션 (Code.gs pairOk_와 같은 계산)
+function pairOk(st, en) { const a = st.slice(0, 10), b = en.slice(0, 10); return b === a || (b === nextDay(a) && minOf(en) < 360); }
+function pracMin(a, b) { const A = absMin(a), B = absMin(b), d0 = a.slice(0, 10);
+  let over = 0; [d0, nextDay(d0)].filter(d => d <= b.slice(0, 10)).forEach(d => { const z = absMin(d + ' 00:00');
+    classesOn(d).forEach(c => { over += Math.max(0, Math.min(B, z + c.e) - Math.max(A, z + c.s)); }); });
+  return Math.max(0, B - A - over); }
 function nowStr() { const t = new Date(Date.parse(DATA.now.replace(' ', 'T')) + (Date.now() - fetchedAt)); return ymd(t) + ' ' + hhmm(t.getHours() * 60 + t.getMinutes()) + ':00'; }
 // 출석 포인트 제외 수업 ([설정] '출석 제외 수업', 기본 K-POP)
 function skipCls(name) { const r = DATA && DATA.cfg.find(r => String(r[0]).trim().startsWith('출석 제외 수업')); const v = r && r[1] !== '' ? String(r[1]) : 'K-POP';

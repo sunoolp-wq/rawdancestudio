@@ -58,6 +58,8 @@ textarea:disabled{opacity:.55}
 .seg small{display:block;font-family:var(--f-en);font-size:14px;letter-spacing:.08em;font-weight:400}
 .seg input:checked+span{border-color:var(--accent);color:var(--fg);background:rgba(185,166,255,.1)}
 .seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.sw{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
+.sw input{width:18px;height:18px;accent-color:var(--accent)}
 .moves{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .moves li{display:grid;grid-template-columns:76px 1fr;gap:8px;align-items:baseline;font-size:14px}
 .moves b{font-family:var(--f-display);font-weight:400;font-size:16px;color:var(--accent)}
@@ -132,12 +134,6 @@ textarea:disabled{opacity:.55}
       <div class="roster" id="roster"></div>
       <p class="hint">동그라미를 누르면 사진을 고르거나 바로 찍을 수 있어요. 얼굴 가까이 찍은 사진이 잘 나와요. 사진은 이 기기 화면에서만 쓰이고, 저장되거나 어디에도 올라가지 않아요. 새로고침하면 사라져요.</p>
 
-      <div class="lab" id="lenLab">레이스 길이</div>
-      <div class="seg" role="radiogroup" aria-labelledby="lenLab">
-        <label><input type="radio" name="len" id="len8" value="8"><span>짧게<small>8 SEC</small></span></label>
-        <label><input type="radio" name="len" id="len13" value="13" checked><span>보통<small>13 SEC</small></span></label>
-        <label><input type="radio" name="len" id="len20" value="20"><span>길게<small>20 SEC</small></span></label>
-      </div>
 
       <div class="lab">장애물 코스</div>
       <ul class="moves">
@@ -146,6 +142,12 @@ textarea:disabled{opacity:.55}
         <li><b>회전 롤러</b><span>슬라이딩 통과, 아니면 튕겨 나가서 어질어질</span></li>
         <li><b>볼풀</b><span>허우적거리며 천천히</span></li>
         <li><b>허들</b><span>결승 직전 한 번 더</span></li>
+      </ul>
+      <div class="row"><span class="lab">길에 떨어진 간식</span><label class="sw"><input type="checkbox" id="snacks" checked> 켜기</label></div>
+      <ul class="moves">
+        <li><b>마라탕</b><span>먹다가 늦고, 쌤한테 혼나서 또 늦어요</span></li>
+        <li><b>엽떡</b><span>먹다가 늦고, 매워서 헥헥</span></li>
+        <li><b>한정선</b><span>먹느라 정신없어서 늦어요</span></li>
       </ul>
       <div class="lab">달리다가 랜덤 무브</div>
       <ul class="moves">
@@ -165,7 +167,7 @@ textarea:disabled{opacity:.55}
         <div id="count" aria-live="polite" hidden></div>
         <div id="results" hidden>
           <h2>오늘 순서</h2>
-          <p>먼저 들어온 댄서가 1번이에요.</p>
+          <p id="resSub">먼저 들어온 댄서가 1번이에요.</p>
           <ol id="resList"></ol>
           <div class="resbtns">
             <button class="primary" id="againBtn" type="button">다시 레이스</button>
@@ -307,6 +309,7 @@ function sfx(kind){
   if (kind === 'first') blip(t, 1047, .25, .3);
   else if (kind === 'finish') blip(t, 784, .08, .15);
   else if (kind === 'fanfare') [523, 659, 784, 1047].forEach((f, i) => blip(t + i * .11, f, .22, .25));
+  else if (kind === 'eat') [0, .16, .32].forEach(dt => noise(t + dt, .08, 900, 'bandpass', .35));
   else if (kind === 'bonk') { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(70, t + .2);
     g.gain.setValueAtTime(.5, t); g.gain.exponentialRampToValueAtTime(.001, t + .25); o.connect(g).connect(master); o.start(t); o.stop(t + .27); }
   else if (kind === 'boing' || kind === 'boing2') { const big = kind === 'boing', o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine';
@@ -443,11 +446,12 @@ function tagTex(name, color, rank, photo){   // 뒤에서 봐도 누군지 알�
     if (x === 18) { g.textAlign = 'center'; g.fillText(name, w / 2, h / 2 + 1, w - 40); } else { g.textAlign = 'left'; g.fillText(name, x, h / 2 + 1, w - x - 20); }
   }, 384, 76);
 }
-const BUB_LABEL = {moon:'문워크!', turn:'턴…', wave:'웨이브!', freeze:'프리즈', trip:'꽈당!', launch:'슝~!', bounce:'통!', knock:'으악!', dizzy:'어질어질', duck:'슬라이딩!', pit:'허우적', hop:''};
+const BUB_LABEL = {moon:'문워크!', turn:'턴…', wave:'웨이브!', freeze:'프리즈', trip:'꽈당!', launch:'슝~!', bounce:'통!', knock:'으악!', dizzy:'어질어질', duck:'슬라이딩!', pit:'허우적', hop:'',
+  eat_mala:'마라탕 후루룩', eat_yup:'엽떡 냠냠', eat_han:'한정선 냠냠', scold:'죄송해요ㅠ', spicy:'맵다!!', full:'배불러~', teacher:'지각이야!'};
 const BUB = {};
 function bubTex(k){ return BUB[k] || (BUB[k] = tex((g, w, h) => { g.fillStyle = '#b9a6ff'; rr(g, 4, 4, w - 8, h - 22, 30); g.fill();
   g.beginPath(); g.moveTo(w / 2 - 14, h - 19); g.lineTo(w / 2, h - 4); g.lineTo(w / 2 + 14, h - 19); g.fill();
-  g.fillStyle = '#120f1a'; g.font = '400 40px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(BUB_LABEL[k], w / 2, (h - 18) / 2 + 3); }, 256, 84)); }
+  g.fillStyle = '#120f1a'; g.font = '400 40px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(BUB_LABEL[k], w / 2, (h - 18) / 2 + 3, w - 30); }, 352, 84)); }
 function makeRig(color){
   const hoodM = mat(color, {roughness:.9}), skin = mat('#f2cba8', {roughness:.9}), dark = mat('#1b1a20');
   const g = new THREE.Group(), body = new THREE.Group(); body.position.y = 1; g.add(body);
@@ -467,7 +471,7 @@ function makeRig(color){
   [legL, legR].forEach(l => { const s = new THREE.Mesh(new THREE.BoxGeometry(.22, .14, .36), mat('#f4f2ee', {roughness:.6})); s.position.set(0, -.66, .06); l.add(s); });
   const shadow = new THREE.Mesh(new THREE.CircleGeometry(.6, 24), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.4})); shadow.rotation.x = -Math.PI / 2; shadow.position.y = .012; g.add(shadow);
   const tag = new THREE.Sprite(new THREE.SpriteMaterial({depthTest:false})); tag.scale.set(1.75, .35, 1); tag.position.y = 2.62; tag.renderOrder = 2; g.add(tag);
-  const bub = new THREE.Sprite(new THREE.SpriteMaterial({depthTest:false})); bub.scale.set(1.35, .44, 1); bub.position.y = 3.15; bub.renderOrder = 3; bub.visible = false; g.add(bub);
+  const bub = new THREE.Sprite(new THREE.SpriteMaterial({depthTest:false})); bub.scale.set(1.85, .44, 1); bub.position.y = 3.15; bub.renderOrder = 3; bub.visible = false; g.add(bub);
   g.scale.setScalar(.8);
   return {g, body, headG, armL, armR, legL, legR, tag, bub, shadow, faceBits, face:null};
 }
@@ -485,14 +489,78 @@ function applyFace(d){
   setTag(d);
 }
 
+/* ── 길에 떨어진 간식: 마라탕(먹고 → 쌤한테 혼남) · 엽떡(먹고 → 매워서 헥헥) · 한정선(먹고 → 배불러) ── */
+const FOOD = {
+  mala: {name:'마라탕', eat:1.7, then:{type:'scold', dur:1.4}, say:n => `${n} 길에서 마라탕 발견… 후루룩`},
+  yup:  {name:'엽떡',   eat:1.5, then:{type:'spicy', dur:.9},  say:n => `${n} 바닥에 떨어진 엽떡을…?! 냠냠`},
+  han:  {name:'한정선', eat:1.8, then:{type:'full', dur:.7},   say:n => `${n} 한정선 먹느라 정신없음`},
+};
+const FOOD_Z = [2.3, 6.6, 11.0, 15.3, 22.6];   // 장애물 사이 빈 구간 (마지막은 결승 바로 앞)
+let foods = [], foodG = null, snacksOn = true;
+function foodMesh(kind){
+  const g = new THREE.Group(), A = (geo, m, x, y, z) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); g.add(o); return o; };
+  const ring = A(new THREE.RingGeometry(.48, .56, 32), new THREE.MeshBasicMaterial({color:col('#ffd166'), transparent:true, opacity:.75, depthWrite:false}), 0, .013, 0); ring.rotation.x = -Math.PI / 2;
+  if (kind === 'mala') {   // 마라탕: 흰 그릇 + 빨간 국물 + 건더기 + 젓가락
+    A(new THREE.CylinderGeometry(.34, .22, .26, 28), mat('#f4f2ee', {roughness:.3}), 0, .13, 0);
+    A(new THREE.CylinderGeometry(.31, .31, .02, 28), mat('#c8371b', {roughness:.25, emissive:col('#3a0800')}), 0, .245, 0);
+    const bits = ['#7ab648', '#f0d9a8', '#e8c06a', '#6b4630', '#f4f2ee', '#7ab648'];
+    bits.forEach((c, i) => { const a = i / bits.length * Math.PI * 2; const b = A(new THREE.BoxGeometry(.09, .03, .06), mat(c), Math.cos(a) * .17, .26, Math.sin(a) * .17); b.rotation.y = a; });
+    [-.03, .03].forEach(x => { const c = A(new THREE.BoxGeometry(.02, .02, .56), mat('#b08a5c'), x, .29, .05); c.rotation.x = .12; });
+  } else if (kind === 'yup') {   // 엽떡: 검은 용기 + 새빨간 떡볶이
+    A(new THREE.BoxGeometry(.6, .14, .44), mat('#1b1a20', {roughness:.4}), 0, .07, 0);
+    A(new THREE.BoxGeometry(.54, .02, .38), mat('#d3261a', {roughness:.3, emissive:col('#3a0500')}), 0, .145, 0);
+    for (let i = 0; i < 12; i++) { const t = A(new THREE.CylinderGeometry(.035, .035, .17, 10), mat('#e88a70', {roughness:.4}), -.2 + (i % 4) * .13, .17, -.12 + Math.floor(i / 4) * .12); t.rotation.z = Math.PI / 2; t.rotation.y = (i * 1.7) % 1; }
+    A(new THREE.BoxGeometry(.12, .02, .08), mat('#e8c27a'), .12, .18, .1); A(new THREE.BoxGeometry(.1, .02, .1), mat('#e8c27a'), -.15, .18, -.02);
+  } else {   // 한정선: 포장 상자 (이름 스티커)
+    A(new THREE.BoxGeometry(.54, .3, .4), mat('#f6f3ec', {roughness:.6}), 0, .15, 0);
+    A(new THREE.BoxGeometry(.56, .03, .42), mat('#b9a6ff', {roughness:.6}), 0, .3, 0);
+    const lab = A(new THREE.PlaneGeometry(.46, .15), new THREE.MeshBasicMaterial({transparent:true, map:tex((c, w, h) => { c.fillStyle = '#120f1a'; c.font = '400 70px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('한정선', w / 2, h / 2 + 3); }, 300, 100)}), 0, .16, -.202);
+    lab.rotation.y = Math.PI;
+  }
+  const sign = new THREE.Sprite(new THREE.SpriteMaterial({map:tex((c, w, h) => { c.fillStyle = '#ffd166'; rr(c, 4, 4, w - 8, h - 8, 26); c.fill(); c.fillStyle = '#120f1a'; c.font = '400 44px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(FOOD[kind].name, w / 2, h / 2 + 2); }, 220, 70)}));
+  sign.scale.set(.85, .27, 1); sign.position.y = .78; g.add(sign); g.userData.sign = sign;
+  g.scale.setScalar(1.15);
+  return g;
+}
+function buildFoods(n){
+  if (foodG) { scene.remove(foodG); disposeTree(foodG); foodG = null; }
+  foods = []; if (!snacksOn || !renderer) return;
+  foodG = new THREE.Group(); scene.add(foodG);
+  const cnt = Math.max(2, Math.min(12, Math.round(n * .6))), used = new Set(), kinds = [];
+  for (let k = 0; k < cnt; k++) kinds.push(['mala', 'yup', 'han'][k % 3]);
+  kinds.sort(() => Math.random() - .5);
+  let guard = 0;
+  while (foods.length < cnt && guard++ < 200) {
+    const lane = Math.floor(Math.random() * n), z = FOOD_Z[Math.floor(Math.random() * FOOD_Z.length)], key = lane + ':' + z;
+    if (used.has(key)) continue; used.add(key);
+    const kind = kinds[foods.length], m = foodMesh(kind); m.position.set(lx(lane, n), 0, z + .4); foodG.add(m);
+    foods.push({kind, lane, z, mesh:m, taken:false});
+  }
+}
+let teachers = [];
+function spawnTeacher(d){   // 마라탕 먹고 늦은 학생 옆에 쌤 등장
+  if (!renderer || d.teacher) return;
+  const T = makeRig('#1d1c22'); T.tag.material.map = tagTex('쌤', '#f4f2ee'); T.tag.material.needsUpdate = true;
+  T.bub.material.map = bubTex('teacher'); T.bub.visible = true;
+  T.g.position.set(lx(d.i, D.length) + laneW * .62, 0, d.z + .25); T.g.rotation.y = -Math.PI / 2; scene.add(T.g);
+  d.teacher = T; teachers.push(T);
+}
+function dropTeacher(d){ if (!d.teacher) return; scene.remove(d.teacher.g); disposeTree(d.teacher.g); teachers = teachers.filter(x => x !== d.teacher); d.teacher = null; }
+function animTeacher(T, t){
+  const {body, headG, armL, armR, legL, legR} = T;
+  body.position.y = 1 + Math.abs(Math.sin(t * 9)) * .04; headG.rotation.z = Math.sin(t * 9) * .08;
+  armR.rotation.set(-1.6, 0, Math.sin(t * 16) * .3); armL.rotation.set(0, 0, -.7); legL.rotation.set(0, 0, .06); legR.rotation.set(0, 0, -.06);
+}
+
 function build(){
-  if (renderer) D.forEach(d => { if (d.R) { scene.remove(d.R.g); disposeTree(d.R.g); } });
+  if (renderer) D.forEach(d => { dropTeacher(d); if (d.R) { scene.remove(d.R.g); disposeTree(d.R.g); } });
   D = names.map((n, i) => ({i, name:n, color:COLORS[i % COLORS.length], photo:photos[n] || null, z:0, y:0, mult:1, target:1, segT:0,
-    ev:null, evT:0, act:null, next:0, tries:0, pitK:.5, phase:Math.random() * 6, seed:Math.random() * 6, done:false, rank:0, extra:0, turned:0, R:null}));
+    ev:null, evT:0, act:null, next:0, vz:0, vy:0, top:2.45 + Math.random() * .7, time:0, tries:0, pitK:.5, phase:Math.random() * 6, seed:Math.random() * 6, done:false, rank:0, extra:0, turned:0, R:null}));
   order = [];
   if (!renderer) return;
   buildStage(D.length);
   D.forEach(d => { d.R = makeRig(d.color); d.R.g.position.x = lx(d.i, D.length); scene.add(d.R.g); applyFace(d); });
+  buildFoods(D.length);
   focusZ = 0; resize();
 }
 
@@ -514,13 +582,17 @@ function animD(d, t){
     if (d.turned < 1) { legL.rotation.x = w * .6; legR.rotation.x = -w * .6; }
     else { const j = Math.abs(Math.sin(t * 5 + d.seed)); body.position.y = 1 + j * .4; armL.rotation.z = -2.7 + Math.sin(t * 10) * .15; armR.rotation.z = 2.7 - Math.sin(t * 10) * .15; legL.rotation.x = -j * .5; legR.rotation.x = -j * .5; }
   } else if (a) {
-    bub = BUB_LABEL[a.type] ? a.type : null;
+    bub = a.type === 'eat' ? 'eat_' + a.food.kind : BUB_LABEL[a.type] ? a.type : null;
     if (a.type === 'hop') { legL.rotation.x = -1.2; legR.rotation.x = .5; armL.rotation.x = -1.6; armR.rotation.x = -.6; body.rotation.x = .25; }
     else if (a.type === 'trip') { const f = k < .25 ? k / .25 : k < .7 ? 1 : 1 - (k - .7) / .3; body.rotation.x = f * Math.PI / 2; body.position.y = 1 - f * .6; armL.rotation.x = armR.rotation.x = -2.6 * f; legL.rotation.x = .3 * f; }
     else if (a.type === 'launch') { const e = k * k * (3 - 2 * k); body.rotation.x = Math.PI * 2 * e; armL.rotation.z = -2.7; armR.rotation.z = 2.7; legL.rotation.x = legR.rotation.x = -.7 * Math.sin(k * Math.PI); }
     else if (a.type === 'bounce') { armL.rotation.z = -2.5; armR.rotation.z = 2.5; legL.rotation.z = .25; legR.rotation.z = -.25; }
     else if (a.type === 'knock') { body.rotation.x = -Math.PI * 2 * k; armL.rotation.z = -1.8 + Math.sin(t * 30) * .6; armR.rotation.z = 1.8 - Math.sin(t * 30) * .6; legL.rotation.x = Math.sin(t * 25) * .8; legR.rotation.x = -Math.sin(t * 25) * .8; }
     else if (a.type === 'dizzy') { headG.rotation.z = Math.sin(t * 14) * .35; body.rotation.y = Math.sin(t * 7) * .5; body.rotation.z = Math.sin(t * 5) * .12; armL.rotation.z = -.9; armR.rotation.z = .9; }
+    else if (a.type === 'eat') { body.position.y = .55; legL.rotation.x = legR.rotation.x = -1.45; armR.rotation.x = -1.55 + Math.sin(t * 14) * .35; armL.rotation.x = -.9; headG.rotation.x = .3 + Math.sin(t * 14) * .08; }
+    else if (a.type === 'scold') { headG.rotation.x = .55; body.rotation.x = .12; body.rotation.z = Math.sin(t * 22) * .03; armL.rotation.set(.35, 0, .15); armR.rotation.set(.35, 0, -.15); }
+    else if (a.type === 'spicy') { armL.rotation.x = -2.3 + Math.sin(t * 28) * .35; armR.rotation.x = -2.3 + Math.sin(t * 28 + 1) * .35; body.position.y = 1 + Math.abs(Math.sin(t * 14)) * .12; headG.rotation.x = -.2; }
+    else if (a.type === 'full') { armL.rotation.set(-.7, 0, .5); armR.rotation.set(-.7, 0, -.5); body.rotation.x = -.14; legL.rotation.x = w * .3; legR.rotation.x = -w * .3; }
     else if (a.type === 'duck') { body.position.y = .62; body.rotation.x = -.55; legL.rotation.x = -1.35; legR.rotation.x = -1.1; armL.rotation.z = -1.3; armR.rotation.z = 1.3; }
   } else if (pit) {
     bub = 'pit'; armL.rotation.z = -2.3 + Math.sin(t * 9) * .4; armR.rotation.z = 2.3 + Math.sin(t * 9 + 1.4) * .4; legL.rotation.x = w * .4; legR.rotation.x = -w * .4; body.rotation.z = Math.sin(t * 6 + d.seed) * .15;
@@ -538,6 +610,7 @@ function animD(d, t){
     if (wave) { armL.rotation.z = -1.45 + Math.sin(t * 13) * .45; armR.rotation.z = 1.45 + Math.sin(t * 13 + 1.6) * .45; body.rotation.z = Math.sin(t * 13 + .8) * .12; }
     else { armL.rotation.x = -w * .65; armR.rotation.x = w * .65; }
   }
+  if (d.teacher) animTeacher(d.teacher, t);
   R.bub.visible = !!bub;
   if (bub && R.bub.material.map !== bubTex(bub)) { R.bub.material.map = bubTex(bub); R.bub.material.needsUpdate = true; }
 }
@@ -565,53 +638,84 @@ function updateCam(dt, t){
 
 /* ── 레이스 진행 ── */
 function say(msg){ if (skipping) return; $('#say').textContent = msg; }
-function startAct(d, a){ a.t = 0; a.z0 = d.z; d.act = a; d.ev = null; }
+/* 가벼운 물리: 학생마다 최고 속도가 다르고, 가속·감속(마찰)으로 속도가 바뀜. 점프대·허들·롤러는 중력 포물선으로 날아감 → 들어오는 시간이 매번 다름 */
+const G = 14;   // 만화 느낌 중력 (m/s²)
+const STOP = ['trip', 'eat', 'scold', 'dizzy', 'spicy'];
+function startAct(d, a){ a.t = 0; a.z0 = d.z; d.act = a; d.ev = null;
+  if (a.type === 'scold') { spawnTeacher(d); say(`${d.name} 마라탕 먹다 늦어서 쌤한테 혼나는 중`); }
+  if (a.type === 'spicy') say(`${d.name} 엽떡 너무 매워서 헥헥`);
+}
+function jump(d, type, vy, vz){ d.vy = vy; d.vz = vz; d.y = .001; startAct(d, {type, dur:2 * vy / G}); }
 function nearObs(z){ return OBS.some(o => z > o.z - 1.8 && z < (o.z2 || o.z) + 2.2); }
 function trigger(d, o){
   if (o.type === 'hurdle') {
     d.next++;
-    if (Math.random() < .25) { startAct(d, {type:'trip', dur:1.1, z1:d.z + .6}); const h = hurdles[o.k][d.i]; if (h) h.userData.fall = true; say(`${d.name} 허들에 걸려 꽈당!`); sfx('bonk'); }
-    else startAct(d, {type:'hop', dur:.42, z1:d.z + 1.3, h:.6});
+    if (Math.random() < .25) { startAct(d, {type:'trip', dur:1.1}); d.vz *= .3; const h = hurdles[o.k][d.i]; if (h) h.userData.fall = true; say(`${d.name} 허들에 걸려 꽈당!`); sfx('bonk'); }
+    else jump(d, 'hop', 3.9, Math.max(d.vz, 2.4));
   } else if (o.type === 'pad') {
     d.next++; if (pads[d.i]) pads[d.i].userData.t = .3;
-    if (Math.random() < .45) { startAct(d, {type:'launch', dur:1.0, z1:d.z + 4, h:2.6}); say(`${d.name} 점프대 타고 슝~ 날아가요!`); sfx('boing'); }
-    else { startAct(d, {type:'bounce', dur:.5, z1:d.z + 1.4, h:.8}); sfx('boing2'); }
+    const pw = Math.random();   // 점프대 타는 힘: 매번 다름
+    if (pw > .5) { jump(d, 'launch', 5.8 + pw * 2.4, 2.6 + pw * 2.4); say(`${d.name} 점프대 타고 슝~ 날아가요!`); sfx('boing'); }
+    else { jump(d, 'bounce', 4.2 + pw * 1.6, 2 + pw * 1.2); sfx('boing2'); }
   } else if (o.type === 'roller') {
     d.tries++; const pHit = [.45, .25, 0][Math.min(d.tries - 1, 2)];
-    if (Math.random() < pHit) { startAct(d, {type:'knock', dur:.6, z1:d.z - 2.2, h:.9, then:{type:'dizzy', dur:.6}}); say(`${d.name} 회전 롤러에 튕겨 나감!`); sfx('bonk'); }
-    else { d.next++; startAct(d, {type:'duck', dur:.5, z1:d.z + 1.6}); if (Math.random() < .4) say(`${d.name} 롤러 밑으로 슬라이딩 통과`); }
+    if (Math.random() < pHit) { jump(d, 'knock', 4 + Math.random(), -(3.4 + Math.random() * 2.6)); say(`${d.name} 회전 롤러에 튕겨 나감!`); sfx('bonk'); }
+    else { d.next++; startAct(d, {type:'duck', dur:.5}); if (Math.random() < .4) say(`${d.name} 롤러 밑으로 슬라이딩 통과`); }
   }
 }
 function step(dt){
-  raceT += dt; const base = 1.45 * L / lenSec;
+  raceT += dt;
   for (const d of D) {
     if (d.done) { d.extra = Math.min(1.6, d.extra + dt * 2.5); if (d.extra >= 1.6) d.turned = Math.min(1, d.turned + dt * 2.5); d.phase += dt * 8; continue; }
     d.segT -= dt;
-    if (d.segT <= 0) { d.target = .7 + Math.random() * .6; d.segT = .35 + Math.random() * .6; }
+    if (d.segT <= 0) { d.target = .75 + Math.random() * .5; d.segT = .4 + Math.random() * .7; }   // 컨디션 출렁
     d.mult += (d.target - d.mult) * Math.min(1, dt * 3);
-    if (d.act) {
-      const a = d.act; a.t += dt; const k = Math.min(1, a.t / a.dur);
-      if (a.z1 !== undefined) d.z = Math.max(0, a.z0 + (a.z1 - a.z0) * (a.type === 'knock' ? 1 - (1 - k) * (1 - k) : k));
-      d.y = a.h ? 4 * a.h * k * (1 - k) : 0;
-      if (k >= 1) { d.act = null; d.y = 0; if (a.then) startAct(d, Object.assign({}, a.then)); }
-      d.phase += dt * 8;
-    } else {
-      if (d.ev) { d.evT -= dt; if (d.evT <= 0) d.ev = null; }
-      else if (raceT > 1 && d.z < L - 2.5 && !nearObs(d.z) && Math.random() < dt * .22) {
-        const k = EV_KEYS[Math.floor(Math.random() * EV_KEYS.length)];
-        d.ev = k; d.evT = EVENTS[k].dur; say(EVENTS[k].say(d.name));
+    if (d.y > 0 || d.vy > 0) {   // 공중: 중력만
+      d.vy -= G * dt; d.y += d.vy * dt; d.z = Math.max(0, d.z + d.vz * dt);
+      if (d.act) d.act.t += dt;
+      if (d.y <= 0) {
+        d.y = 0; d.vy = 0; const a = d.act; d.act = null;
+        while (OBS[d.next] && OBS[d.next].type !== 'pit' && OBS[d.next].z < d.z - .2) d.next++;   // 날아서 넘은 장애물은 통과
+        if (a && a.type === 'knock') startAct(d, {type:'dizzy', dur:.7});
+        else if (a && a.type === 'launch' && Math.random() < .3) { startAct(d, {type:'trip', dur:.9}); say(`${d.name} 착지 실패! 꽈당`); sfx('bonk'); }
       }
-      let v = base * (d.ev ? EVENTS[d.ev].k : d.mult);
-      if (inPit(d)) v *= d.pitK;
-      d.z = Math.max(0, d.z + v * dt);
-      d.phase += dt * (5 + Math.abs(v) / base * 7);
-      const o = OBS[d.next];
-      if (o && o.type === 'pit') { if (d.z >= o.z) { d.next++; d.pitK = .32 + Math.random() * .3; d.ev = null; if (Math.random() < .5) say(`${d.name} 볼풀에서 허우적허우적`); } }
-      else if (o && d.z >= o.z - (o.type === 'hurdle' ? .65 : o.type === 'pad' ? .05 : .7)) trigger(d, o);
+    } else {
+      let tgt, rate = 3; const a = d.act;
+      if (a) {
+        a.t += dt;
+        if (STOP.includes(a.type)) { tgt = 0; rate = a.type === 'dizzy' ? 4 : 9; }
+        else if (a.type === 'full') tgt = d.top * .45;
+        else if (a.type === 'duck') tgt = Math.max(d.top, 3.2);
+        else tgt = d.top * d.mult;
+        if (a.type === 'eat' && a.food.mesh) { const k = Math.min(1, a.t / a.dur); a.food.mesh.scale.setScalar(Math.max(.01, 1.15 * (1 - .75 * k))); a.food.mesh.userData.sign.visible = false; }
+        if (a.t >= a.dur) { if (a.type === 'eat' && a.food.mesh) a.food.mesh.visible = false; if (a.type === 'scold') dropTeacher(d);
+          d.act = null; if (a.then) startAct(d, Object.assign({}, a.then)); }
+      } else {
+        if (d.ev) { d.evT -= dt; if (d.evT <= 0) d.ev = null; }
+        else if (raceT > 1 && d.z < L - 2.5 && !nearObs(d.z) && Math.random() < dt * .22) {
+          const k = EV_KEYS[Math.floor(Math.random() * EV_KEYS.length)];
+          d.ev = k; d.evT = EVENTS[k].dur; say(EVENTS[k].say(d.name));
+        }
+        tgt = d.top * (d.ev ? EVENTS[d.ev].k : d.mult);
+        if (d.ev === 'turn' || d.ev === 'freeze') rate = 8;
+        if (inPit(d)) { tgt *= d.pitK; rate = 2; }
+      }
+      d.vz += (tgt - d.vz) * Math.min(1, dt * rate);
+      d.z = Math.max(0, d.z + d.vz * dt);
+      if (!d.act) {
+        const f = foods.find(f => !f.taken && f.lane === d.i && d.z >= f.z - .1 && d.z < f.z + .4);
+        if (f) { f.taken = true; d.z = f.z; d.vz = 0; say(FOOD[f.kind].say(d.name)); sfx('eat'); startAct(d, {type:'eat', dur:FOOD[f.kind].eat, food:f, then:Object.assign({}, FOOD[f.kind].then)}); }
+        else {
+          const o = OBS[d.next];
+          if (o && o.type === 'pit') { if (d.z >= o.z) { d.next++; d.pitK = .3 + Math.random() * .3; d.ev = null; if (Math.random() < .5) say(`${d.name} 볼풀에서 허우적허우적`); } }
+          else if (o && d.vz > 0 && d.z >= o.z - (o.type === 'hurdle' ? .65 : o.type === 'pad' ? .05 : .7)) trigger(d, o);
+        }
+      }
     }
-    if (d.z >= L) {
-      d.z = L; d.y = 0; d.act = null; d.ev = null; d.done = true; order.push(d); d.rank = order.length; setTag(d);
-      if (d.rank === 1) { say(`${d.name} 1등 도착!`); sfx('first'); } else sfx('finish');
+    d.phase += dt * (4 + Math.abs(d.vz) * 2.6);
+    if (d.z >= L) { dropTeacher(d);
+      d.z = L; d.y = 0; d.vy = 0; d.act = null; d.ev = null; d.done = true; d.time = raceT; order.push(d); d.rank = order.length; setTag(d);
+      if (d.rank === 1) { say(`${d.name} 1등 도착! ${raceT.toFixed(1)}초`); sfx('first'); } else sfx('finish');
     }
   }
   if (state === 'race' && order.length === D.length) finish();
@@ -652,6 +756,7 @@ function showResults(){
     if (d.photo) li.append(rk, avatar(d.name, d.color), nm); else li.append(rk, nm);
     ol.appendChild(li);
   });
+  if (order.length) $('#resSub').textContent = `먼저 들어온 댄서가 1번이에요. 1등 ${order[0].time.toFixed(1)}초 · 마지막 ${order[order.length - 1].time.toFixed(1)}초`;
   $('#results').hidden = false; $('#results').scrollTop = 0; setUI();
 }
 let boardT = 0;
@@ -706,9 +811,8 @@ function loop(ts){
 
 /* ── 연결 ── */
 $('#names').value = store.get('rawRaceNames') ?? SAMPLE;
-const savedLen = store.get('rawRaceLen'); if (savedLen && $('#len' + savedLen)) $('#len' + savedLen).checked = true;
-lenSec = +document.querySelector('input[name="len"]:checked').value;
-document.querySelectorAll('input[name="len"]').forEach(r => r.addEventListener('change', () => { lenSec = +r.value; store.set('rawRaceLen', r.value); }));
+if (store.get('rawRaceSnacks') === '0') { snacksOn = false; $('#snacks').checked = false; }
+$('#snacks').addEventListener('change', e => { snacksOn = e.target.checked; store.set('rawRaceSnacks', snacksOn ? '1' : '0'); if (state === 'idle' || state === 'done') { state = 'idle'; build(); $('#results').hidden = true; setUI(); } });
 $('#names').addEventListener('input', () => { clearTimeout(syncNames.h); syncNames.h = setTimeout(syncNames, 250); });
 $('#startBtn').addEventListener('click', start);
 $('#againBtn').addEventListener('click', start);

@@ -26,18 +26,18 @@ build("A30", BA, 6.5, (BUSK_STILL, ed("01 — STAGE", "이 무대에\n[서기까
 # ── B30: 수업(장르 몰아치기) → 연습(YUNI) → 무대 (약 30초) ──
 BB = 4 * 60 / 129.19921875
 def g(word, en, sub=""): return big(word, sub, en)
-B30 = [
+B30 = [   # 원장님 2026-11-13: 수업 소개 순서 케이팝 → 베이직(힙합 베이직) → 전문반 → 나머지 / "걸리쉬" 표기 / 15초 음악 끊김 → 8마디(한 프레이즈) 뒤에 넘어가게
  (1, YUNI_K_D, big("RAW", "로우댄스학원 수원점")),
+ (1, MINK_D, ed("02 — TEACHERS", "강사진 전원\n[현역 댄서]")),
+ (h, YUNI, g("케이팝", "K-POP", "T. YUNI")), (h, GAON, g("힙합 베이직", "HIPHOP BASIC", "T. GAON")),
  (h, YELLS_D, g("전문반", "PRO CLASS", "T. YELLS")), (h, NOFF, g("힙합", "HIP HOP", "T. NOFF")),
- (h, HEEONE, g("힐코레오", "HEELSCHOREO", "T. HEEONE")), (h, ARIN, g("걸리시", "GIRLISH", "T. ARIN")),
- (h, YUNI, g("케이팝", "K-POP", "T. YUNI")), (h, HWANU_D, g("코레오", "CHOREOGRAPHY", "T. HWAN.U")),
- (h, GAON, g("베이직", "BASIC", "T. GAON")), (h, KIRY, g("재즈", "JAZZ", "T. KIRY")),
+ (h, HEEONE, g("힐코레오", "HEELSCHOREO", "T. HEEONE")), (h, ARIN, g("걸리쉬", "GIRLISH", "T. ARIN")),
+ (h, HWANU_D, g("코레오", "CHOREOGRAPHY", "T. HWAN.U")), (h, KIRY, g("재즈", "JAZZ", "T. KIRY")),
  (h, WAACK_B, g("왁킹", "WAACKING", "T. J")), (h, MINK_G, g("걸스힙합", "GIRLS HIPHOP", "T. MINKYUNG")),
  (h, POPUP_D, g("팝업", "POP-UP CLASS")), (h, HWANU_G, g("전부", "FREE PASS", "전문반은 전 클래스 프리패스")),
- (1, AUD_B1, ed("02 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반"), AL),   # ← 여기부터 음악: 브레이크다운 끝 2마디
- (1, AUD_B2, ed("03 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), AL),
+ (1, AUD_B1, ed("03 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반"), AL),   # ← 음악: 8마디 끝나고 브레이크다운 끝 2마디
+ (1, AUD_B2, ed("04 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), AL),
  (1, BUSK_GO2, big("무대", "월말평가 · 버스킹 · 콘서트", "STAGE"), BL),                      # ← 드롭
- (h, BUSK_A, None, BL), (h, BUSK_B, None, BL),
  (h, BUSK_E, big("제대로", pre="배울 거면"), BL), (h, MINK_G2, "+"),
  (1.5, YELLS_W, END, None, {"speed": 0.8}),
 ]
@@ -45,11 +45,13 @@ build("B30", BB, 0.0, (HEEONE_LIE, ed("01 — CLASS · PRACTICE · STAGE", "수�
 
 # B30 음악: [1.138 → 비트 7마디 끝] + [드롭 직전 2마디] + [드롭 48.10 →]  (마디 경계에서 이어 붙임, 10ms 페이드로 '딱' 소리 방지)
 def music_b30(src, out):
-    s1a, s1b = 1.138, 1.138 + 2.382 + 7 * BB
+    s1a, s1b = 1.138, 1.138 + 2.382 + 8 * BB   # 비트 8마디(한 프레이즈) 끝에서 넘어감
     s2a, s2b = 48.10 - 2 * BB, 48.10
-    fc = (f"[0:a]atrim={s1a}:{s1b},asetpts=PTS-STARTPTS,afade=t=out:st={s1b - s1a - 0.01}:d=0.01[a];"
-          f"[0:a]atrim={s2a}:{s2b},asetpts=PTS-STARTPTS,afade=t=in:d=0.01,afade=t=out:st={s2b - s2a - 0.01}:d=0.01[b];"
-          f"[0:a]atrim={s2b}:{s2b + 20},asetpts=PTS-STARTPTS,afade=t=in:d=0.01[c];[a][b][c]concat=n=3:v=0:a=1[m]")
+    X = 0.12   # 첫 이음새는 짧게 겹쳐서(크로스페이드) 자연스럽게. 겹친 만큼 뒤 구간을 미리 가져와 박자 위치는 그대로
+    fc = (f"[0:a]atrim={s1a}:{s1b + X / 2},asetpts=PTS-STARTPTS[a];"
+          f"[0:a]atrim={s2a - X / 2}:{s2b},asetpts=PTS-STARTPTS,afade=t=out:st={s2b - s2a + X / 2 - 0.01}:d=0.01[b];"
+          f"[a][b]acrossfade=d={X}:c1=tri:c2=tri[ab];"
+          f"[0:a]atrim={s2b}:{s2b + 20},asetpts=PTS-STARTPTS,afade=t=in:d=0.01[c];[ab][c]concat=n=2:v=0:a=1[m]")
     subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", src, "-filter_complex", fc, "-map", "[m]", out], check=True)
 if __name__ == "__main__" and os.environ.get("MUSIC_SRC"):
     music_b30(os.environ["MUSIC_SRC"], os.environ["MUSIC_OUT"]); print("B30 음악:", os.environ["MUSIC_OUT"])

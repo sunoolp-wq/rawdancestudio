@@ -22,40 +22,11 @@
   "b": 4.2
  },
  {
-  "type": "big",
-  "word": "전문반",
-  "sub": "T. YELLS",
-  "en": "PRO CLASS",
-  "pre": "",
+  "type": "ed",
+  "tag": "02 — TEACHERS",
+  "h": "강사진 전원\n[현역 댄서]",
   "a": 4.29,
-  "b": 5.128
- },
- {
-  "type": "big",
-  "word": "힙합",
-  "sub": "T. NOFF",
-  "en": "HIP HOP",
-  "pre": "",
-  "a": 5.218,
   "b": 6.057
- },
- {
-  "type": "big",
-  "word": "힐코레오",
-  "sub": "T. HEEONE",
-  "en": "HEELSCHOREO",
-  "pre": "",
-  "a": 6.147,
-  "b": 6.986
- },
- {
-  "type": "big",
-  "word": "걸리시",
-  "sub": "T. ARIN",
-  "en": "GIRLISH",
-  "pre": "",
-  "a": 7.076,
-  "b": 7.915
  },
  {
   "type": "big",
@@ -63,8 +34,53 @@
   "sub": "T. YUNI",
   "en": "K-POP",
   "pre": "",
+  "a": 6.147,
+  "b": 6.986
+ },
+ {
+  "type": "big",
+  "word": "힙합 베이직",
+  "sub": "T. GAON",
+  "en": "HIPHOP BASIC",
+  "pre": "",
+  "a": 7.076,
+  "b": 7.915
+ },
+ {
+  "type": "big",
+  "word": "전문반",
+  "sub": "T. YELLS",
+  "en": "PRO CLASS",
+  "pre": "",
   "a": 8.005,
   "b": 8.844
+ },
+ {
+  "type": "big",
+  "word": "힙합",
+  "sub": "T. NOFF",
+  "en": "HIP HOP",
+  "pre": "",
+  "a": 8.934,
+  "b": 9.772
+ },
+ {
+  "type": "big",
+  "word": "힐코레오",
+  "sub": "T. HEEONE",
+  "en": "HEELSCHOREO",
+  "pre": "",
+  "a": 9.862,
+  "b": 10.701
+ },
+ {
+  "type": "big",
+  "word": "걸리쉬",
+  "sub": "T. ARIN",
+  "en": "GIRLISH",
+  "pre": "",
+  "a": 10.791,
+  "b": 11.63
  },
  {
   "type": "big",
@@ -72,17 +88,8 @@
   "sub": "T. HWAN.U",
   "en": "CHOREOGRAPHY",
   "pre": "",
-  "a": 8.934,
-  "b": 9.772
- },
- {
-  "type": "big",
-  "word": "베이직",
-  "sub": "T. GAON",
-  "en": "BASIC",
-  "pre": "",
-  "a": 9.862,
-  "b": 10.701
+  "a": 11.72,
+  "b": 12.559
  },
  {
   "type": "big",
@@ -90,8 +97,8 @@
   "sub": "T. KIRY",
   "en": "JAZZ",
   "pre": "",
-  "a": 10.791,
-  "b": 11.63
+  "a": 12.649,
+  "b": 13.488
  },
  {
   "type": "big",
@@ -99,8 +106,8 @@
   "sub": "T. J",
   "en": "WAACKING",
   "pre": "",
-  "a": 11.72,
-  "b": 12.559
+  "a": 13.578,
+  "b": 14.416
  },
  {
   "type": "big",
@@ -108,8 +115,8 @@
   "sub": "T. MINKYUNG",
   "en": "GIRLS HIPHOP",
   "pre": "",
-  "a": 12.649,
-  "b": 13.488
+  "a": 14.506,
+  "b": 15.345
  },
  {
   "type": "big",
@@ -117,8 +124,8 @@
   "sub": "",
   "en": "POP-UP CLASS",
   "pre": "",
-  "a": 13.578,
-  "b": 14.416
+  "a": 15.435,
+  "b": 16.274
  },
  {
   "type": "big",
@@ -126,26 +133,13 @@
   "sub": "전문반은 전 클래스 프리패스",
   "en": "FREE PASS",
   "pre": "",
-  "a": 14.506,
-  "b": 15.345
- },
- {
-  "type": "ed",
-  "tag": "02 — T. YUNI",
-  "h": "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반",
-  "a": 15.435,
+  "a": 16.364,
   "b": 17.203
- },
- {
-  "type": "lbl",
-  "a": 15.385,
-  "b": 17.223,
-  "text": "T. YUNI — AUDITION CLASS"
  },
  {
   "type": "ed",
   "tag": "03 — T. YUNI",
-  "h": "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]",
+  "h": "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반",
   "a": 17.293,
   "b": 19.06
  },
@@ -156,11 +150,9 @@
   "text": "T. YUNI — AUDITION CLASS"
  },
  {
-  "type": "big",
-  "word": "무대",
-  "sub": "월말평가 · 버스킹 · 콘서트",
-  "en": "STAGE",
-  "pre": "",
+  "type": "ed",
+  "tag": "04 — T. YUNI",
+  "h": "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]",
   "a": 19.15,
   "b": 20.918
  },
@@ -168,17 +160,20 @@
   "type": "lbl",
   "a": 19.1,
   "b": 20.938,
-  "text": "RAW 파주운정점 버스킹 · 수원점 전문반 게스트"
+  "text": "T. YUNI — AUDITION CLASS"
+ },
+ {
+  "type": "big",
+  "word": "무대",
+  "sub": "월말평가 · 버스킹 · 콘서트",
+  "en": "STAGE",
+  "pre": "",
+  "a": 21.008,
+  "b": 22.776
  },
  {
   "type": "lbl",
   "a": 20.958,
-  "b": 21.867,
-  "text": "RAW 파주운정점 버스킹 · 수원점 전문반 게스트"
- },
- {
-  "type": "lbl",
-  "a": 21.887,
   "b": 22.796,
   "text": "RAW 파주운정점 버스킹 · 수원점 전문반 게스트"
  },

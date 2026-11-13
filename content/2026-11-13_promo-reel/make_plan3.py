@@ -110,7 +110,7 @@ B = [
  (1, YELLS_D, big("전문반", "T. YELLS · 모든 수업 무제한 프리패스", "PRO CLASS")),
  (1, NOFF, big("힙합", "T. NOFF", "HIP HOP")),
  (1, HEEONE, big("힐코레오", "T. HEEONE", "HEELSCHOREO")),
- (1, ARIN, big("걸리시", "T. ARIN", "GIRLISH")),
+ (1, ARIN, big("걸리쉬", "T. ARIN", "GIRLISH")),
  (1, YUNI, big("케이팝", "T. YUNI", "K-POP")),
  (1, HWANU_D, big("코레오", "T. HWAN.U · T. RAEKU", "CHOREOGRAPHY")),
  (1, RAEKU, "+"),

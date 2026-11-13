@@ -35,19 +35,22 @@ B30 = [   # 원장님 2026-11-13 (2차): 케이팝 → 베이직 → 장르들 �
  (h, ARIN, g("걸리쉬", "GIRLISH", "T. ARIN")), (h, HWANU_D, g("코레오", "CHOREOGRAPHY", "T. HWAN.U")),
  (h, KIRY, g("재즈", "JAZZ", "T. KIRY")), (h, WAACK_B, g("왁킹", "WAACKING", "T. J")),
  (h, MINK_G, g("걸스힙합", "GIRLS HIPHOP", "T. MINKYUNG")), (h, POPUP_D, g("팝업", "POP-UP CLASS")),
- (h, YELLS_D, g("전문반", "PRO CLASS", "T. YELLS · 전 클래스 프리패스")), (h, AUD_C, g("오디션반", "AUDITION CLASS", "T. YUNI"), AL),
- (1, AUD_B1, ed("03 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반"), AL),   # ← 음악: 8마디 끝나고 브레이크다운 끝 2마디
- (1, AUD_B2, ed("04 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), AL),
+ (1, YELLS_D, g("전문반", "PRO CLASS", "T. YELLS · 전 클래스 프리패스")),
+ # ← 음악: 8마디 끝나고 브레이크다운 끝 4마디 (원장님 2026-11-13: 전문반도 눈에 보이는 혜택 3가지 설명)
+ (h, PRAC, ed("03 — PRO CLASS", "매달 [월말평가]\n연습실 [상시 개방]\n다양한 [공연 기회]")), (h, PRAC2, "+"), (h, BUSK_A, "+", BL),
+ (h, AUD_C, g("오디션반", "AUDITION CLASS", "T. YUNI"), AL),
+ (1, AUD_B1, ed("04 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반"), AL),
+ (1, AUD_B2, ed("05 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), AL),
  (1, BUSK_GO2, big("무대", "월말평가 · 버스킹 · 콘서트", "STAGE"), BL),                      # ← 드롭
  (h, BUSK_E, big("제대로", pre="배울 거면"), BL), (h, MINK_G2, "+"),
  (1.5, YELLS_W, END, None, {"speed": 0.8}),
 ]
 build("B30", BB, 0.0, (HEEONE_LIE, ed("01 — CLASS · PRACTICE · STAGE", "수업 · 연습 · 무대\n[전부] 여기서"), "T. HEEONE — HEELSCHOREO"), B30)
 
-# B30 음악: [1.138 → 비트 7마디 끝] + [드롭 직전 2마디] + [드롭 48.10 →]  (마디 경계에서 이어 붙임, 10ms 페이드로 '딱' 소리 방지)
+# B30 음악: [1.138 → 비트 8마디 끝] + [드롭 직전 4마디] + [드롭 48.10 →]  (마디 경계에서 이어 붙임, 10ms 페이드로 '딱' 소리 방지)
 def music_b30(src, out):
     s1a, s1b = 1.138, 1.138 + 2.382 + 8 * BB   # 비트 8마디(한 프레이즈) 끝에서 넘어감
-    s2a, s2b = 48.10 - 2 * BB, 48.10
+    s2a, s2b = 48.10 - 4 * BB, 48.10   # 브레이크다운 끝 4마디 (전문반·오디션반 설명)
     X = 0.12   # 첫 이음새는 짧게 겹쳐서(크로스페이드) 자연스럽게. 겹친 만큼 뒤 구간을 미리 가져와 박자 위치는 그대로
     fc = (f"[0:a]atrim={s1a}:{s1b + X / 2},asetpts=PTS-STARTPTS[a];"
           f"[0:a]atrim={s2a - X / 2}:{s2b},asetpts=PTS-STARTPTS,afade=t=out:st={s2b - s2a + X / 2 - 0.01}:d=0.01[b];"

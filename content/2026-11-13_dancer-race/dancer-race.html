@@ -2,9 +2,9 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&family=Montserrat:ital,wght@1,900&display=swap">
 <style>
-/* 레이아웃: 왼쪽 참가자 패널 + 오른쪽 무대(레인 캔버스). 폰에서는 무대가 위, 패널이 아래. 로우 릴스와 같은 보라 포인트의 어두운 무대 한 가지 룩 */
+/* 레이아웃: 왼쪽 참가자 패널 + 오른쪽 3D 무대(런웨이를 카메라 쪽으로 달려옴). 폰에서는 무대가 위. 로우 보라 포인트의 어두운 무대 한 가지 룩 */
 :root{
   color-scheme:dark;
   --bg:#0d0b13; --stage:#110e19; --panel:#16131f; --line:#2b2540;
@@ -21,7 +21,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15
 button,textarea,input{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.app{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.app{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 
 header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .eyebrow{font-family:var(--f-en);letter-spacing:.32em;color:var(--accent);font-size:15px;line-height:1}
@@ -38,16 +38,9 @@ h1{font-family:var(--f-display);font-weight:400;font-size:clamp(32px,5vw,48px);m
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .lab{font-weight:700;font-size:15px}
 .chip{font-family:var(--f-en);font-size:18px;letter-spacing:.06em;color:var(--accent);font-variant-numeric:tabular-nums}
-textarea{width:100%;min-height:210px;resize:vertical;background:var(--stage);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;line-height:1.55}
+textarea{width:100%;min-height:190px;resize:vertical;background:var(--stage);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;line-height:1.55}
 textarea:disabled{opacity:.55}
 .hint{color:var(--muted);font-size:13px;margin:0}
-.seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg label{flex:1;min-width:70px}
-.seg input{position:absolute;opacity:0;pointer-events:none}
-.seg span{display:block;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px 6px;font-size:14px;font-weight:600;color:var(--muted)}
-.seg small{display:block;font-family:var(--f-en);font-size:14px;letter-spacing:.08em;font-weight:400}
-.seg input:checked+span{border-color:var(--accent);color:var(--fg);background:rgba(185,166,255,.1)}
-.seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
 .ph{position:relative;display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:5px 6px;min-width:0}
 .ph label{display:flex;align-items:center;gap:8px;min-width:0;flex:1;cursor:pointer}
@@ -58,8 +51,13 @@ textarea:disabled{opacity:.55}
 .ph .nm{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .ph .x{background:none;border:0;color:var(--muted);font-size:16px;padding:2px 4px;flex:none}
 .ph .x:hover{color:var(--hot)}
-#resList .av{width:46px;height:46px;align-self:center}
-#resList li:first-child .av{width:76px;height:76px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg label{flex:1;min-width:70px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px 6px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg small{display:block;font-family:var(--f-en);font-size:14px;letter-spacing:.08em;font-weight:400}
+.seg input:checked+span{border-color:var(--accent);color:var(--fg);background:rgba(185,166,255,.1)}
+.seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 .moves{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .moves li{display:grid;grid-template-columns:76px 1fr;gap:8px;align-items:baseline;font-size:14px}
 .moves b{font-family:var(--f-display);font-weight:400;font-size:16px;color:var(--accent)}
@@ -70,23 +68,32 @@ textarea:disabled{opacity:.55}
 .live{font-family:var(--f-en);font-size:15px;letter-spacing:.14em;color:var(--ink);background:var(--hot);border-radius:5px;padding:2px 7px 0;flex:none}
 .live.off{background:var(--line);color:var(--muted)}
 #say{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.trackbox{position:relative;border-radius:10px;overflow:hidden;background:var(--stage);min-height:320px}
-.scroll{max-height:min(64vh,660px);overflow-y:auto}
-canvas{display:block;width:100%}
-#count{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--f-en);font-size:clamp(110px,22vw,240px);line-height:1;color:var(--accent);text-shadow:0 0 40px rgba(185,166,255,.45)}
+.trackbox{position:relative;border-radius:10px;overflow:hidden;background:var(--stage);height:clamp(380px,64vh,700px)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
+#board{position:absolute;left:10px;top:10px;margin:0;padding:8px 10px;list-style:none;background:rgba(13,11,19,.72);border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:700;display:grid;gap:2px;min-width:110px;max-width:46%;pointer-events:none}
+@media (max-width:500px){#board{font-size:12px;padding:6px 8px;min-width:90px}}
+#board li{display:flex;gap:8px;align-items:center;white-space:nowrap;overflow:hidden}
+#board .r{font-family:var(--f-en);font-size:17px;font-weight:400;width:1.1em;color:var(--muted);font-variant-numeric:tabular-nums}
+#board .d{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+#board .n{overflow:hidden;text-overflow:ellipsis}
+#board li.fin .r{color:var(--accent)}
+#count{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--f-en);font-size:clamp(110px,22vw,240px);line-height:1;color:var(--accent);text-shadow:0 0 40px rgba(185,166,255,.55),0 4px 30px rgba(0,0,0,.6)}
 #count.pop{animation:pop .45s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{transform:scale(1.35);opacity:.2}to{transform:scale(1);opacity:1}}
+#nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
 
-#results{position:absolute;inset:0;overflow-y:auto;background:rgba(13,11,19,.94);padding:22px 20px 24px}
+#results{position:absolute;inset:0;overflow-y:auto;background:rgba(13,11,19,.93);padding:22px 20px 24px}
 #results h2{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,4.4vw,44px);margin:0;line-height:1.1}
 #results p{color:var(--muted);margin:4px 0 16px}
-#resList{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+#resList{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 #resList li{display:flex;align-items:baseline;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:0;animation:rise .4s both}
 #resList li:first-child{grid-column:1/-1;border-color:var(--c);background:rgba(185,166,255,.08)}
 #resList .rk{font-family:var(--f-en);font-size:44px;line-height:1;color:var(--c);font-variant-numeric:tabular-nums;min-width:1.2em}
 #resList .nm{font-family:var(--f-display);font-size:26px;line-height:1.15;overflow-wrap:anywhere;min-width:0}
+#resList .av{width:40px;height:40px;align-self:center}
 #resList li:first-child .rk{font-size:72px}
 #resList li:first-child .nm{font-size:clamp(34px,6vw,54px)}
+#resList li:first-child .av{width:76px;height:76px}
 @keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
 .resbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 #copyBox{width:100%;min-height:120px;margin-top:10px}
@@ -135,7 +142,7 @@ canvas{display:block;width:100%}
       <div class="lab">레이스 중 랜덤 무브</div>
       <ul class="moves">
         <li><b>문워크</b><span>뒤로 쭉 밀려요</span></li>
-        <li><b>턴</b><span>돌다가 멈칫, 잠깐 제자리</span></li>
+        <li><b>턴</b><span>빙글 돌다가 멈칫, 잠깐 제자리</span></li>
         <li><b>웨이브</b><span>웨이브 타고 확 가속</span></li>
         <li><b>프리즈</b><span>포즈 잡고 잠깐 정지</span></li>
       </ul>
@@ -143,8 +150,10 @@ canvas{display:block;width:100%}
 
     <section class="stage" aria-label="무대">
       <div class="ticker"><span class="live off" id="live">STANDBY</span><span id="say">5·6·7·8 카운트 뒤에 출발해요</span></div>
-      <div class="trackbox">
-        <div class="scroll"><canvas id="cv" aria-label="댄서 레이스 무대"></canvas></div>
+      <div class="trackbox" id="trackbox">
+        <canvas id="cv" aria-label="댄서 레이스 3D 무대"></canvas>
+        <ol id="board" aria-label="실시간 순위" hidden></ol>
+        <div id="nogl" hidden>이 기기에서는 3D 화면을 띄울 수 없어요.<br>다른 브라우저나 기기에서 열어 주세요.</div>
         <div id="count" aria-live="polite" hidden></div>
         <div id="results" hidden>
           <h2>오늘 순서</h2>
@@ -169,15 +178,17 @@ canvas{display:block;width:100%}
 </div>
 <div id="toast" role="status" hidden></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
 <script>
 (() => {
 const $ = s => document.querySelector(s);
 const COLORS = ['#b9a6ff','#ff7aa2','#7ce0c3','#ffd166','#7fb4ff','#ff9f5a','#e38cff','#9be15d','#5ee7ff','#f4f2ee'];
 const EVENTS = {
-  moon:   {label:'문워크', k:-0.6, dur:1.1,  say:n=>`${n} 문워크! 뒤로 밀려요`},
-  turn:   {label:'턴…',    k:0,    dur:0.9,  say:n=>`${n} 턴 돌다가 멈칫`},
+  moon:   {label:'문워크!', k:-0.6, dur:1.1,  say:n=>`${n} 문워크! 뒤로 밀려요`},
+  turn:   {label:'턴…',     k:0,    dur:0.9,  say:n=>`${n} 턴 돌다가 멈칫`},
   wave:   {label:'웨이브!', k:2.2,  dur:0.9,  say:n=>`${n} 웨이브 타고 가속`},
-  freeze: {label:'프리즈', k:0,    dur:0.75, say:n=>`${n} 프리즈 포즈로 정지`},
+  freeze: {label:'프리즈',  k:0,    dur:0.75, say:n=>`${n} 프리즈 포즈로 정지`},
 };
 const EV_KEYS = Object.keys(EVENTS);
 const SAMPLE = '지우\n서연\n하준\n민서\n도윤\n예린';
@@ -189,21 +200,6 @@ const store = {
 let names = [], D = [], state = 'idle', raceT = 0, order = [], lenSec = 13;
 let countStart = 0, countK = -1, skipping = false, lastTs = 0, wake = null;
 
-/* ── 참가자 ── */
-function parseNames(text){
-  const seen = {}, out = [];
-  text.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).slice(0, 40).forEach(n => {
-    seen[n] = (seen[n] || 0) + 1;
-    out.push(seen[n] > 1 ? `${n}(${seen[n]})` : n);
-  });
-  return out;
-}
-function build(){
-  D = names.map((n,i) => ({name:n, color:COLORS[i % COLORS.length], photo:photos[n] || null, p:0, mult:1, target:1, segT:0,
-    ev:null, evT:0, phase:Math.random()*6, done:false, rank:0}));
-  order = [];
-}
-
 /* ── 얼굴 사진: 메모리에만 둠 (저장·전송 없음) ── */
 const photos = {};
 function loadPhoto(file, name){
@@ -211,11 +207,11 @@ function loadPhoto(file, name){
   const url = URL.createObjectURL(file), img = new Image();
   img.onload = () => {
     const w = img.naturalWidth, h = img.naturalHeight, s = Math.min(w, h);
-    const c = document.createElement('canvas'); c.width = c.height = 160;
-    c.getContext('2d').drawImage(img, (w - s) / 2, (h - s) * .3, s, s, 0, 0, 160, 160);   // 세로 사진은 위쪽(얼굴 쪽)으로 자름
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    c.getContext('2d').drawImage(img, (w - s) / 2, (h - s) * .3, s, s, 0, 0, 256, 256);   // 세로 사진은 위쪽(얼굴 쪽)으로 자름
     URL.revokeObjectURL(url);
     photos[name] = {c, url:c.toDataURL('image/jpeg', .85)};
-    D.forEach(d => { if (d.name === name) d.photo = photos[name]; });
+    D.forEach(d => { if (d.name === name) { d.photo = photos[name]; applyFace(d); } });
     renderRoster();
   };
   img.onerror = () => { URL.revokeObjectURL(url); toast('이 사진은 열 수 없어요'); };
@@ -240,18 +236,28 @@ function renderRoster(){
     if (photos[n]) {
       const x = document.createElement('button'); x.type = 'button'; x.className = 'x'; x.textContent = '×';
       x.setAttribute('aria-label', `${n} 사진 빼기`);
-      x.addEventListener('click', () => { delete photos[n]; D.forEach(d => { if (d.name === n) d.photo = null; }); renderRoster(); });
+      x.addEventListener('click', () => { delete photos[n]; D.forEach(d => { if (d.name === n) { d.photo = null; applyFace(d); } }); renderRoster(); });
       row.appendChild(x);
     }
     box.appendChild(row);
   });
+}
+
+/* ── 참가자 ── */
+function parseNames(text){
+  const seen = {}, out = [];
+  text.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).slice(0, 40).forEach(n => {
+    seen[n] = (seen[n] || 0) + 1;
+    out.push(seen[n] > 1 ? `${n}(${seen[n]})` : n);
+  });
+  return out;
 }
 function syncNames(){
   names = parseNames($('#names').value);
   store.set('rawRaceNames', $('#names').value);
   $('#cnt').textContent = names.length + '명';
   renderRoster();
-  if (state === 'idle' || state === 'done') { state = 'idle'; build(); layout(); setUI(); $('#results').hidden = true; }
+  if (state === 'idle' || state === 'done') { state = 'idle'; build(); $('#results').hidden = true; setUI(); }
 }
 
 /* ── 소리 (버튼 누른 뒤에만) ── */
@@ -295,126 +301,190 @@ function sfx(kind){
   else if (kind === 'fanfare') [523, 659, 784, 1047].forEach((f, i) => blip(t + i * .11, f, .22, .25));
 }
 
-/* ── 무대 그리기 ── */
-const cv = $('#cv'), ctx = cv.getContext('2d');
-let W = 0, H = 0, laneH = 48, x0 = 90, x1 = 0, dpr = 1;
-const PT = 26, PB = 12;
-function layout(){
-  W = cv.parentElement.clientWidth || 600;
-  const n = Math.max(1, D.length);
-  const avail = Math.max(240, Math.min(window.innerHeight * .62, 640));
-  laneH = Math.max(30, Math.min(68, Math.floor((avail - PT - PB) / n)));
-  H = PT + n * laneH + PB;
-  x0 = Math.max(64, Math.min(120, W * .22)); x1 = W - 40;
-  dpr = Math.min(2, window.devicePixelRatio || 1);
-  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + 'px';
+/* ── 3D 무대 ── */
+const L = 22;          // 레이스 거리 (m): A홀 긴 쪽
+let laneW = 1.3, renderer = null, scene, camera, stageG = null, ledM = [], focusZ = 0;
+const col = h => new THREE.Color(h).convertSRGBToLinear();
+const mat = (h, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color:col(h), roughness:.8}, o));
+function tex(draw, w, h){ const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
+function rr(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+function disposeTree(o){ o.traverse(x => { if (x.geometry) x.geometry.dispose(); if (x.material) { if (x.material.map) x.material.map.dispose(); x.material.dispose(); } }); }
+
+try {
+  renderer = new THREE.WebGLRenderer({canvas:$('#cv'), antialias:true});
+  renderer.outputEncoding = THREE.sRGBEncoding; renderer.setClearColor(0x0d0b13);
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x0c0b10, 34, 80);
+  camera = new THREE.PerspectiveCamera(48, 1, .1, 220);
+  scene.add(new THREE.HemisphereLight(0xdcd6ff, 0x16141c, .75));
+  const key = new THREE.DirectionalLight(0xffffff, .55); key.position.set(-3, 12, 26); scene.add(key);
+} catch(e) { renderer = null; $('#nogl').hidden = false; }
+
+// 무대: 학원 A홀 안 (콘크리트 바닥 + 댄스 테이프 레인, 왼쪽 벽 전신 거울, 오른쪽 벽 RAW LED 간판, 출발 쪽 벽 RAW 스티커, 천장 스팟 빛 점 · 벽 위 LED 줄)
+// 카메라는 결승 쪽에서 출발 쪽을 바라봄 → 학생들이 카메라 쪽으로 달려와서 얼굴이 보임
+const LED = ['#ff2a3d', '#8e74ff', '#2f7bff', '#ff4fb3', '#2fe08a', '#ffffff'];
+let ledCi = 0, hallLights = [], mirrorReal = null;
+function rawLogo(kind){ return tex((g, w, h) => { g.clearRect(0, 0, w, h); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = 'italic 900 210px Montserrat, "Arial Black", sans-serif';
+  if (kind === 'led') { g.shadowColor = '#fff'; g.shadowBlur = 46; g.fillStyle = '#fff'; for (let i = 0; i < 3; i++) g.fillText('RAW', w / 2, h / 2); g.shadowBlur = 0; g.fillStyle = '#141318'; g.fillText('RAW', w / 2, h / 2); }
+  else { g.fillStyle = 'rgba(232,230,236,.92)'; g.fillText('RAW', w / 2, h / 2); } }, 1024, 320); }
+function floorText(text, font, color, wdt, z){
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(wdt, wdt / 4), new THREE.MeshBasicMaterial({transparent:true, depthWrite:false, map:tex((g, w, h) => { g.fillStyle = color; g.font = font; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, w / 2, h / 2 + 6); }, 1024, 256)}));
+  m.rotation.x = -Math.PI / 2; m.position.set(0, .009, z); stageG.add(m); }
+function setLed(ci){ ledCi = ci; const c = col(LED[ci]); ledM.forEach(m => m.color.copy(c)); hallLights.forEach(l => l.color.copy(c)); }
+function buildStage(n){
+  if (!renderer) return;
+  if (stageG) { scene.remove(stageG); disposeTree(stageG); }
+  stageG = new THREE.Group(); scene.add(stageG); ledM = []; hallLights = []; mirrorReal = null;
+  laneW = n > 12 ? 1.0 : 1.3;
+  const RW = n * laneW, W = Math.max(8, RW + 3.2), hw = W / 2, Z0 = -2.6, Z1 = L + 60, ZL = Z1 - Z0, ZC = (Z0 + Z1) / 2, HH = 3.4;
+  const add = (geo, m, x, y, z) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); stageG.add(o); return o; };
+  const fl = add(new THREE.PlaneGeometry(W, ZL), mat('#7b7a80', {roughness:.55, metalness:.08}), 0, 0, ZC); fl.rotation.x = -Math.PI / 2;
+  const wallM = mat('#16151a', {roughness:.85});
+  add(new THREE.BoxGeometry(W + .4, HH, .2), wallM, 0, HH / 2, Z0 - .1);
+  [-1, 1].forEach(s => add(new THREE.BoxGeometry(.2, HH, ZL), wallM, s * (hw + .1), HH / 2, ZC));
+  // 천장 + 스팟 조명 기구
+  const ceil = add(new THREE.PlaneGeometry(W + .4, ZL), mat('#1c1b22', {roughness:.9}), 0, HH, ZC); ceil.rotation.x = Math.PI / 2;
+  const canM = mat('#0b0a0e', {roughness:.4, metalness:.6}), canG = new THREE.CylinderGeometry(.12, .16, .22, 14);
+  [-1, 1].forEach(sx => { for (let z = -1; z < L + 14; z += 3.2) add(canG, canM, sx * W / 3.4, HH - .11, z); });
+  // 댄스 테이프 레인 + 출발·결승 테이프
+  const tapeM = new THREE.MeshBasicMaterial({color:col('#f4f2ee'), transparent:true, opacity:.5});
+  for (let i = 0; i <= n; i++) { const t = add(new THREE.PlaneGeometry(.05, L + 1.2), tapeM, (i - n / 2) * laneW, .007, L / 2); t.rotation.x = -Math.PI / 2; }
+  const st = add(new THREE.PlaneGeometry(RW, .09), new THREE.MeshBasicMaterial({color:col('#f4f2ee')}), 0, .008, 0); st.rotation.x = -Math.PI / 2;
+  const cols = Math.max(8, Math.round(RW / .25));
+  const chk = tex((g, w, h) => { const s = w / cols; for (let r = 0; r < 2; r++) for (let c = 0; c < cols; c++) { g.fillStyle = (r + c) % 2 ? '#141120' : '#f4f2ee'; g.fillRect(c * s, r * s, s + 1, s + 1); } }, cols * 16, 32);
+  const fn = add(new THREE.PlaneGeometry(RW, RW * 2 / cols), new THREE.MeshBasicMaterial({map:chk}), 0, .008, L); fn.rotation.x = -Math.PI / 2;
+  floorText('S T A R T', '400 150px "Bebas Neue", Impact, sans-serif', 'rgba(244,242,238,.5)', Math.min(RW, 5), -1);
+  floorText('F I N I S H', '400 150px "Bebas Neue", Impact, sans-serif', 'rgba(185,166,255,.75)', Math.min(RW, 6), L + 1.3);
+  // 출발 쪽 벽 RAW 스티커 + 스피커, 오른쪽 벽 LED 간판
+  const lg = add(new THREE.PlaneGeometry(Math.min(W * .6, 5.2), Math.min(W * .6, 5.2) * 320 / 1024), new THREE.MeshBasicMaterial({map:rawLogo('sticker'), transparent:true}), 0, 2.15, Z0 + .01);
+  const spM = mat('#0b0a0e', {roughness:.5});
+  [-1, 1].forEach(s => add(new THREE.BoxGeometry(.5, .75, .4), spM, s * (hw - .5), 2.75, Z0 + .22));
+  const led = add(new THREE.PlaneGeometry(3.4, 3.4 * 320 / 1024), new THREE.MeshBasicMaterial({map:rawLogo('led'), transparent:true}), hw - .01, 2.35, L * .42); led.rotation.y = -Math.PI / 2;
+  const aLab = add(new THREE.PlaneGeometry(1.4, .35), new THREE.MeshBasicMaterial({transparent:true, map:tex((g, w, h) => { g.fillStyle = '#b9a6ff'; g.font = '700 46px "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('A홀 · 메인홀', w / 2, h / 2); }, 400, 100)}), hw - .01, 1.65, L * .42); aLab.rotation.y = -Math.PI / 2;
+  // 왼쪽 벽 전신 거울 (실제로 비춤, 안 되면 금속 판)
+  const mLen = L + 14, mGeo = new THREE.PlaneGeometry(mLen, 2.4), mz = Z0 + .4 + mLen / 2;
+  let mir;
+  if (THREE.Reflector) { const box = $('#trackbox'), q = Math.min(1.5, window.devicePixelRatio || 1) * .75;
+    mir = new THREE.Reflector(mGeo, {textureWidth:Math.round(box.clientWidth * q), textureHeight:Math.round(box.clientHeight * q), color:0x9aa3ad, clipBias:.003}); mirrorReal = mir; }
+  else mir = new THREE.Mesh(mGeo, mat('#8b93a6', {roughness:.1, metalness:.9}));
+  mir.position.set(-hw + .02, 1.35, mz); mir.rotation.y = Math.PI / 2; stageG.add(mir);
+  add(new THREE.BoxGeometry(.03, 2.5, mLen + .1), mat('#0b0a0e'), -hw + .005, 1.35, mz);
+  // 조명: 천장 스팟이 떨어뜨리는 빛 점, 벽 위 LED 줄, 색 조명
+  const glow = new THREE.CircleGeometry(.13, 16), nx = Math.max(3, Math.round(W / 1.6));
+  for (let i = 0; i < nx; i++) for (let z = -1.6; z < L + 12; z += 1.6) { const m = new THREE.MeshBasicMaterial({color:col(LED[0]), transparent:true, opacity:.85, depthWrite:false}); ledM.push(m);
+    const s = add(glow, m, -hw + (i + .5) * W / nx, .012, z); s.rotation.x = -Math.PI / 2; }
+  [-1, 1].forEach(s => { const m = new THREE.MeshBasicMaterial({color:col(LED[0])}); ledM.push(m); add(new THREE.BoxGeometry(.06, .06, ZL), m, s * (hw - .04), HH - .05, ZC); });
+  const sm = new THREE.MeshBasicMaterial({color:col(LED[0])}); ledM.push(sm); add(new THREE.BoxGeometry(W, .06, .06), sm, 0, HH - .05, Z0 + .04);
+  [2, L * .5, L - 1].forEach(z => { const p = new THREE.PointLight(col(LED[0]), 1.1, 14, 1.2); p.position.set(0, 2.8, z); stageG.add(p); hallLights.push(p); });
+  setLed(0);
 }
-function limb(ax, ay, a1, a2, L1, L2){
-  const bx = ax + Math.sin(a1) * L1, by = ay + Math.cos(a1) * L1;
-  const cx = bx + Math.sin(a1 + a2) * L2, cy = by + Math.cos(a1 + a2) * L2;
-  ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.lineTo(cx, cy); ctx.stroke();
+
+// 캐릭터 (온라인 RAW 연습실과 같은 모양): 후드 색 = 참가자 색
+function limb(len, r, m){ const g = new THREE.Group(), x = new THREE.Mesh(new THREE.CylinderGeometry(r, r * .9, len, 12), m); x.position.y = -len / 2; g.add(x); return g; }
+function tagTex(name, color, rank){
+  return tex((g, w, h) => {
+    g.fillStyle = 'rgba(18,15,26,.86)'; rr(g, 4, 4, w - 8, h - 8, 34); g.fill();
+    g.strokeStyle = color; g.lineWidth = 5; rr(g, 4, 4, w - 8, h - 8, 34); g.stroke();
+    let x0 = w / 2, align = 'center';
+    if (rank) { g.fillStyle = rank === 1 ? color : '#2b2540'; g.beginPath(); g.arc(46, h / 2, 28, 0, 7); g.fill();
+      g.fillStyle = rank === 1 ? '#120f1a' : '#f4f2ee'; g.font = '400 40px "Bebas Neue", Impact, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(rank, 46, h / 2 + 2); x0 = 86; align = 'left'; }
+    g.fillStyle = '#f4f2ee'; g.font = '700 40px "IBM Plex Sans KR", system-ui, sans-serif'; g.textAlign = align; g.textBaseline = 'middle';
+    g.fillText(name, x0, h / 2 + 1, w - x0 - 20);
+  }, 384, 76);
 }
-function drawDancer(d, cx, by, h, t){
-  const pose = state === 'race' || state === 'done' ? (d.done ? 'win' : (d.ev || 'run')) : 'idle';
-  const ph = d.phase, s = Math.sin(ph);
-  ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(cx, by + 1, h * .2, h * .05, 0, 0, Math.PI * 2); ctx.fill();
-  if (pose === 'wave' || pose === 'moon') {   // 속도선
-    ctx.strokeStyle = d.color; ctx.globalAlpha = .45; ctx.lineWidth = Math.max(1.5, h * .04);
-    const dir = pose === 'wave' ? -1 : 1;
-    for (let k = 0; k < 3; k++) { const yy = by - h * (.3 + k * .2), x = cx + dir * h * .32;
-      ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + dir * h * (.25 + .12 * ((k + Math.floor(t * 12)) % 2)), yy); ctx.stroke(); }
-    ctx.globalAlpha = 1;
-  }
-  ctx.save(); ctx.translate(cx, by);
-  if (pose === 'turn') { const c = Math.cos(d.evT * 16); ctx.scale(Math.abs(c) < .08 ? .08 * Math.sign(c || 1) : c, 1); }
-  ctx.strokeStyle = d.color; ctx.fillStyle = d.color;
-  ctx.lineWidth = Math.max(2, h * .085); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  let lean = 0, bounce = 0, legs, arms;
-  const L = h * .23, A1 = h * .17, A2 = h * .16;
-  if (pose === 'idle') {
-    bounce = Math.abs(Math.sin((t + d.phase * .05) * Math.PI * 2)) * h * .03;
-    legs = [[.13, 0], [-.13, 0]]; arms = [[.25, -.35], [-.25, .35]];
-  } else if (pose === 'run' || pose === 'wave') {
-    lean = pose === 'wave' ? .22 : .12; bounce = Math.abs(Math.cos(ph)) * h * .04;
-    legs = [[.55 * s, -Math.max(0, -s) * .9], [-.55 * s, -Math.max(0, s) * .9]];
-    arms = pose === 'wave'
-      ? [[1.5, .7 * Math.sin(t * 14)], [-1.5, .7 * Math.sin(t * 14 + 1.6)]]
-      : [[-.7 * s, .9], [.7 * s, .9]];
-  } else if (pose === 'moon') {
-    lean = -.1; const m = Math.sin(ph * .8);
-    legs = [[.15 * m - .05, m > 0 ? -.7 * m : 0], [-.15 * m - .05, m < 0 ? .7 * m : 0]];
-    arms = [[-.25 * m, .5], [.25 * m, .5]];
-  } else if (pose === 'turn') {
-    legs = [[0, 0], [.6, -1.4]]; arms = [[1.45, 0], [-1.45, 0]];
-  } else if (pose === 'freeze') {
-    lean = .08; legs = [[-.05, 0], [1.2, -1.05]]; arms = [[2.6, 0], [-2.6, 0]];
-  } else { // win
-    bounce = Math.abs(Math.sin(t * Math.PI * 2)) * h * .06;
-    legs = [[.22, 0], [-.22, 0]]; arms = [[2.7 + .15 * Math.sin(t * 8), 0], [-2.7 - .15 * Math.sin(t * 8), 0]];
-  }
-  const hipY = -h * .46 - bounce;
-  legs.forEach(l => limb(0, hipY, l[0], l[1], L, L));
-  const TL = h * .3, nx = Math.sin(lean) * TL, ny = hipY - Math.cos(lean) * TL;
-  ctx.beginPath(); ctx.moveTo(0, hipY); ctx.lineTo(nx, ny); ctx.stroke();
-  const sx = nx - Math.sin(lean) * h * .04, sy = ny + Math.cos(lean) * h * .04;
-  arms.forEach(a => limb(sx, sy, a[0], a[1], A1, A2));
-  // 머리: 사진이 있으면 얼굴, 없으면 색 동그라미 (사진이 잘 보이게 머리를 크게)
-  const r = d.photo ? h * .2 : h * .14, hx = nx + Math.sin(lean) * (r + h * .02), hy = ny - Math.cos(lean) * (r + h * .02);
-  ctx.beginPath(); ctx.arc(hx, hy, r, 0, Math.PI * 2);
+const BUB = {};
+function bubTex(k){ return BUB[k] || (BUB[k] = tex((g, w, h) => { g.fillStyle = '#b9a6ff'; rr(g, 4, 4, w - 8, h - 22, 30); g.fill();
+  g.beginPath(); g.moveTo(w / 2 - 14, h - 19); g.lineTo(w / 2, h - 4); g.lineTo(w / 2 + 14, h - 19); g.fill();
+  g.fillStyle = '#120f1a'; g.font = '400 40px "Black Han Sans", "IBM Plex Sans KR", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(EVENTS[k].label, w / 2, (h - 18) / 2 + 3); }, 256, 84)); }
+function makeRig(color){
+  const hoodM = mat(color, {roughness:.9}), skin = mat('#f2cba8', {roughness:.9}), dark = mat('#1b1a20');
+  const g = new THREE.Group(), body = new THREE.Group(); body.position.y = 1; g.add(body);
+  body.add(new THREE.Mesh(new THREE.CylinderGeometry(.34, .4, .72, 16), hoodM));
+  const headG = new THREE.Group(); headG.position.y = .78; body.add(headG);
+  headG.add(new THREE.Mesh(new THREE.SphereGeometry(.46, 24, 18), skin));
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(.48, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2.1), dark); cap.position.y = .05; cap.rotation.x = -.15; headG.add(cap);
+  const brim = new THREE.Mesh(new THREE.CylinderGeometry(.26, .26, .04, 20, 1, false, 0, Math.PI), dark); brim.rotation.set(0, Math.PI / 2, 0); brim.position.set(0, .1, .36); headG.add(brim);
+  const faceBits = [cap, brim];
+  [-.15, .15].forEach(x => { const e = new THREE.Mesh(new THREE.SphereGeometry(.05, 10, 8), new THREE.MeshBasicMaterial({color:0x15131a})); e.position.set(x, -.02, .42); headG.add(e); faceBits.push(e); });
+  [-.25, .25].forEach(x => { const b = new THREE.Mesh(new THREE.CircleGeometry(.06, 12), new THREE.MeshBasicMaterial({color:col('#ff9db5'), transparent:true, opacity:.6})); b.position.set(x, -.12, .405); headG.add(b); faceBits.push(b); });
+  const armL = limb(.62, .1, hoodM), armR = limb(.62, .1, hoodM); armL.position.set(-.44, .28, 0); armR.position.set(.44, .28, 0); body.add(armL, armR);
+  [armL, armR].forEach(a => { const h = new THREE.Mesh(new THREE.SphereGeometry(.11, 12, 10), skin); h.position.y = -.66; a.add(h); });
+  const pants = mat('#2a2834'), legL = limb(.62, .13, pants), legR = limb(.62, .13, pants); legL.position.set(-.17, -.34, 0); legR.position.set(.17, -.34, 0); body.add(legL, legR);
+  [legL, legR].forEach(l => { const s = new THREE.Mesh(new THREE.BoxGeometry(.22, .14, .36), mat('#f4f2ee', {roughness:.6})); s.position.set(0, -.66, .06); l.add(s); });
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(.6, 24), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.4})); shadow.rotation.x = -Math.PI / 2; shadow.position.y = .012; g.add(shadow);
+  const tag = new THREE.Sprite(new THREE.SpriteMaterial({depthTest:false})); tag.scale.set(1.75, .35, 1); tag.position.y = 2.62; tag.renderOrder = 2; g.add(tag);
+  const bub = new THREE.Sprite(new THREE.SpriteMaterial({depthTest:false})); bub.scale.set(1.35, .44, 1); bub.position.y = 3.15; bub.renderOrder = 3; bub.visible = false; g.add(bub);
+  g.scale.setScalar(.8);
+  return {g, body, headG, armL, armR, legL, legR, tag, bub, faceBits, face:null};
+}
+function setTag(d){ if (d.R.tag.material.map) d.R.tag.material.map.dispose(); d.R.tag.material.map = tagTex(d.name, d.color, d.rank); d.R.tag.material.needsUpdate = true; }
+function applyFace(d){
+  if (!d.R) return; const R = d.R;
+  if (R.face) { R.headG.remove(R.face); disposeTree(R.face); R.face = null; }
+  R.faceBits.forEach(b => b.visible = !d.photo);
   if (d.photo) {
-    ctx.save(); ctx.clip(); ctx.drawImage(d.photo.c, hx - r, hy - r, r * 2, r * 2); ctx.restore();
-    ctx.lineWidth = Math.max(1.5, h * .05); ctx.beginPath(); ctx.arc(hx, hy, r, 0, Math.PI * 2); ctx.stroke();
-  } else ctx.fill();
-  ctx.restore();
-}
-function pill(text, x, y, color, fs){
-  ctx.font = `700 ${fs}px "IBM Plex Sans KR", system-ui, sans-serif`;
-  const w = ctx.measureText(text).width + 12, hh = fs + 8;
-  if (x + w > W - 4) x = W - 4 - w;
-  ctx.fillStyle = 'rgba(13,11,19,.92)'; ctx.strokeStyle = color; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, hh, hh / 2) : ctx.rect(x, y, w, hh); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#f4f2ee'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillText(text, x + 6, y + hh / 2 + 1);
-}
-function draw(t){
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = '#110e19'; ctx.fillRect(0, 0, W, H);
-  const n = D.length, yEnd = PT + n * laneH;
-  for (let i = 0; i < n; i++) if (i % 2 === 0) { ctx.fillStyle = 'rgba(185,166,255,.035)'; ctx.fillRect(0, PT + i * laneH, W, laneH); }
-  ctx.strokeStyle = 'rgba(244,242,238,.07)'; ctx.lineWidth = 1;
-  for (let i = 0; i <= n; i++) { const y = PT + i * laneH + .5; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-  // 결승선 쪽 조명: 박자(120BPM)에 맞춰 반짝
-  const beat = state === 'race' || state === 'count' ? Math.pow(1 - ((t * 2) % 1), 3) : .25;
-  const g = ctx.createLinearGradient(x1 - 70, 0, x1, 0);
-  g.addColorStop(0, 'rgba(185,166,255,0)'); g.addColorStop(1, `rgba(185,166,255,${.06 + .16 * beat})`);
-  ctx.fillStyle = g; ctx.fillRect(x1 - 70, PT, 70, n * laneH);
-  // 출발선
-  ctx.strokeStyle = 'rgba(244,242,238,.25)'; ctx.setLineDash([4, 5]);
-  ctx.beginPath(); ctx.moveTo(x0 + .5, PT); ctx.lineTo(x0 + .5, yEnd); ctx.stroke(); ctx.setLineDash([]);
-  // 결승선 체크무늬
-  const sq = Math.max(5, Math.min(8, laneH / 5));
-  for (let y = PT, r = 0; y < yEnd; y += sq, r++) for (let c = 0; c < 2; c++) {
-    ctx.fillStyle = (r + c) % 2 ? '#110e19' : 'rgba(244,242,238,.85)'; ctx.fillRect(x1 + c * sq, y, sq, Math.min(sq, yEnd - y));
+    const t = new THREE.CanvasTexture(d.photo.c); t.encoding = THREE.sRGBEncoding;
+    const f = new THREE.Mesh(new THREE.CircleGeometry(.4, 40), new THREE.MeshBasicMaterial({map:t}));
+    const ring = new THREE.Mesh(new THREE.RingGeometry(.4, .46, 40), new THREE.MeshBasicMaterial({color:col(d.color)}));
+    f.add(ring); f.position.set(0, .02, .47); R.headG.add(f); R.face = f;
   }
-  ctx.font = '400 15px "Bebas Neue", Impact, sans-serif'; ctx.fillStyle = '#a39db5'; ctx.textBaseline = 'alphabetic';
-  ctx.textAlign = 'center'; ctx.fillText('START', x0, PT - 8); ctx.fillText('FINISH', Math.min(W - 22, x1 + sq), PT - 8);
-  // 댄서
-  const fs = Math.max(11, Math.min(16, laneH * .3)), bubbles = [];
-  D.forEach((d, i) => {
-    const top = PT + i * laneH, by = top + laneH * .88, h = laneH * .78;
-    const cx = x0 + h * .2 + d.p * (x1 - x0 - h * .55);
-    ctx.font = `600 ${fs}px "IBM Plex Sans KR", system-ui, sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = d.done ? d.color : '#f4f2ee';
-    ctx.fillText(d.name, cx - h * .3, top + laneH * .55, Math.max(40, x0 - 8));
-    drawDancer(d, cx, by, h, t);
-    if (d.ev) bubbles.push([EVENTS[d.ev].label, cx + h * .2, top + 2, d.color]);
-    if (d.done) {
-      const r = Math.min(13, laneH * .34), bx = W - 17, byy = top + laneH / 2;
-      ctx.fillStyle = d.rank === 1 ? d.color : '#2b2540'; ctx.beginPath(); ctx.arc(bx, byy, r, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = d.rank === 1 ? '#120f1a' : '#f4f2ee'; ctx.textAlign = 'center';
-      ctx.font = `400 ${Math.round(r * 1.35)}px "Bebas Neue", Impact, sans-serif`; ctx.fillText(String(d.rank), bx, byy + 1);
-    }
-  });
-  bubbles.forEach(b => pill(b[0], b[1], b[2], b[3], Math.max(11, Math.min(14, laneH * .26))));
+}
+
+function build(){
+  if (renderer) D.forEach(d => { scene.remove(d.R.g); disposeTree(d.R.g); });
+  D = names.map((n, i) => ({name:n, color:COLORS[i % COLORS.length], photo:photos[n] || null, p:0, mult:1, target:1, segT:0,
+    ev:null, evT:0, phase:Math.random() * 6, seed:Math.random() * 6, done:false, rank:0, extra:0, R:null}));
+  order = [];
+  if (!renderer) return;
+  buildStage(D.length);
+  D.forEach((d, i) => { d.R = makeRig(d.color); d.R.g.position.x = (i - (D.length - 1) / 2) * laneW; scene.add(d.R.g); setTag(d); applyFace(d); });
+  focusZ = 0; resize();
+}
+
+function animD(d, t){
+  const {body, headG, armL, armR, legL, legR} = d.R;
+  body.position.y = 1; body.rotation.set(0, 0, 0); headG.rotation.set(0, 0, 0); [armL, armR, legL, legR].forEach(x => x.rotation.set(0, 0, 0));
+  const pose = state === 'race' || state === 'done' ? (d.done ? 'win' : (d.ev || 'run')) : 'idle';
+  const beat = Math.pow(1 - ((t * 2) % 1), 3), w = Math.sin(d.phase);
+  if (pose === 'idle') {   // 박자에 맞춰 바운스
+    body.position.y = 1 - beat * .08; armL.rotation.z = -.15 - beat * .25; armR.rotation.z = .15 + beat * .25;
+    legL.rotation.z = .08; legR.rotation.z = -.08; headG.rotation.z = Math.sin(t * Math.PI + d.seed) * .08;
+  } else if (pose === 'run') {
+    legL.rotation.x = w * .75; legR.rotation.x = -w * .75; armL.rotation.x = -w * .65; armR.rotation.x = w * .65;
+    body.position.y = 1 + Math.abs(Math.cos(d.phase)) * .1; body.rotation.x = .1;
+  } else if (pose === 'wave') {
+    legL.rotation.x = w * .9; legR.rotation.x = -w * .9; body.rotation.x = .18; body.position.y = 1 + Math.abs(Math.cos(d.phase)) * .1;
+    armL.rotation.z = -1.45 + Math.sin(t * 13) * .45; armR.rotation.z = 1.45 + Math.sin(t * 13 + 1.6) * .45; body.rotation.z = Math.sin(t * 13 + .8) * .12;
+  } else if (pose === 'moon') {   // 정면 보고 뒤로 미끄러짐
+    const m = Math.sin(d.phase * .8); legL.rotation.x = -.45 * Math.max(0, m); legR.rotation.x = -.45 * Math.max(0, -m);
+    body.position.y = 1 + Math.abs(m) * .05; body.rotation.x = -.12; armL.rotation.x = .3 * m; armR.rotation.x = -.3 * m; headG.rotation.x = -.1;
+  } else if (pose === 'turn') {
+    body.rotation.y = (1 - d.evT / EVENTS.turn.dur) * Math.PI * 4; armL.rotation.z = -1.3; armR.rotation.z = 1.3; legR.rotation.x = -.9; legR.rotation.z = -.3;
+  } else if (pose === 'freeze') {
+    body.position.y = .8; legL.rotation.x = -.9; legR.rotation.x = .35; armR.rotation.z = 2.7; armL.rotation.z = -.5; armL.rotation.x = -.6; body.rotation.z = .15; headG.rotation.z = -.2;
+  } else {   // 도착: 점프하며 만세
+    const j = Math.abs(Math.sin(t * 5 + d.seed)); body.position.y = 1 + j * .4; armL.rotation.z = -2.7 + Math.sin(t * 10) * .15; armR.rotation.z = 2.7 - Math.sin(t * 10) * .15;
+    legL.rotation.x = -j * .5; legR.rotation.x = -j * .5;
+  }
+  d.R.g.position.z = d.p * L + d.extra;
+  d.R.bub.visible = !!d.ev;
+  if (d.ev && d.R.bub.material.map !== bubTex(d.ev)) { d.R.bub.material.map = bubTex(d.ev); d.R.bub.material.needsUpdate = true; }
+}
+function resize(){
+  if (!renderer) return;
+  const box = $('#trackbox'), w = box.clientWidth, h = box.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 60 : 46; camera.updateProjectionMatrix();
+}
+function updateCam(dt, t){
+  let target = 0;
+  if (state === 'race' || state === 'done') target = Math.min(L, Math.max(0, ...D.map(d => d.p * L)));
+  focusZ += (target - focusZ) * Math.min(1, dt * 2.2);
+  const halfW = D.length * laneW / 2 + 1, vf = camera.fov * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
+  const dist = Math.max(6, Math.min(45, halfW / Math.tan(hf / 2) * 1.05));
+  const sway = state === 'race' ? Math.sin(t * .4) * Math.min(1.2, dist * .05) : 0;
+  camera.position.set(sway, Math.min(2.85, 1.5 + dist * .22), focusZ + 1.4 + dist);
+  camera.lookAt(0, camera.aspect < 1 ? .45 : .95, focusZ - dist * .08);   // 세로 화면은 바닥 쪽으로 더 숙임
 }
 
 /* ── 레이스 진행 ── */
@@ -422,7 +492,7 @@ function say(msg){ if (skipping) return; $('#say').textContent = msg; }
 function step(dt){
   raceT += dt; const base = 1.15 / lenSec;
   for (const d of D) {
-    if (d.done) { d.phase += dt * 6; continue; }
+    if (d.done) { d.phase += dt * 6; d.extra = Math.min(1.6, d.extra + dt * 2.5); continue; }
     d.segT -= dt;
     if (d.segT <= 0) { d.target = .7 + Math.random() * .6; d.segT = .35 + Math.random() * .6; }
     d.mult += (d.target - d.mult) * Math.min(1, dt * 3);
@@ -433,9 +503,10 @@ function step(dt){
     }
     const v = base * (d.ev ? EVENTS[d.ev].k : d.mult);
     d.p = Math.max(0, d.p + v * dt);
-    d.phase += dt * (4 + Math.abs(v) / base * 6);
+    d.phase += dt * (5 + Math.abs(v) / base * 7);
     if (d.p >= 1) {
       d.p = 1; d.done = true; d.ev = null; order.push(d); d.rank = order.length;
+      if (d.R) setTag(d);
       if (d.rank === 1) { say(`${d.name} 1등 도착!`); sfx('first'); } else sfx('finish');
     }
   }
@@ -445,7 +516,7 @@ async function lockWake(){ try { wake = await navigator.wakeLock?.request('scree
 function releaseWake(){ try { wake && wake.release(); } catch(e) {} wake = null; }
 function start(){
   if (names.length < 2) return;
-  build(); layout(); state = 'count'; countK = -1; raceT = 0;
+  build(); state = 'count'; countK = -1; raceT = 0;
   countStart = performance.now() / 1000 + .06;
   $('#results').hidden = true; $('#copyBox').hidden = true;
   say('5, 6, 7, 8…'); startBeat(); lockWake(); setUI();
@@ -453,12 +524,13 @@ function start(){
 function finish(){
   state = 'done'; stopBeat(); releaseWake(); sfx('fanfare'); setUI();
   if (!skipping) say(`도착 완료! 1번은 ${order[0].name}`);
-  setTimeout(showResults, skipping ? 0 : 900);
+  setTimeout(showResults, skipping ? 0 : 1600);
 }
 function skip(){
   if (state !== 'race' && state !== 'count') return;
   skipping = true; $('#count').hidden = true; if (state === 'count') state = 'race';
   let guard = 0; while (state === 'race' && guard++ < 200000) step(1 / 30);
+  D.forEach(d => d.extra = 1.6);
   skipping = false; say(`건너뛰기 완료! 1번은 ${order[0].name}`);
 }
 function showCount(txt){
@@ -477,6 +549,18 @@ function showResults(){
     ol.appendChild(li);
   });
   $('#results').hidden = false; $('#results').scrollTop = 0; setUI();
+}
+let boardT = 0;
+function updateBoard(){
+  const b = $('#board'), show = state === 'race' || (state === 'done' && $('#results').hidden);
+  b.hidden = !show; if (!show) return;
+  const list = [...D].sort((a, c) => (a.done && c.done) ? a.rank - c.rank : a.done ? -1 : c.done ? 1 : c.p - a.p).slice(0, $('#trackbox').clientWidth < 500 ? 3 : 5);
+  b.innerHTML = '';
+  list.forEach((d, i) => { const li = document.createElement('li'); if (d.done) li.className = 'fin'; li.style.setProperty('--c', d.color);
+    const r = document.createElement('span'); r.className = 'r'; r.textContent = i + 1;
+    const dot = document.createElement('span'); dot.className = 'd';
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = d.name;
+    li.append(r, dot, n); b.appendChild(li); });
 }
 function setUI(){
   const racing = state === 'count' || state === 'race';
@@ -502,7 +586,15 @@ function loop(ts){
     }
   } else if (state === 'race') step(dt);
   else for (const d of D) d.phase += dt * 6;
-  draw(now);
+  if ((boardT += dt) > .2) { boardT = 0; updateBoard(); }
+  if (renderer) {
+    const racing = state === 'race' || state === 'count', beat = racing ? Math.pow(1 - ((now * 2) % 1), 3) : .35;
+    if (racing) { const ci = Math.floor(now / 2) % LED.length; if (ci !== ledCi) setLed(ci); } else if (ledCi !== 0) setLed(0);   // 레이스 중엔 4박마다 조명 색이 바뀜 (평소엔 A홀 빨간 조명)
+    const lc = col(LED[ledCi]).multiplyScalar(.45 + .55 * beat); ledM.forEach(m => m.color.copy(lc)); hallLights.forEach(l => l.intensity = .7 + .8 * beat);
+    D.forEach(d => animD(d, now));
+    updateCam(dt, now);
+    renderer.render(scene, camera);
+  }
   requestAnimationFrame(loop);
 }
 
@@ -511,7 +603,7 @@ $('#names').value = store.get('rawRaceNames') ?? SAMPLE;
 const savedLen = store.get('rawRaceLen'); if (savedLen && $('#len' + savedLen)) $('#len' + savedLen).checked = true;
 lenSec = +document.querySelector('input[name="len"]:checked').value;
 document.querySelectorAll('input[name="len"]').forEach(r => r.addEventListener('change', () => { lenSec = +r.value; store.set('rawRaceLen', r.value); }));
-$('#names').addEventListener('input', () => { clearTimeout(syncNames.h); syncNames.h = setTimeout(syncNames, 200); });
+$('#names').addEventListener('input', () => { clearTimeout(syncNames.h); syncNames.h = setTimeout(syncNames, 250); });
 $('#startBtn').addEventListener('click', start);
 $('#againBtn').addEventListener('click', start);
 $('#skipBtn').addEventListener('click', skip);
@@ -531,9 +623,10 @@ $('#fsBtn').addEventListener('click', () => {
   try { (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => toast('이 화면에서는 전체화면이 안 돼요')); }
   catch(e) { toast('이 화면에서는 전체화면이 안 돼요'); }
 });
-new ResizeObserver(() => layout()).observe(cv.parentElement);
-window.addEventListener('resize', layout);
-syncNames();
+new ResizeObserver(resize).observe($('#trackbox'));
+syncNames(); setUI();
+// 글꼴이 늦게 오면 이름표·현수막을 다시 그림
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (state === 'idle') build(); });
 requestAnimationFrame(loop);
 })();
 </script>

@@ -20,6 +20,15 @@ FB = M("tall", "C2259.MP4", 0.5); SMILE = M("yolo", "C2204.MP4", 3.0, 0.8, pick_
 BUSK_STILL = M("full", "BUSK.mp4", 4.118); BUSK_GO = M("wide", "BUSK.mp4", 6.5, 0.5); BUSK_GO2 = M("wide", "BUSK.mp4", 12.0, 0.5)
 BUSK_A = M("wide", "BUSK.mp4", 30.0, 0.5); BUSK_B = M("wide", "BUSK.mp4", 60.0, 0.5); BUSK_C = M("wide", "BUSK.mp4", 100.0, 0.45)
 BUSK_D = M("wide", "BUSK.mp4", 173.5, 0.42); BUSK_E = M("wide", "BUSK.mp4", 176.0, 0.42); BUSK_PRE = M("full", "BUSK.mp4", 1.0)
+
+# 다양하게 (원장님 2026-11-13 "다양하게 써 영상"): 같은 장면 반복 없이, A·B도 서로 다른 구간
+YELLS_2 = M("yolo", "YELLS.mp4", 19.5); NOFF_3 = M("wide", "NOFF.mp4", 79.5); NOFF_4 = M("yolo", "NOFF.mp4", 44.5)
+ARIN_2 = M("wide", "ARIN.mp4", 99.5); ARIN_3 = M("wide", "ARIN.mp4", 29.5, 0.45)
+YUNI_K2 = M("wide", "C1912.MP4", 19.5); YUNI_K3 = M("wide", "C1912.MP4", 29.5, 0.55)
+HWANU_2 = M("wide", "C2059.MP4", 24.5, 0.45); RAEKU_2 = M("wide", "C2127.MP4", 29.5)
+GAON_V2 = M("vert", "GAONV.mp4", 14.5); KIRY_2 = M("yolo", "C2246.MP4", 44.5, shape="auto"); KIRY_STAND = M("wide", "C2246.MP4", 3.0)
+HEEONE_FLOOR = M("wide", "HEEONE.mp4", 59.5); MINK_3 = M("wide", "C1870.MP4", 24.5); HWANU_G2 = M("wide", "HWANU.mp4", 34.5)
+BUSK_F = M("wide", "BUSK.mp4", 140.0, 0.45)
 BL = "RAW 파주운정점 버스킹 · 수원점 전문반 게스트"
 END = {"type": "ed", "end": True, "tag": "RAW DANCE SUWON", "h": "로우댄스학원 수원점\n[전문반]",
        "info": ["**중·고등** · 예고·예대 입시 · 기획사 준비", "상담 인스타 DM @rawdance_suwon", "카톡 '로우댄스수원점학원' · 수원 팔달구 매산로 136, 4층"],
@@ -56,26 +65,26 @@ def build(name, bar, music_ss, hook, items):
 BA = 4 * 60 / 114.84375; h = 0.5
 A = [
  (1, BUSK_GO, big("RAW", "수원점 전문반"), BL),
- (h, BUSK_A, None, BL), (h, BUSK_B, None, BL),
+ (h, BUSK_A, None, BL), (h, BUSK_F, None, BL),
  (1, PRAC, ed("02 — BEHIND THE STAGE", "그 무대 뒤에는\n[이 연습실]이 있다")),
- (1, NOFF_G, big("100평", "4층 · 홀 3개 · 2026 오픈", "STUDIO")),
+ (1, NOFF_3, big("100평", "4층 · 홀 3개 · 2026 오픈", "STUDIO")),
  (1, PRAC2, big("항시 개방", "연습실", "PRACTICE ROOM")),
  (1, HEEONE2, big("최신 장비", "촬영 장비 · LED 조명", "EQUIPMENT"), "T. HEEONE — HEELSCHOREO"),
  (1, MINK, ed("03 — TEACHERS", "강사진 전원\n[현역 댄서]"), "T. MINKYUNG — GIRLS HIPHOP"),
- (h, YELLS, ed("04 — PRO CLASS", "전문반이면\n[모든 수업 무제한]"), "T. YELLS — PRO CLASS"),
- (h, NOFF, "+", "T. NOFF — HIP HOP"),
- (h, ARIN, None, "T. ARIN — GIRLISH"), (h, YUNI, None, "T. YUNI — K-POP"),
- (h, HWANU, None, "T. HWAN.U — CHOREOGRAPHY"), (h, RAEKU, None, "T. RAEKU — CHOREOGRAPHY"),
- (h, GAON, None, "T. GAON — BASIC"), (h, KIRY, None, "T. KIRY — JAZZ"),
- (h, HEEONE, None, "T. HEEONE — HEELSCHOREO"), (h, MINK_G, None, "T. MINKYUNG — GIRLS HIPHOP"),
+ (h, YELLS_2, ed("04 — PRO CLASS", "전문반이면\n[모든 수업 무제한]"), "T. YELLS — PRO CLASS"),
+ (h, NOFF_4, "+", "T. NOFF — HIP HOP"),
+ (h, ARIN_3, None, "T. ARIN — GIRLISH"), (h, YUNI_K2, None, "T. YUNI — K-POP"),
+ (h, HWANU_2, None, "T. HWAN.U — CHOREOGRAPHY"), (h, RAEKU_2, None, "T. RAEKU — CHOREOGRAPHY"),
+ (h, GAON_V2, None, "T. GAON — BASIC"), (h, KIRY_2, None, "T. KIRY — JAZZ"),
+ (h, HEEONE, None, "T. HEEONE — HEELSCHOREO"), (h, MINK_3, None, "T. MINKYUNG — GIRLS HIPHOP"),
  (1, POPUP, big("전부", "팝업 수업까지 프리패스", "FREE PASS"), "POP-UP CLASS"),
  (1, FB, ed("05 — FEEDBACK", "쌤 피드백은\n[바로바로]")),
  (1, PRAC3, ed("06 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반")),
  (1, YUNI_T, ed("07 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), "T. YUNI — K-POP"),
  (1, SMILE, ed("08 — BEHIND", "수업이 끝나도\n[연습]은 계속")),
- (1, HEEONE_LIE, None),                                        # 음악 쉼: 바닥에 누운 정지 장면
- (h, YELLS_W2, None), (h, BUSK_D, None, BL), (h, NOFF, None), (h, BUSK_E, None, BL),
- (h, MINK_G2, None), (h, GAON2, None), (h, BUSK_C, big("제대로", pre="배울 거면"), BL), (h, YELLS, "+"),
+ (1, HEEONE_FLOOR, None),                                      # 음악 쉼: 다 같이 바닥에 누운 정지 장면
+ (h, YELLS_W2, None), (h, BUSK_D, None, BL), (h, ARIN_2, None), (h, BUSK_B, None, BL),
+ (h, MINK_G2, None), (h, GAON2, None), (h, BUSK_C, big("제대로", pre="배울 거면"), BL), (h, YUNI_K3, "+"),
  (2, YELLS_W, END, None, {"speed": 0.72}),
 ]
 build("A", BA, 6.5, (BUSK_STILL, ed("01 — STAGE", "이 무대에\n[서기까지]"), BL), A)
@@ -83,10 +92,10 @@ build("A", BA, 6.5, (BUSK_STILL, ed("01 — STAGE", "이 무대에\n[서기까�
 # ── B: TRINDADE "수업 → 연습 → 무대" (60초) ── 16마디 비트(수업) → 8마디 브레이크다운(연습) → 4마디 드롭(무대) → 2마디 엔딩
 BB = 4 * 60 / 129.19921875
 B = [
- (1, NOFF, big("RAW", "로우댄스학원 수원점")),
+ (1, YUNI_K, big("RAW", "로우댄스학원 수원점")),
  (1, MINK, ed("02 — TEACHERS", "강사진 전원\n[현역 댄서]")),
  (1, YELLS, big("전문반", "T. YELLS · 모든 수업 무제한 프리패스", "PRO CLASS")),
- (1, NOFF_G, big("힙합", "T. NOFF", "HIP HOP")),
+ (1, NOFF, big("힙합", "T. NOFF", "HIP HOP")),
  (1, HEEONE, big("힐코레오", "T. HEEONE", "HEELSCHOREO")),
  (1, ARIN, big("걸리시", "T. ARIN", "GIRLISH")),
  (1, YUNI, big("케이팝", "T. YUNI", "K-POP")),
@@ -97,8 +106,8 @@ B = [
  (1, MINK_G, big("걸스힙합", "T. MINKYUNG", "GIRLS HIPHOP")),
  (1, POPUP, big("팝업", "팝업 수업까지 프리패스", "POP-UP CLASS")),
  (1, HWANU_G, big("전부", "전문반은 전 클래스 프리패스", "FREE PASS")),
- (h, YUNI_K, None), (h, GAON2, None),
- (1, MINK_G2, ed("03 — AFTER CLASS", "수업이 끝나면")),
+ (h, NOFF_G, None), (h, GAON2, None),
+ (1, HWANU_G2, ed("03 — AFTER CLASS", "수업이 끝나면")),
  # 브레이크다운: 연습
  (1, PRAC, ed("04 — PRACTICE", "연습실\n[항시 개방]")),
  (1, PRAC2, ed("05 — STUDIO", "4층 [100평] · 홀 3개\n2026 오픈")),
@@ -106,12 +115,12 @@ B = [
  (1, PRAC3, ed("07 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반")),
  (1, YUNI_T, ed("08 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]")),
  (1, SMILE, ed("09 — FILM", "[최신 촬영 장비]로\n찍는 수업 영상")),
- (1, M("wide", "C2246.MP4", 3.0), ed("10 — STAGE", "그리고\n[무대]")),
+ (1, KIRY_STAND, ed("10 — STAGE", "그리고\n[무대]")),
  (1, BUSK_PRE, None, BL),
  # 드롭: 무대
  (1, BUSK_GO2, big("무대", "월말평가 · 버스킹 · 콘서트", "STAGE"), BL),
- (h, BUSK_A, None, BL), (h, BUSK_B, None, BL), (h, BUSK_C, None, BL), (h, BUSK_D, None, BL),
- (h, BUSK_E, big("제대로", pre="배울 거면"), BL), (h, YELLS_W2, "+"),
+ (h, BUSK_A, None, BL), (h, BUSK_B, None, BL), (h, BUSK_C, None, BL), (h, BUSK_F, None, BL),
+ (h, BUSK_E, big("제대로", pre="배울 거면"), BL), (h, MINK_G2, "+"),
  (2, YELLS_W, END, None, {"speed": 0.8}),
 ]
 build("B", BB, 1.138, (HEEONE_LIE, ed("01 — CLASS · PRACTICE · STAGE", "수업 · 연습 · 무대\n[전부] 여기서"), "T. HEEONE — HEELSCHOREO"), B)

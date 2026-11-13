@@ -11,7 +11,7 @@ html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hi
 #rec{position:absolute;left:82px;top:258px;font:600 28px Montserrat;color:#fff;letter-spacing:.14em;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 #rec i{display:inline-block;width:18px;height:18px;border-radius:50%;background:#ff3b4a;margin-right:12px;vertical-align:1px}
 #tc{position:absolute;right:82px;top:258px;font:500 28px Montserrat;color:#fff;letter-spacing:.12em;font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-#lbl{position:absolute;left:82px;top:318px;font:600 26px Montserrat;color:#fff;letter-spacing:.16em;text-shadow:0 1px 8px rgba(0,0,0,.7);white-space:nowrap}
+#lbl{position:absolute;left:82px;top:262px;font:600 26px Montserrat;color:#fff;letter-spacing:.16em;text-shadow:0 1px 8px rgba(0,0,0,.7);white-space:nowrap}
 #lbl b{display:inline-block;width:26px;height:3px;background:#b9a6ff;vertical-align:8px;margin-right:14px}
 #idx{position:absolute;right:82px;bottom:322px;font:600 24px Montserrat;color:rgba(244,242,238,.85);letter-spacing:.2em}
 #scrim{position:absolute;left:0;right:0;bottom:0;height:58%;background:linear-gradient(to bottom,rgba(6,5,10,0),rgba(6,5,10,.5) 45%,rgba(6,5,10,.82));opacity:0}
@@ -32,7 +32,7 @@ html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hi
 #big .sub{font:700 42px "IBM Plex Sans KR";color:#fff;letter-spacing:.08em;margin-top:14px;text-shadow:0 2px 14px rgba(0,0,0,.65)}
 </style></head><body>
 <div id="scrim"></div>
-<div class="hud" id="hud"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div><div id="rec"><i></i>REC</div><div id="tc"></div><div id="lbl"></div><div id="idx"></div></div>
+<div class="hud" id="hud"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div><div id="rec" style="display:none"><i></i>REC</div><div id="tc" style="display:none"></div><div id="lbl"></div><div id="idx"></div></div>
 <div id="ed"></div><div id="big"></div>
 <script>
 let CUES = [], FPS = 24000 / 1001, CUTS = [], END = 1e9;

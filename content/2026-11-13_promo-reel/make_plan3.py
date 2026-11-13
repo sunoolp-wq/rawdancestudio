@@ -37,6 +37,11 @@ YELLS_D = M("wide", "YELLS.mp4", 25.0)                     # 더 역동적인 �
 HWANU_D = M("yolo", "C2059.MP4", 21.0)                     # 멈춰 있는 구간 말고 움직이는 구간
 POPUP_D = M("yolo", "C2037.MP4", 8.0, 0.55); POPUP_D2 = M("wide", "C2037.MP4", 10.0, 0.5)  # 걸어가는 컷 말고 춤
 SMILE_D = M("wide", "C2204.MP4", 4.5, 0.6)                 # 같은 영상 다른 장면
+# 원장님 추가 영상 (2026-11-13): 오디션반(YUNI) · 왁킹(J)
+AUD_A1 = M("wide", "AUD.mp4", 24.5); AUD_A2 = M("yolo", "AUD.mp4", 46.0, 0.6)
+AUD_B1 = M("wide", "AUD.mp4", 15.0); AUD_B2 = M("yolo", "AUD.mp4", 37.0, 0.45)
+WAACK_A = M("yolo", "WAACK.mp4", 5.8); WAACK_B = M("yolo", "WAACK.mp4", 13.5)
+AL = "T. YUNI — AUDITION CLASS"
 BL = "RAW 파주운정점 버스킹 · 수원점 전문반 게스트"
 END = {"type": "ed", "end": True, "tag": "RAW DANCE SUWON", "h": "로우댄스학원 수원점\n[전문반]",
        "info": ["**중·고등** · 예고·예대 입시 · 기획사 준비", "상담 인스타 DM @rawdance_suwon", "카톡 '로우댄스수원점학원' · 수원 팔달구 매산로 136, 4층"],
@@ -84,11 +89,11 @@ A = [
  (h, ARIN_3, None, "T. ARIN — GIRLISH"), (h, YUNI_K2, None, "T. YUNI — K-POP"),
  (h, HWANU_2, None, "T. HWAN.U — CHOREOGRAPHY"), (h, RAEKU_2, None, "T. RAEKU — CHOREOGRAPHY"),
  (h, GAON_V2, None, "T. GAON — BASIC"), (h, KIRY_2, None, "T. KIRY — JAZZ"),
- (h, HEEONE, None, "T. HEEONE — HEELSCHOREO"), (h, MINK_3, None, "T. MINKYUNG — GIRLS HIPHOP"),
+ (h, HEEONE, None, "T. HEEONE — HEELSCHOREO"), (h, WAACK_A, None, "T. J — WAACKING"),
  (1, POPUP_D2, big("전부", "팝업 수업까지 프리패스", "FREE PASS"), "POP-UP CLASS"),
  (1, FB, ed("05 — FEEDBACK", "쌤 피드백은\n[바로바로]")),
- (1, PRAC3, ed("06 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반")),
- (1, YUNI_T, ed("07 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), "T. YUNI — K-POP"),
+ (1, AUD_A1, ed("06 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반"), AL),
+ (1, AUD_A2, ed("07 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), AL),
  (1, SMILE_D, ed("08 — BEHIND", "수업 없는 시간에도\n[연습]은 계속")),
  (1, HEEONE_FLOOR, None),                                      # 음악 쉼: 다 같이 바닥에 누운 정지 장면
  (h, YELLS_W2, None), (h, BUSK_D, None, BL), (h, ARIN_2, None), (h, BUSK_B, None, BL),
@@ -111,17 +116,17 @@ B = [
  (1, RAEKU, "+"),
  (1, GAON, big("베이직", "T. GAON", "BASIC")),
  (1, KIRY, big("재즈", "T. KIRY", "JAZZ")),
+ (1, WAACK_B, big("왁킹", "T. J", "WAACKING")),
  (1, MINK_G, big("걸스힙합", "T. MINKYUNG", "GIRLS HIPHOP")),
  (1, POPUP_D, big("팝업", "팝업 수업까지 프리패스", "POP-UP CLASS")),
  (1, HWANU_G, big("전부", "전문반은 전 클래스 프리패스", "FREE PASS")),
- (h, NOFF_G, None), (h, GAON2, None),
  (1, HWANU_G2, ed("03 — PRACTICE", "수업 없는 시간엔\n[연습실]로")),
  # 브레이크다운: 연습
  (1, PRAC, ed("04 — PRACTICE ROOM", "전문반은\n[연습실 항시 개방]")),
  (1, PRAC2, ed("05 — STUDIO", "[110평] · 홀 3개\n2026 오픈")),
  (1, FB, ed("06 — FEEDBACK", "쌤 피드백은\n[바로바로]")),
- (1, PRAC3, ed("07 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반")),
- (1, YUNI_T, ed("08 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]")),
+ (1, AUD_B1, ed("07 — T. YUNI", "[대형 기획사 연습생 출신]\n쌤의 오디션 전문반"), AL),
+ (1, AUD_B2, ed("08 — T. YUNI", "오디션 · 예고 · 예대\n[쌤 제자 다수 합격]"), AL),
  (1, SMILE_D, ed("09 — FILM", "[최신 촬영 장비]로\n찍는 수업 영상")),
  (1, KIRY_STAND, ed("10 — STAGE", "그리고\n[무대]")),
  (1, BUSK_D, None, BL),

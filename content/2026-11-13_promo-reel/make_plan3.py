@@ -23,7 +23,7 @@ BUSK_D = M("wide", "BUSK.mp4", 173.5, 0.42); BUSK_E = M("wide", "BUSK.mp4", 176.
 
 # 다양하게 (원장님 2026-11-13 "다양하게 써 영상"): 같은 장면 반복 없이, A·B도 서로 다른 구간
 YELLS_2 = M("yolo", "YELLS.mp4", 19.5); NOFF_3 = M("wide", "NOFF.mp4", 79.5); NOFF_4 = M("yolo", "NOFF.mp4", 44.5)
-ARIN_2 = M("wide", "ARIN.mp4", 99.5); ARIN_3 = M("wide", "ARIN.mp4", 29.5, 0.45)
+ARIN_2 = M("wide", "ARIN.mp4", 72.0); ARIN_3 = M("wide", "ARIN.mp4", 41.0)
 YUNI_K2 = M("wide", "C1912.MP4", 19.5); YUNI_K3 = M("wide", "C1912.MP4", 29.5, 0.55)
 HWANU_2 = M("wide", "C2059.MP4", 24.5, 0.45); RAEKU_2 = M("wide", "C2127.MP4", 29.5)
 GAON_V2 = M("vert", "GAONV.mp4", 14.5); KIRY_2 = M("yolo", "C2246.MP4", 44.5, shape="auto"); KIRY_STAND = M("wide", "C2246.MP4", 3.0)

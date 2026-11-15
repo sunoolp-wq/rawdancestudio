@@ -38,6 +38,14 @@
  "2026-11-16": {
   "replace": [
    {
+    "start": "19:40",
+    "name": "HEELSCHOREO",
+    "set": {
+     "name": "HIP HOP",
+     "teacher": "NOFF"
+    }
+   },
+   {
     "start": "20:50",
     "name": "CHOREO",
     "set": {

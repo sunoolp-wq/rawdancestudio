@@ -54,5 +54,17 @@
     }
    }
   ]
+ },
+ "2026-11-19": {
+  "replace": [
+   {
+    "start": "18:30",
+    "name": "BASIC",
+    "set": {
+     "teacher": "TENA",
+     "mark": "popup"
+    }
+   }
+  ]
  }
 }

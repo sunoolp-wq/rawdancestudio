@@ -31,8 +31,12 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
 .job pre{white-space:pre-wrap;font-size:11px;color:var(--mu);max-height:120px;overflow:auto;margin:6px 0 0}
 .job video{width:100%;border-radius:8px;margin-top:8px;background:#000}.job img{width:100%;border-radius:8px;margin-top:8px}
 .err{color:var(--bad);font-weight:700}
+.cands{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px}
+.cand{border:2px solid var(--ln);border-radius:12px;overflow:hidden;cursor:pointer;background:#0e0d12;padding:0;color:var(--fg);text-align:left;font:inherit}
+.cand.on{border-color:var(--ac)}.cand img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.cand div{padding:6px 8px;font-size:12px;color:var(--mu)}.cand b{color:var(--fg);font-size:14px}.cand .rec{color:var(--ac);font-weight:800}
 </style></head><body>
-<header><b>RAW</b><div><div style="font-weight:800;font-size:18px">영상공장</div><span id="outp">결과 폴더: …</span></div><button class="sm" style="margin-left:auto" onclick="api('/api/reveal',{})">결과 폴더 열기</button></header>
+<header><b>RAW</b><div><div style="font-weight:800;font-size:18px">영상공장</div><span id="outp">결과 폴더: …</span></div><button class="sm" style="margin-left:auto" id="musicbtn" onclick="api('/api/reveal',{path:INFO.music})">음원 폴더 열기</button><button class="sm" onclick="api('/api/reveal',{})">결과 폴더 열기</button></header>
 <div class="wrap"><main>
 <nav id="tabs"></nav>
 <section id="t-story" class="card">
@@ -52,7 +56,8 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
   <label class="f">요일<select id="tc-day"></select></label><label class="f">시간<input id="tc-time" placeholder="19:40"></label>
   <label class="f">홀<select id="tc-hall"><option>A</option><option>B</option><option>C</option><option value="">(표시 안 함)</option></select></label>
   <label class="f">끝 화면 문구<input id="tc-kr" placeholder="매주 월 19:40"></label></div>
- <div class="row"><label class="chk"><input type="checkbox" id="tc-pop">팝업 수업 (POP-UP CLASS 표시)</label></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="tc-pop">팝업 수업 (POP-UP CLASS 표시)</label>
+  <label class="chk"><input type="checkbox" id="tc-auto" checked>음원 폴더에 같은 곡이 있으면 깨끗한 음원으로 (없으면 원래 소리)</label></div>
  <div id="teacher-lut"></div>
  <div class="row"><button class="go" onclick="runTeacher()">만들기</button><span class="hint">끝 화면 문구가 비면 '매주 요일 시간'으로 들어가요</span></div>
 </section>
@@ -63,6 +68,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
   <label class="f">강사 (큰 글씨)<input id="tp-teacher" list="teachers"></label><label class="f">장르<input id="tp-genre" list="genres"></label>
   <label class="f">곡명 (작게, 비워도 됨)<input id="tp-track" placeholder="AD LA - Ain't In LA"></label><label class="f">자막 시작 (결과 영상 초)<input type="number" step="0.1" id="tp-at" value="0"></label></div>
  <div id="trackpad-song"></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="tp-auto" checked>음원을 안 올리면 음원 폴더에서 같은 곡 자동으로 찾기</label></div>
  <div class="row"><label class="chk"><input type="checkbox" id="tp-trim" checked>노래 시작(0:00)부터 자르기</label><label class="f" style="flex-direction:row;align-items:center">노래 0:00 = 원본 몇 초 (자동이 안 되면)<input id="tp-off" style="width:90px"></label></div>
  <div id="trackpad-lut"></div>
  <div class="row"><button class="go" onclick="runTrackpad()">만들기</button></div>
@@ -70,6 +76,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
 <section id="t-music" class="card" hidden>
  <h2>음원 싱크</h2><p class="hint">영상 속 연습실 소리와 음원을 비교해서 정확한 위치에 음원을 입혀요. 같은 노래를 여러 번 튼 영상이면 쓸 구간(시작·끝)을 꼭 넣어 주세요.</p>
  <div id="music-file"></div><div id="music-song"></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="mu-auto" checked>음원을 안 올리면 음원 폴더에서 같은 곡 자동으로 찾기</label></div>
  <div class="grid"><label class="f">쓸 구간 시작 (초)<input id="mu-start" placeholder="0"></label><label class="f">쓸 구간 끝 (초)<input id="mu-end" placeholder="끝까지"></label>
   <label class="f">노래 0:00 = 영상 몇 초 (자동이 안 되면)<input id="mu-off"></label></div>
  <div class="row"><label class="chk"><input type="checkbox" id="mu-trim" checked>노래 시작(0:00)부터 자르기</label></div>
@@ -108,20 +115,31 @@ function fileBox(key, opts){
     x.onload=()=>{const r=JSON.parse(x.responseText); if(r.error){d.innerHTML=`<span class="err">${r.error}</span>`;return}
       FILES[key]=r; d.innerHTML=`<b>${r.name}</b> · ${opts.audio?'음원':`${r.w}×${r.h} · ${r.dur.toFixed(1)}초${r.h>r.w?' · 세로 영상(따라가기 없이 그대로)':''}`} <button class="sm" style="float:right">바꾸기</button>`;
       d.querySelector('button').onclick=e=>{e.stopPropagation(); inp.value=''; inp.click()};
-      if(opts.pick&&r.h<=r.w) pickBox(key, opts.pick);};
+      if(opts.pick) pickBox(key, opts.pick, opts.dur, r.h>r.w);};
     x.send(fd);
   }
 }
-function pickBox(key, startSel){
+function pickBox(key, startSel, durSel, vertical){
   let box=$('#'+key+'-pick'); if(!box){box=document.createElement('div'); box.id=key+'-pick'; $('#'+key).appendChild(box);}
   const st=+($(startSel).value||0);
-  box.innerHTML=`<p class="hint" style="margin:10px 0 6px">쌤을 눌러 주세요 (보라 동그라미). 슬라이더로 장면을 옮길 수 있어요. 쌤이 혼자면 안 눌러도 돼요.</p>
+  box.innerHTML=`<div class="row" style="margin-top:10px"><button class="sm fs">🎯 춤 시작 자동 찾기</button><span class="hint fsm">음원 폴더에 이 노래가 있으면 더 정확해요. 1~2분 걸려요</span></div><div class="cands"></div>
+   <p class="hint" style="margin:10px 0 6px">${vertical?'슬라이더로 장면을 옮기고 [이 장면을 시작으로]를 눌러도 돼요.':'쌤을 눌러 주세요 (보라 동그라미). 슬라이더로 장면을 옮길 수 있어요. 쌤이 혼자면 안 눌러도 돼요.'}</p>
    <div class="row"><input type="range" min="0" max="${FILES[key].dur.toFixed(1)}" step="0.1" value="${st+0.5}" style="flex:1"><span class="tt"></span><button class="sm">이 장면을 시작으로</button></div>
    <div class="pick"><img><div class="mk" hidden></div></div>`;
   const rg=box.querySelector('input'), img=box.querySelector('img'), mk=box.querySelector('.mk'), tt=box.querySelector('.tt');
   const load=()=>{tt.textContent=(+rg.value).toFixed(1)+'초'; img.src=`/api/frame?id=${FILES[key].id}&t=${rg.value}`};
   rg.oninput=()=>{tt.textContent=(+rg.value).toFixed(1)+'초'}; rg.onchange=load; load();
-  box.querySelector('button').onclick=()=>{$(startSel).value=(+rg.value).toFixed(1)};
+  box.querySelectorAll('button.sm').forEach(b=>{ if(b.textContent==='이 장면을 시작으로') b.onclick=()=>{$(startSel).value=(+rg.value).toFixed(1)}; });
+  // 춤 시작 후보: 사진을 누르면 시작 초 + 슬라이더가 그 장면으로
+  box.querySelector('.fs').onclick=()=>{ const b=box.querySelector('.fs'), cs=box.querySelector('.cands'), m=box.querySelector('.fsm');
+    b.disabled=true; m.textContent='찾는 중… (영상 길이에 따라 1~2분)'; cs.innerHTML='';
+    api(`/api/findstart?id=${FILES[key].id}&dur=${+($(durSel).value||15)}`).then(r=>{ b.disabled=false;
+      if(r.error||!r.cands?.length){ m.innerHTML=`<span class="err">${r.error||'후보를 못 찾았어요. 슬라이더로 골라 주세요'}</span>`; return; }
+      m.textContent=(r.log||[]).filter(l=>l.startsWith('곡:')).join(' ')||(r.how==='반복'?`같은 구간을 ${r.period.toFixed(1)}초마다 반복한 영상이에요`:'사진을 눌러 고르세요');
+      cs.innerHTML=r.cands.map((c,i)=>`<button class="cand" data-i="${i}"><img src="/api/frame?id=${FILES[key].id}&t=${c.t+0.3}"><div><b>${c.t.toFixed(1)}초</b> ${c.best?'<span class="rec">추천</span>':''}<br>${c.why}</div></button>`).join('');
+      cs.querySelectorAll('.cand').forEach(el=>el.onclick=()=>{ const c=r.cands[+el.dataset.i]; cs.querySelectorAll('.cand').forEach(x=>x.classList.toggle('on',x===el));
+        $(startSel).value=c.t.toFixed(1); rg.value=(c.t+0.5).toFixed(1); load(); mk.hidden=true; delete PICK[key]; });
+    }).catch(()=>{ b.disabled=false; m.innerHTML='<span class="err">찾다가 멈췄어요. 슬라이더로 골라 주세요</span>'; }); };
   img.onclick=e=>{const r=img.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
     mk.hidden=false; mk.style.left=(x*100)+'%'; mk.style.top=(y*100)+'%';
     PICK[key]={x:+x.toFixed(3), t:Math.max(0,+rg.value-(+$(startSel).value||0))}};
@@ -132,12 +150,12 @@ const lutVal=k=>({lut:$('#'+k+'-s').value, strength:+$('#'+k+'-v').value||100});
 const need=(k,msg)=>{if(!FILES[k]){alert(msg);throw 0}return FILES[k].id};
 const go=(kind,p,title)=>api('/api/run',{kind,_title:title,...p}).then(()=>poll());
 
-api('/api/info').then(i=>{Object.assign(INFO,i); $('#outp').textContent='결과 폴더: '+i.out;
+api('/api/info').then(i=>{Object.assign(INFO,i); $('#outp').textContent='결과 폴더: '+i.out; $('#musicbtn').textContent=`음원 폴더 열기 (${i.songs.length}곡)`;
   $('#teachers').innerHTML=i.teachers.map(t=>`<option value="${t}">`).join(''); $('#genres').innerHTML=i.genres.map(t=>`<option value="${t}">`).join('');
   ['teacher-lut','trackpad-lut','music-lut','lut-lut'].forEach(lutBox);
   const t=new Date(i.today+'T00:00:00'), dw=(t.getDay()+6)%7, mon=new Date(t); mon.setDate(t.getDate()-dw+7); const fri=new Date(mon); fri.setDate(mon.getDate()+4);
   const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); $('#s-from').value=iso(mon); $('#s-to').value=iso(fri); $('#d-date').value=iso(mon);});
-fileBox('teacher-file',{label:'수업 영상',pick:'#tc-start'}); fileBox('trackpad-file',{label:'수업 영상',pick:'#tp-start'}); fileBox('trackpad-song',{label:'음원 (선택)',audio:1});
+fileBox('teacher-file',{label:'수업 영상',pick:'#tc-start',dur:'#tc-dur'}); fileBox('trackpad-file',{label:'수업 영상',pick:'#tp-start',dur:'#tp-dur'}); fileBox('trackpad-song',{label:'음원 (선택)',audio:1});
 fileBox('music-file',{label:'영상'}); fileBox('music-song',{label:'음원',audio:1}); fileBox('lut-file',{label:'영상'});
 
 // 스토리
@@ -154,16 +172,17 @@ function runStory(){ const a=new Date($('#s-from').value+'T00:00:00'), b=new Dat
 // 쌤 15초
 function runTeacher(){ const id=need('teacher-file','수업 영상을 먼저 올려 주세요'); const n=$('#tc-name').value.trim(), g=$('#tc-genre').value.trim(), tm=$('#tc-time').value.trim(), dy=$('#tc-day').value;
   if(!n||!g||!tm) return alert('강사·장르·시간을 넣어 주세요');
-  const p={file:id,start:+$('#tc-start').value,dur:+$('#tc-dur').value,name:n,genre:g,when:`${dy} ${tm}`,whenKr:$('#tc-kr').value.trim()||`매주 ${KR[dy]} ${tm}`,hall:$('#tc-hall').value,popup:$('#tc-pop').checked,
+  const p={file:id,start:+$('#tc-start').value,dur:+$('#tc-dur').value,name:n,genre:g,when:`${dy} ${tm}`,whenKr:$('#tc-kr').value.trim()||`매주 ${KR[dy]} ${tm}`,hall:$('#tc-hall').value,popup:$('#tc-pop').checked,auto_song:$('#tc-auto').checked,
     pickx:(PICK['teacher-file']||{}).x??.5,pickt:(PICK['teacher-file']||{}).t??.5,...lutVal('teacher-lut')};
   go('teacher',p,`쌤 15초 · ${n} ${g}`); }
 // TRACKPAD
 function runTrackpad(){ const id=need('trackpad-file','수업 영상을 먼저 올려 주세요'); const t=$('#tp-teacher').value.trim(), g=$('#tp-genre').value.trim(); if(!t||!g) return alert('강사·장르를 넣어 주세요');
   const p={file:id,start:+$('#tp-start').value,dur:+$('#tp-dur').value,teacher:t,genre:g,track:$('#tp-track').value.trim(),at:+$('#tp-at').value||0,
-    song:FILES['trackpad-song']?.id||'',trim:$('#tp-trim').checked,offset:$('#tp-off').value.trim(),pickx:(PICK['trackpad-file']||{}).x??.5,pickt:(PICK['trackpad-file']||{}).t??.5,...lutVal('trackpad-lut')};
+    song:FILES['trackpad-song']?.id||'',auto_song:$('#tp-auto').checked,trim:$('#tp-trim').checked,offset:$('#tp-off').value.trim(),pickx:(PICK['trackpad-file']||{}).x??.5,pickt:(PICK['trackpad-file']||{}).t??.5,...lutVal('trackpad-lut')};
   go('trackpad',p,`TRACKPAD · ${t} ${g}`); }
-function runMusic(){ const id=need('music-file','영상을 먼저 올려 주세요'), s=need('music-song','음원을 올려 주세요');
-  go('music',{file:id,song:s,start:$('#mu-start').value.trim(),end:$('#mu-end').value.trim(),offset:$('#mu-off').value.trim(),trim:$('#mu-trim').checked,name:FILES['music-file'].name.replace(/\.[^.]+$/,''),...lutVal('music-lut')},'음원 싱크'); }
+function runMusic(){ const id=need('music-file','영상을 먼저 올려 주세요'), s=FILES['music-song']?.id||'';
+  if(!s&&!$('#mu-auto').checked) return alert('음원을 올리거나 \'음원 폴더에서 자동으로 찾기\'를 켜 주세요');
+  go('music',{file:id,song:s,auto_song:!s&&$('#mu-auto').checked,start:$('#mu-start').value.trim(),end:$('#mu-end').value.trim(),offset:$('#mu-off').value.trim(),trim:$('#mu-trim').checked,name:FILES['music-file'].name.replace(/\.[^.]+$/,''),...lutVal('music-lut')},'음원 싱크'); }
 function runLut(){ const id=need('lut-file','영상을 먼저 올려 주세요'); const l=lutVal('lut-lut'); if(!l.lut) return alert('LUT를 골라 주세요'); go('lut',{file:id,...l},'LUT · '+l.lut); }
 // 작업 목록
 let timer=null;

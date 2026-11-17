@@ -15,7 +15,11 @@ LUTS = os.path.join(HERE, "luts")
 OUT = os.path.expanduser(os.environ.get("RAW_OUT", "~/Movies/RAW 영상공장"))
 WORK = os.path.join(OUT, ".작업중")
 UP = os.path.join(WORK, "uploads")
-for d in (OUT, WORK, UP): os.makedirs(d, exist_ok=True)
+# 음원 폴더: 원장님이 받은 음원(mp3 등)을 넣어 두면 영상 속 노래와 같은 곡을 자동으로 찾아 입힘 (2026-11-17)
+MUSIC = os.path.expanduser(os.environ.get("RAW_MUSIC", "~/Music/RAW 음원"))
+for d in (OUT, WORK, UP, MUSIC): os.makedirs(d, exist_ok=True)
+sys.path.insert(0, os.path.join(ROOT, "tools", "class-reel"))
+from audiomatch import song_files
 DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 KR = dict(zip(DAYS, ["월", "화", "수", "목", "금", "토", "일"]))
 
@@ -53,7 +57,7 @@ JOBS, QUEUE, LOCK = {}, [], threading.Lock()
 class Job:
     def __init__(self, kind, params):
         self.id = uuid.uuid4().hex[:8]; self.kind = kind; self.params = params
-        self.status = "대기"; self.log = []; self.outs = []; self.created = time.time(); self.err = ""
+        self.status = "대기"; self.log = []; self.outs = []; self.created = time.time(); self.err = ""; self.warn = ""
     def say(self, s):
         for line in str(s).splitlines():
             if line.strip(): self.log.append(line.rstrip())
@@ -114,7 +118,27 @@ def track(job, src, start, dur, pickx, pickt, check=None):
     return out
 
 def keep(job, path, label):
-    job.outs.append({"path": path, "label": label, "url": "/files/" + os.path.relpath(path, OUT)})
+    job.outs.append({"path": path, "label": job.warn + label, "url": "/files/" + os.path.relpath(path, OUT)})
+
+def music(job, src, out, P, auto_ok=False):
+    """음원 입히기. 올린 음원이 있으면 그것, 없고 '음원 폴더에서 자동'이면 폴더에서 같은 곡을 찾음.
+    auto_ok: 폴더에서 못 찾으면 실패하지 않고 원래 소리 그대로 (쌤 15초) → False 돌려줌"""
+    song = upath(P["song"]) if P.get("song") else (MUSIC if P.get("auto_song") else None)
+    if not song: return False
+    if song == MUSIC and not song_files(MUSIC):
+        if auto_ok: job.say("음원 폴더가 비어 있어서 원래 소리 그대로 써요"); return False
+        raise RuntimeError(f"음원 폴더가 비어 있어요: {MUSIC}")
+    cmd = [PY, os.path.join(CR, "music_sync.py"), "--video", src, "--song", song, "--out", out]
+    if P.get("trim"): cmd.append("--trim-to-song")
+    for k in ("start", "end", "offset"):
+        if str(P.get(k, "")).strip() != "": cmd += ["--" + k, str(float(P[k]))]
+    n0 = len(job.log)
+    try: job.run(cmd)
+    except RuntimeError:
+        if auto_ok and song == MUSIC: job.say("음원 폴더에서 이 노래를 못 찾아서 원래 소리 그대로 써요"); return False
+        raise
+    if any(l.startswith("확인필요") for l in job.log[n0:]): job.warn = "⚠️ 음원 박자 확인필요 · "
+    return True
 
 # ── 파이프라인 4+1개 ──────────────────────────────────
 def p_story(job, P):
@@ -129,6 +153,9 @@ def p_teacher(job, P):
     base = f"{P['name']}_{P['genre']}"; chk = outfile("확인사진", base, "jpg")
     v = track(job, src, start, dur + 0.4, P.get("pickx", .5), P.get("pickt", .5), chk)
     if os.path.exists(chk): keep(job, chk, "쌤 확인 사진 (보라 상자 = 쌤)")
+    if P.get("auto_song") or P.get("song"):
+        mv = os.path.join(WORK, f"{job.id}_music.mp4")
+        if music(job, v, mv, {"song": P.get("song"), "auto_song": P.get("auto_song")}, auto_ok=True): v = mv
     if P.get("lut"):
         lv = os.path.join(WORK, f"{job.id}_lut.mp4"); apply_lut(job, v, lv, P["lut"], P.get("strength", 100)); v = lv
     out = outfile("쌤15초", base)
@@ -143,11 +170,10 @@ def p_trackpad(job, P):
     base = f"{P['teacher']}_{P['genre']}"; chk = outfile("확인사진", base, "jpg")
     v = track(job, src, start, dur, P.get("pickx", .5), P.get("pickt", .5), chk)
     if os.path.exists(chk): keep(job, chk, "쌤 확인 사진 (보라 상자 = 쌤)")
-    if P.get("song"):
-        mv = os.path.join(WORK, f"{job.id}_music.mp4"); cmd = [PY, os.path.join(CR, "music_sync.py"), "--video", v, "--song", upath(P["song"]), "--out", mv]
-        if P.get("trim"): cmd.append("--trim-to-song")
-        if str(P.get("offset", "")).strip() != "": cmd += ["--offset", str(float(P["offset"]) - start)]
-        job.run(cmd); v = mv
+    if P.get("song") or P.get("auto_song"):
+        mv = os.path.join(WORK, f"{job.id}_music.mp4")
+        off = str(P.get("offset", "")).strip()
+        if music(job, v, mv, {"song": P.get("song"), "auto_song": P.get("auto_song"), "trim": P.get("trim"), "offset": float(off) - start if off else ""}): v = mv
     if P.get("lut"):
         lv = os.path.join(WORK, f"{job.id}_lut.mp4"); apply_lut(job, v, lv, P["lut"], P.get("strength", 100)); v = lv
     out = outfile("TRACKPAD", base)
@@ -158,12 +184,7 @@ def p_trackpad(job, P):
 def p_music(job, P):
     src = upath(P["file"]); out = outfile("음원싱크", P.get("name") or "영상")
     tmp = os.path.join(WORK, f"{job.id}_music.mp4") if P.get("lut") else out
-    cmd = [PY, os.path.join(CR, "music_sync.py"), "--video", src, "--song", upath(P["song"]), "--out", tmp]
-    if P.get("trim"): cmd.append("--trim-to-song")
-    if str(P.get("start", "")).strip() != "": cmd += ["--start", str(float(P["start"]))]
-    if str(P.get("end", "")).strip() != "": cmd += ["--end", str(float(P["end"]))]
-    if str(P.get("offset", "")).strip() != "": cmd += ["--offset", str(float(P["offset"]))]
-    job.run(cmd)
+    if not music(job, src, tmp, P): raise RuntimeError("음원을 올리거나 '음원 폴더에서 자동으로 찾기'를 골라 주세요")
     if P.get("lut"): apply_lut(job, tmp, out, P["lut"], P.get("strength", 100))
     keep(job, out, "음원 입힌 영상")
 
@@ -205,7 +226,22 @@ def info():
                     if c.get("teacher"): teachers.add(c["teacher"])
                     if c.get("name") and "K-POP" not in c["name"]: genres.add(c["name"])
     luts = sorted(f for f in os.listdir(LUTS) if f.endswith(".cube"))
-    return jsonify({"teachers": sorted(teachers), "genres": sorted(genres), "luts": luts, "out": OUT, "today": datetime.date.today().isoformat()})
+    return jsonify({"teachers": sorted(teachers), "genres": sorted(genres), "luts": luts, "out": OUT, "today": datetime.date.today().isoformat(),
+                    "music": MUSIC, "songs": [os.path.relpath(f, MUSIC) for f in song_files(MUSIC)]})
+
+FS_CACHE = {}
+@app.get("/api/findstart")
+def findstart():
+    """춤 시작 후보 (원장님 2026-11-17). 음원 폴더에 곡이 있으면 같이 써서 더 정확하게"""
+    uid = request.args["id"]; d = float(request.args.get("dur", 15)); key = (uid, d, len(song_files(MUSIC)))
+    if key not in FS_CACHE:
+        cmd = [PY, os.path.join(CR, "find_start.py"), "--video", upath(uid), "--dur", str(d), "--n", "4"]
+        if song_files(MUSIC): cmd += ["--song", MUSIC]
+        r = subprocess.run(cmd, capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=900)
+        last = (r.stdout.strip().splitlines() or [""])[-1]
+        if r.returncode or not last.startswith("{"): return jsonify({"error": (r.stderr.strip().splitlines() or ["후보를 못 찾았어요"])[-1]}), 500
+        j = json.loads(last); j["log"] = [l for l in r.stdout.splitlines()[:-1] if l.startswith(("곡:", "음원 폴더"))]; FS_CACHE[key] = j
+    return jsonify(FS_CACHE[key])
 
 @app.post("/api/upload")
 def upload():

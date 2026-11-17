@@ -32,3 +32,17 @@ module.exports.renderFrames = async ({ file, setupArg, n, fps, dir, type = 'png'
   if (pipe) { await flush(); pipe.end(); return null; }
   return path.join(dir, '%05d' + (type === 'png' ? '.png' : '.jpg'));
 };
+
+// 장면을 임시 폴더에 다 그린 뒤 ffmpeg로 합치기 (원장님 맥 2026-11-17 '장면 420/510'에서 멈춤:
+// 그리면서 ffmpeg에 바로 넣는 방식(pipe)이 맥 ffmpeg 9·node 26에서 서로 기다리다 멈춤 → 파이프 없이 파일로)
+// ffArgs(seq): seq = '임시폴더/%05d.png' 를 받아 ffmpeg 인자 배열을 돌려주는 함수
+module.exports.renderToVideo = async ({ ffArgs, type = 'png', ...o }) => {
+  const os = require('os'), path = require('path'), { spawn } = require('child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'raw-frames-'));
+  try {
+    const seq = await module.exports.renderFrames({ ...o, type, dir });
+    console.log('영상 합치는 중...');
+    const code = await new Promise(r => { const ff = spawn('ffmpeg', ['-nostdin', ...ffArgs(seq)], { stdio: ['ignore', 'inherit', 'inherit'] }); ff.on('close', r); ff.on('error', () => r(1)); });
+    if (code) { console.error('ffmpeg 실패'); process.exit(code || 1); }
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+};

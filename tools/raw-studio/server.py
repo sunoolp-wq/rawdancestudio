@@ -60,9 +60,18 @@ class Job:
         self.log = self.log[-200:]
     def run(self, cmd, cwd=ROOT):
         self.say("▶ " + " ".join(os.path.basename(c) if i == 0 else c for i, c in enumerate(cmd))[:300])
-        p = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
-        for line in p.stdout: self.say(line)
-        if p.wait() != 0: raise RuntimeError((self.log[-1] if self.log else "") or f"실패: {os.path.basename(cmd[0])}")
+        # stdin 없음: ffmpeg 등이 검은 창 키보드 입력을 기다리며 멈추지 않게 (2026-11-17 맥 '장면 420/510' 멈춤)
+        p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+        last = [time.time()]; stuck = [False]
+        def watch():   # 15분 동안 아무 진행 표시가 없으면 멈춘 것으로 보고 끔
+            while p.poll() is None:
+                if time.time() - last[0] > 900: stuck[0] = True; p.kill(); return
+                time.sleep(5)
+        threading.Thread(target=watch, daemon=True).start()
+        for line in p.stdout: last[0] = time.time(); self.say(line)
+        if p.wait() != 0:
+            if stuck[0]: raise RuntimeError("15분 동안 진행이 없어 멈췄어요. 검은 창을 닫고 2_RAW영상공장_열기를 다시 실행한 뒤 다시 만들어 주세요")
+            raise RuntimeError((self.log[-1] if self.log else "") or f"실패: {os.path.basename(cmd[0])}")
     def view(self):
         return {"id": self.id, "kind": self.kind, "status": self.status, "log": self.log[-12:], "outs": self.outs, "err": self.err,
                 "title": self.params.get("_title", self.kind), "created": self.created}

@@ -11,7 +11,11 @@ import numpy as np
 from audiomatch import load, dur, best_offset, candidates, match_folder
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--video", required=True); ap.add_argument("--song", required=True, help="음원 파일 또는 음원 폴더(폴더면 맞는 곡을 자동으로 찾음)"); ap.add_argument("--out", required=True)
+ap.add_argument("--video", required=True); ap.add_argument("--song", required=True, help="음원 파일 또는 음원 폴더(폴더면 맞는 곡을 자동으로 찾음)"); ap.add_argument("--out")
+ap.add_argument("--pre-room", action="store_true", help="노래가 영상 중간에 시작되면 그 전까지는 연습실 원래 소리(카운트 등) → 노래 시작에 음원으로 자연스럽게")
+ap.add_argument("--find-only", action="store_true", help="찾기만 하고 JSON {find, song, offset, sure} 출력 (영상은 안 만듦)")
+ap.add_argument("--match-pad", type=float, default=0.0, help="음원 폴더에서 곡을 고를 때 쓸 구간을 앞뒤로 이만큼 넓힘 (짧은 영상 대비)")
+ap.add_argument("--fade-out", type=float, default=1.2, help="끝 페이드아웃(초). 뒤에서 따로 처리하면 0")
 ap.add_argument("--trim-to-song", action="store_true"); ap.add_argument("--start", type=float, default=0.0); ap.add_argument("--end", type=float); ap.add_argument("--offset", type=float)
 a = ap.parse_args()
 SR = 22050
@@ -19,9 +23,10 @@ SR = 22050
 VD = dur(a.video)
 if os.path.isdir(a.song):
     if a.offset is not None: sys.exit("음원 폴더를 줄 때는 --offset 을 같이 쓸 수 없어요 (곡을 먼저 골라야 해서)")
-    f, n1, n2, _ = match_folder(a.video, a.song, a.start, a.end, log=lambda s: print(s, flush=True))
+    f, n1, n2, _ = match_folder(a.video, a.song, max(0.0, a.start - a.match_pad), min(VD, (a.end or VD) + a.match_pad), log=lambda s: print(s, flush=True))
     if not f: sys.exit(f"음원 폴더에서 이 영상 노래를 못 찾았어요 ({n1}표 대 {n2}표). 같은 곡·같은 버전(스피드업·리믹스 아님) 파일을 폴더에 넣어 주세요")
     print(json.dumps({"matched_song": os.path.basename(f), "votes": n1, "second_song": n2}, ensure_ascii=False), flush=True); a.song = f
+ok = True
 if a.offset is not None:
     off = a.offset
 else:
@@ -33,6 +38,7 @@ else:
     if not ok:
         # 비기는 흔한 이유: 쌤이 영상 중간에 노래를 처음부터 다시 틈 (2026-11-17 AD LA 원본: 30초마다 다시 틂) → 두 위치 다 맞음
         cs = candidates(vid, song, SR, S0); inclip = sorted(o for o, n in cs if S0 <= o <= S1 - 5)
+        ok = False
         if a.trim_to_song and inclip:
             off = inclip[0]; print(f"노래가 영상 {off:.1f}초에 처음부터 다시 시작돼요 → 그 지점부터 씀", flush=True)
         elif cs:
@@ -42,14 +48,27 @@ else:
         else:
             sys.exit(f"영상 속 소리에서 이 노래를 못 찾았어요 ({how}). 같은 노래·같은 버전(스피드업·리믹스 아님)인지 확인하거나, '노래 0:00 = 영상 몇 초' 칸에 직접 넣어 주세요")
 
+if a.find_only:
+    print(json.dumps({"find": True, "song": a.song, "offset": round(off, 4), "sure": ok}, ensure_ascii=False)); sys.exit(0)
+if not a.out: sys.exit("--out 이 필요해요")
 T0 = max(a.start, off) if a.trim_to_song else a.start
 T1 = min(a.end, VD) if a.end else VD
 D = T1 - T0
 s0 = T0 - off                                  # 결과 0초 때 노래 위치
 pre = ["-ss", f"{s0:.4f}"] if s0 >= 0 else []
 delay = int(round(-s0 * 1000)) if s0 < 0 else 0
-af = (f"adelay={delay}|{delay}," if delay else "") + f"apad,atrim=0:{D:.3f},afade=t=in:st=0:d=0.05,afade=t=out:st={max(0, D - 1.2):.3f}:d=1.2"
-subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-ss", f"{T0:.4f}", "-t", f"{D:.4f}", "-i", a.video, *pre, "-i", a.song,
-                "-filter_complex", f"[1:a]{af}[a]", "-map", "0:v", "-map", "[a]", "-c:v", "libx264", "-crf", "15", "-preset", "medium",
-                "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "320k", "-t", f"{D:.4f}", "-movflags", "+faststart", a.out], check=True)
+fo = f",afade=t=out:st={max(0, D - a.fade_out):.3f}:d={a.fade_out}" if a.fade_out > 0 else ""
+if delay and a.pre_room:
+    # 노래 시작 0.3초 전부터 연습실 소리를 줄이고 음원을 올림 (원장님 2026-11-17 TRACKPAD 춤 시작 전 자막 구간)
+    d = delay / 1000
+    fc = (f"[0:a]atrim=0:{d + 0.05:.3f},afade=t=out:st={max(0, d - 0.3):.3f}:d=0.35,apad[r];"
+          f"[1:a]adelay={delay}|{delay},afade=t=in:st={max(0, d - 0.05):.3f}:d=0.1,apad[m];"
+          f"[r][m]amix=inputs=2:normalize=0:duration=longest,atrim=0:{D:.3f}{fo}[a]")
+else:
+    fc = "[1:a]" + (f"adelay={delay}|{delay}," if delay else "") + f"apad,atrim=0:{D:.3f},afade=t=in:st=0:d=0.05{fo}[a]"
+whole = T0 <= 0.001 and abs(T1 - VD) < 0.05         # 자르지 않으면 영상은 다시 압축하지 않고 그대로 (화질 보존)
+vin = ["-i", a.video] if whole else ["-ss", f"{T0:.4f}", "-t", f"{D:.4f}", "-i", a.video]
+venc = ["-c:v", "copy"] if whole else ["-c:v", "libx264", "-crf", "14", "-preset", "medium", "-pix_fmt", "yuv420p"]
+subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", *vin, *pre, "-i", a.song,
+                "-filter_complex", fc, "-map", "0:v", "-map", "[a]", *venc, "-c:a", "aac", "-b:a", "320k", "-t", f"{D:.4f}", "-movflags", "+faststart", a.out], check=True)
 print(json.dumps({"out": a.out, "video_start": round(T0, 3), "song_start": round(max(0, s0), 3), "length": round(D, 2)}, ensure_ascii=False))

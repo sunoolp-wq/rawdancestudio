@@ -43,7 +43,7 @@ def settle(t, back=1.5, fwd=1.5):
     return (i0 + int(np.argmin(sm(mo, 3)[i0:i1]))) / MF
 
 x = load(a.video, SR)
-cands, period, how = [], None, ""
+cands, period, how, ends = [], None, "", {}
 
 # ── 1) 음원으로 ──────────────────────────────────────────
 song = a.song
@@ -62,9 +62,12 @@ if song and os.path.isfile(song):
         span = ts[-1] - ts[0] + 3; dens = len(ts) / (span / HOP)
         if dens < 0.6: continue
         t0 = o if -0.5 <= o <= ts[0] + 0.5 else ts[0]; pos = max(0.0, t0 - o)
-        runs.append((span * dens + (15 if pos < 1 else 0), max(0.0, t0), "노래 처음(0:00)부터" if pos < 1 else f"노래 {int(pos // 60)}:{int(pos % 60):02d} 지점부터"))
+        runs.append((span * dens + (15 if pos < 1 else 0), max(0.0, t0), "노래 처음(0:00)부터" if pos < 1 else f"노래 {int(pos // 60)}:{int(pos % 60):02d} 지점부터", ts[-1] + 3))
     runs.sort(reverse=True)
-    cands = [(t, why) for _, t, why in runs[:a.n]]
+    starts = sorted(t for _, t, _, _ in runs)
+    # 이 반복이 끝나는 시각: 다음 반복이 시작되기 직전, 없으면 마지막으로 노래가 들린 조각
+    ends = {round(t, 1): min([e - 1.5] + [u - 0.1 for u in starts if u > t + 3]) for _, t, _, e in runs}
+    cands = [(t, why) for _, t, why, _ in runs[:a.n]]
     if cands: how = "음원"
 
 # ── 2) 반복 길이로 ───────────────────────────────────────
@@ -96,7 +99,7 @@ if not cands and D > 20:
             phi = ph[int(np.argmin(f))]
             for k in range(int(D / P) + 1):
                 t = phi + k * P
-                if t < D - 3: cands.append((settle(t), f"{k + 1}번째 반복 시작 (반복 {P:.1f}초)"))
+                if t < D - 3: cands.append((settle(t), f"{k + 1}번째 반복 시작 (반복 {P:.1f}초)")); ends[round(cands[-1][0], 1)] = min(D, t + P)
             how = "반복"
 
 # ── 3) 노래가 시작되는 순간 · 장면이 바뀌는 순간 · 움직임이 확 커지는 순간 ────────────
@@ -136,7 +139,10 @@ if len(cands) < 2:   # 반복으로 찾은 게 1개 이하면 다른 방법 후�
 out = []
 for t, why in cands:
     t = round(max(0.0, t), 1); room = min(1.0, (D - t) / a.dur)
-    out.append({"t": t, "why": why, "score": round(motion(t, t + a.dur) * room, 2)})
+    c = {"t": t, "why": why, "score": round(motion(t, t + a.dur) * room, 2)}
+    e = next((v for k, v in ends.items() if abs(k - t) < 0.15), None)
+    if e and e - t > 3: c["end"] = round(min(e, D), 1)
+    out.append(c)
 out.sort(key=lambda c: c["t"])
 # 너무 많으면 점수 높은 n개 (시간 순서 유지)
 if how == "반복": out = out[:a.n]

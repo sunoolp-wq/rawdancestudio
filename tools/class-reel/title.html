@@ -44,7 +44,15 @@ window.setup=o=>{O=o;const y=o.y||862, k=o.offset||0; // y: 큰 줄 글자 윗�
   const capTop=v=>v; // 글꼴 윗여백 보정
   $("t").style.top=(y-4-0.2*fs)+"px"; $("n").style.top=(y+134-0.2*58)+"px"; $("trk").style.top=(y-86-0.27*38+(o.trkdy||0))+"px";
 };
-window.render=(s)=>{
+// 자막 길이(len초, 1~5)에 맞추기 (원장님 2026-11-17 "초에 따라 속도가 알아서"): 원래 5초 동작을 그대로 줄이면 1초일 때 너무 정신없음
+// → 등장(0~0.75초)·퇴장(4.33~4.96초)은 √(len/5)배만 빨라지고, 가운데 머무는 시간이 나머지를 맞춤. len=5면 원래와 같음
+const SPD=()=>Math.sqrt(Math.min(5,Math.max(1,(O&&O.len)||5))/5);
+const tmap=u=>{const L=Math.min(5,Math.max(1,(O&&O.len)||5)), k=SPD(), ei=0.75*k, eo=0.63*k;
+  if(L>=4.999) return u;
+  if(u<ei) return u/k;
+  if(u>L-eo) return 4.33+(u-(L-eo))/k;
+  return 0.75+(u-ei)/Math.max(1e-6,L-ei-eo)*(4.33-0.75);};
+window.render=(u)=>{ const s=tmap(u);
   LINES.forEach(({el,chars,cfg})=>{
     let ls;
     if(cfg.keys){ // 원본 프레임 측정: 켜지는 동안 천천히 벌어짐 → 1프레임에 '싹' 모임(살짝 더 좁게) → 2프레임 동안 자리 잡음
@@ -54,7 +62,7 @@ window.render=(s)=>{
         if(s>=t1) ls=v1;}
     } else ls=cfg.ls1;
     el.style.letterSpacing=ls+"em"; el.style.paddingLeft=ls+"em";
-    const F=1/24;
+    const F=1/24/SPD();   // 회색 글자 1프레임은 빨라져도 실제로 한 프레임은 보이게
     chars.forEach(c=>{
       let show=false,ghost=null,gv=1;
       if(s>=c.on && s<c.off) show=true;

@@ -97,10 +97,11 @@ threading.Thread(target=worker, daemon=True).start()
 def apply_lut(job, src, out, lut, strength=100):
     lp = lut_path(lut); s = max(0, min(100, int(strength or 100))) / 100
     lpe = lp.replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
-    vf = (f"lut3d=file='{lpe}':interp=tetrahedral" if s >= 0.999 else
-          f"split[a][b];[b]lut3d=file='{lpe}':interp=tetrahedral[l];[a][l]blend=all_mode=normal:all_opacity={s:.2f}")
+    # 16비트로 계산 (어두운 그라데이션 계단 줄임, 원장님 2026-11-17 "화질 깨짐 없나") + 중간 파일은 crf 12로 거의 무손실
+    vf = (f"format=gbrp16le,lut3d=file='{lpe}':interp=tetrahedral" if s >= 0.999 else
+          f"format=gbrp16le,split[a][b];[b]lut3d=file='{lpe}':interp=tetrahedral[l];[a][l]blend=all_mode=normal:all_opacity={s:.2f}")
     job.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", src, "-filter_complex", f"[0:v]{vf},format=yuv420p[v]", "-map", "[v]", "-map", "0:a?",
-             "-c:v", "libx264", "-crf", "14", "-preset", "medium", "-c:a", "copy", "-movflags", "+faststart", out])
+             "-c:v", "libx264", "-crf", "12", "-preset", "medium", "-c:a", "copy", "-movflags", "+faststart", out])
 
 def track(job, src, start, dur, pickx, pickt, check=None):
     """가로 → 쌤 따라가며 세로로, 세로 원본이면 그 구간만 자름. 결과: 작업 폴더의 세로 영상"""
@@ -120,22 +121,35 @@ def track(job, src, start, dur, pickx, pickt, check=None):
 def keep(job, path, label):
     job.outs.append({"path": path, "label": job.warn + label, "url": "/files/" + os.path.relpath(path, OUT)})
 
-def music(job, src, out, P, auto_ok=False):
+def music(job, src, out, P, auto_ok=False, orig=None, cs=0.0):
     """음원 입히기. 올린 음원이 있으면 그것, 없고 '음원 폴더에서 자동'이면 폴더에서 같은 곡을 찾음.
-    auto_ok: 폴더에서 못 찾으면 실패하지 않고 원래 소리 그대로 (쌤 15초) → False 돌려줌"""
+    orig/cs: 따라가기 전 원본과 자른 시작 시각. 주면 곡·위치를 원본에서 앞뒤 20초 넓혀 찾음 (짧은 영상도 확실하게, 2026-11-17)
+    auto_ok: 못 찾으면 실패하지 않고 원래 소리 그대로 → False 돌려줌"""
     song = upath(P["song"]) if P.get("song") else (MUSIC if P.get("auto_song") else None)
     if not song: return False
     if song == MUSIC and not song_files(MUSIC):
         if auto_ok: job.say("음원 폴더가 비어 있어서 원래 소리 그대로 써요"); return False
         raise RuntimeError(f"음원 폴더가 비어 있어요: {MUSIC}")
-    cmd = [PY, os.path.join(CR, "music_sync.py"), "--video", src, "--song", song, "--out", out]
-    if P.get("trim"): cmd.append("--trim-to-song")
-    for k in ("start", "end", "offset"):
-        if str(P.get(k, "")).strip() != "": cmd += ["--" + k, str(float(P[k]))]
-    n0 = len(job.log)
-    try: job.run(cmd)
-    except RuntimeError:
-        if auto_ok and song == MUSIC: job.say("음원 폴더에서 이 노래를 못 찾아서 원래 소리 그대로 써요"); return False
+    n0 = len(job.log); off = None
+    try:
+        if orig:
+            cmd = [PY, os.path.join(CR, "music_sync.py"), "--video", orig, "--song", song, "--find-only", "--match-pad", "20",
+                   "--start", f"{cs:.3f}", "--end", f"{cs + probe(src)['dur']:.3f}"]
+            if str(P.get("offset", "")).strip() != "": cmd += ["--offset", str(float(P["offset"]))]
+            job.run(cmd)
+            f = next(json.loads(l) for l in reversed(job.log) if l.startswith('{"find"'))
+            song, off = f["song"], f["offset"] - cs
+        cmd = [PY, os.path.join(CR, "music_sync.py"), "--video", src, "--song", song, "--out", out]
+        if P.get("trim"): cmd.append("--trim-to-song")
+        if P.get("pre_room"): cmd.append("--pre-room")
+        if P.get("fade_out") is not None: cmd += ["--fade-out", str(P["fade_out"])]
+        if off is not None: cmd += ["--offset", f"{off:.4f}"]
+        else:
+            for k in ("start", "end", "offset"):
+                if str(P.get(k, "")).strip() != "": cmd += ["--" + k, str(float(P[k]))]
+        job.run(cmd)
+    except (RuntimeError, StopIteration):
+        if auto_ok: job.say("음원을 못 맞춰서 연습실 원래 소리 그대로 써요"); job.warn = "⚠️ 음원 못 찾음(연습실 소리) · "; return False
         raise
     if any(l.startswith("확인필요") for l in job.log[n0:]): job.warn = "⚠️ 음원 박자 확인필요 · "
     return True
@@ -155,7 +169,7 @@ def p_teacher(job, P):
     if os.path.exists(chk): keep(job, chk, "쌤 확인 사진 (보라 상자 = 쌤)")
     if P.get("auto_song") or P.get("song"):
         mv = os.path.join(WORK, f"{job.id}_music.mp4")
-        if music(job, v, mv, {"song": P.get("song"), "auto_song": P.get("auto_song")}, auto_ok=True): v = mv
+        if music(job, v, mv, {"song": P.get("song"), "auto_song": P.get("auto_song"), "fade_out": 0}, auto_ok=True, orig=src, cs=start): v = mv
     if P.get("lut"):
         lv = os.path.join(WORK, f"{job.id}_lut.mp4"); apply_lut(job, v, lv, P["lut"], P.get("strength", 100)); v = lv
     out = outfile("쌤15초", base)
@@ -166,20 +180,28 @@ def p_teacher(job, P):
     job.run(cmd); keep(job, out, "쌤 15초 영상")
 
 def p_trackpad(job, P):
+    """춤 시작 전 pre초(1~5) 동안 TRACKPAD 자막 → 춤(dur초) → RAW 로고 엔딩 OUTRO초 (원장님 2026-11-17)
+    로고 엔딩 동안에도 영상은 계속 흘러가고 그 위를 로고가 덮음 → 연습실 소리·음원이 끊기지 않고 이어짐"""
+    OUTRO = 2.5
     src = upath(P["file"]); start, dur = float(P.get("start", 0)), float(P.get("dur", 30))
+    pre = min(5.0, max(1.0, float(P.get("pre", 5) or 5)))
+    cs = max(0.0, start - pre)                                    # 실제로 자르기 시작하는 원본 시각
+    total = (start - cs) + dur + (OUTRO if P.get("outro", True) else 0)
     base = f"{P['teacher']}_{P['genre']}"; chk = outfile("확인사진", base, "jpg")
-    v = track(job, src, start, dur, P.get("pickx", .5), P.get("pickt", .5), chk)
+    v = track(job, src, cs, total, P.get("pickx", .5), float(P.get("pickt", .5)) + (start - cs), chk)
     if os.path.exists(chk): keep(job, chk, "쌤 확인 사진 (보라 상자 = 쌤)")
     if P.get("song") or P.get("auto_song"):
         mv = os.path.join(WORK, f"{job.id}_music.mp4")
         off = str(P.get("offset", "")).strip()
-        if music(job, v, mv, {"song": P.get("song"), "auto_song": P.get("auto_song"), "trim": P.get("trim"), "offset": float(off) - start if off else ""}): v = mv
+        if music(job, v, mv, {"song": P.get("song"), "auto_song": P.get("auto_song"), "pre_room": True, "fade_out": 0, "offset": off},
+                 auto_ok=True, orig=src, cs=cs): v = mv
     if P.get("lut"):
         lv = os.path.join(WORK, f"{job.id}_lut.mp4"); apply_lut(job, v, lv, P["lut"], P.get("strength", 100)); v = lv
     out = outfile("TRACKPAD", base)
-    cmd = ["node", os.path.join(CR, "add_title.js"), "--video", v, "--title", P["teacher"], "--name", P["genre"], "--at", str(P.get("at", 0) or 0), "--out", out]
+    cmd = ["node", os.path.join(CR, "add_title.js"), "--video", v, "--title", P["teacher"], "--name", P["genre"], "--len", f"{max(1.0, start - cs):.2f}", "--at", "0", "--out", out]
+    if P.get("outro", True): cmd += ["--outro", str(OUTRO)]
     if P.get("track"): cmd += ["--track", P["track"]]
-    job.run(cmd); keep(job, out, "TRACKPAD 릴스 (로고 엔딩은 원장님이)")
+    job.run(cmd); keep(job, out, "TRACKPAD 릴스")
 
 def p_music(job, P):
     src = upath(P["file"]); out = outfile("음원싱크", P.get("name") or "영상")

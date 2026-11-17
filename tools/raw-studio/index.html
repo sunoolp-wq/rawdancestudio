@@ -1,0 +1,177 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAW 영상공장</title>
+<style>
+:root{--bg:#0e0d12;--pn:#17151f;--ln:#2c2838;--fg:#f4f2ee;--mu:#a39db5;--ac:#b9a6ff;--ok:#7ce0c3;--bad:#ff6b8b;--ink:#120f1a}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+header{display:flex;align-items:center;gap:18px;padding:18px 28px;border-bottom:1px solid var(--ln)}
+header b{font:italic 900 26px Montserrat,-apple-system,sans-serif;letter-spacing:-.02em}header span{color:var(--mu)}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;padding:22px 28px;align-items:start}
+@media (max-width:1000px){.wrap{grid-template-columns:1fr}}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+nav button{background:transparent;border:1px solid var(--ln);color:var(--mu);border-radius:999px;padding:9px 16px;font-weight:700;cursor:pointer;font-size:14px}
+nav button.on{background:var(--ac);color:var(--ink);border-color:var(--ac)}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px}
+h2{margin:0;font-size:20px}.hint{color:var(--mu);font-size:13px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--mu);font-weight:600}
+input,select{background:#0e0d12;border:1px solid var(--ln);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--ac)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+.drop{border:2px dashed var(--ln);border-radius:14px;padding:18px;text-align:center;color:var(--mu);cursor:pointer}
+.drop.has{border-style:solid;border-color:var(--ac);color:var(--fg);text-align:left}
+.bar{height:6px;background:var(--ln);border-radius:3px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--ac);width:0}
+.pick{position:relative;display:inline-block;max-width:100%;cursor:crosshair}.pick img{max-width:100%;border-radius:10px;display:block}
+.pick .mk{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border:3px solid var(--ac);border-radius:50%;box-shadow:0 0 0 3px rgba(0,0,0,.5);pointer-events:none}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.go{background:var(--ac);color:var(--ink);border:0;border-radius:12px;padding:13px 22px;font-weight:800;font-size:16px;cursor:pointer}
+.go:disabled{opacity:.4}.sm{background:transparent;border:1px solid var(--ln);color:var(--fg);border-radius:9px;padding:7px 12px;cursor:pointer;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;border-bottom:1px solid var(--ln);text-align:left}td input{width:100%}
+.jobs{position:sticky;top:12px}.job{border:1px solid var(--ln);border-radius:12px;padding:12px;margin-top:10px;background:#120f19}
+.job .st{font-weight:800}.st.완료{color:var(--ok)}.st.실패{color:var(--bad)}.st.작업{color:var(--ac)}
+.job pre{white-space:pre-wrap;font-size:11px;color:var(--mu);max-height:120px;overflow:auto;margin:6px 0 0}
+.job video{width:100%;border-radius:8px;margin-top:8px;background:#000}.job img{width:100%;border-radius:8px;margin-top:8px}
+.err{color:var(--bad);font-weight:700}
+</style></head><body>
+<header><b>RAW</b><div><div style="font-weight:800;font-size:18px">영상공장</div><span id="outp">결과 폴더: …</span></div><button class="sm" style="margin-left:auto" onclick="api('/api/reveal',{})">결과 폴더 열기</button></header>
+<div class="wrap"><main>
+<nav id="tabs"></nav>
+<section id="t-story" class="card">
+ <h2>스토리 시간표</h2><p class="hint">날짜만 고르면 '오늘의 수업' 15초 스토리가 만들어져요. 대강·팝업·휴강은 아래에서 날짜별로 바꾼 뒤 저장하세요. (토·일은 건너뜀)</p>
+ <div class="grid"><label class="f">시작 날짜<input type="date" id="s-from"></label><label class="f">끝 날짜<input type="date" id="s-to"></label></div>
+ <div class="card" style="background:#120f19">
+  <div class="row"><b>바뀐 수업 (대강 · 팝업 · 휴강)</b><input type="date" id="d-date"><button class="sm" onclick="loadDay()">불러오기</button></div>
+  <div id="d-box" class="hint">날짜를 고르고 불러오기를 누르세요.</div>
+ </div>
+ <div class="row"><button class="go" onclick="runStory()">스토리 만들기</button></div>
+</section>
+<section id="t-teacher" class="card" hidden>
+ <h2>쌤 15초 (스토리 뒤에 올리는 영상)</h2><p class="hint">영상 → 쌤 따라가며 세로로 → RAW 스타일 이름·장르·요일 + 끝 화면 2초. 단체 수업이면 사진에서 쌤을 눌러 주세요.</p>
+ <div id="teacher-file"></div>
+ <div class="grid"><label class="f">시작 (초)<input type="number" step="0.1" id="tc-start" value="0"></label><label class="f">길이 (초)<input type="number" step="0.5" id="tc-dur" value="15"></label>
+  <label class="f">강사 이름<input id="tc-name" list="teachers" placeholder="NOFF"></label><label class="f">장르<input id="tc-genre" list="genres" placeholder="HIP HOP"></label>
+  <label class="f">요일<select id="tc-day"></select></label><label class="f">시간<input id="tc-time" placeholder="19:40"></label>
+  <label class="f">홀<select id="tc-hall"><option>A</option><option>B</option><option>C</option><option value="">(표시 안 함)</option></select></label>
+  <label class="f">끝 화면 문구<input id="tc-kr" placeholder="매주 월 19:40"></label></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="tc-pop">팝업 수업 (POP-UP CLASS 표시)</label></div>
+ <div id="teacher-lut"></div>
+ <div class="row"><button class="go" onclick="runTeacher()">만들기</button><span class="hint">끝 화면 문구가 비면 '매주 요일 시간'으로 들어가요</span></div>
+</section>
+<section id="t-trackpad" class="card" hidden>
+ <h2>TRACKPAD 릴스 (풀 안무)</h2><p class="hint">쌤 따라가기 + 앞부분 TRACKPAD 자막(곡명 / 강사 / 장르). 음원을 넣으면 연습실 소리에 맞춰 깨끗한 음원으로 바꿔요. 로고 엔딩은 원장님이 붙여요.</p>
+ <div id="trackpad-file"></div>
+ <div class="grid"><label class="f">시작 (초)<input type="number" step="0.1" id="tp-start" value="0"></label><label class="f">길이 (초)<input type="number" step="0.5" id="tp-dur" value="30"></label>
+  <label class="f">강사 (큰 글씨)<input id="tp-teacher" list="teachers"></label><label class="f">장르<input id="tp-genre" list="genres"></label>
+  <label class="f">곡명 (작게, 비워도 됨)<input id="tp-track" placeholder="AD LA - Ain't In LA"></label><label class="f">자막 시작 (결과 영상 초)<input type="number" step="0.1" id="tp-at" value="0"></label></div>
+ <div id="trackpad-song"></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="tp-trim" checked>노래 시작(0:00)부터 자르기</label><label class="f" style="flex-direction:row;align-items:center">노래 0:00 = 원본 몇 초 (자동이 안 되면)<input id="tp-off" style="width:90px"></label></div>
+ <div id="trackpad-lut"></div>
+ <div class="row"><button class="go" onclick="runTrackpad()">만들기</button></div>
+</section>
+<section id="t-music" class="card" hidden>
+ <h2>음원 싱크</h2><p class="hint">영상 속 연습실 소리와 음원을 비교해서 정확한 위치에 음원을 입혀요. 같은 노래를 여러 번 튼 영상이면 쓸 구간(시작·끝)을 꼭 넣어 주세요.</p>
+ <div id="music-file"></div><div id="music-song"></div>
+ <div class="grid"><label class="f">쓸 구간 시작 (초)<input id="mu-start" placeholder="0"></label><label class="f">쓸 구간 끝 (초)<input id="mu-end" placeholder="끝까지"></label>
+  <label class="f">노래 0:00 = 영상 몇 초 (자동이 안 되면)<input id="mu-off"></label></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="mu-trim" checked>노래 시작(0:00)부터 자르기</label></div>
+ <div id="music-lut"></div>
+ <div class="row"><button class="go" onclick="runMusic()">만들기</button></div>
+</section>
+<section id="t-lut" class="card" hidden>
+ <h2>LUT만 입히기</h2><p class="hint">완성된 영상에 색감(LUT)만 입혀요. 강도 100% = 프리미어에서 그대로 입힌 것과 같아요.</p>
+ <div id="lut-file"></div><div id="lut-lut"></div>
+ <div class="row"><button class="go" onclick="runLut()">만들기</button></div>
+</section>
+</main>
+<aside class="jobs card"><h2>작업</h2><p class="hint">하나씩 차례로 만들어요. 4K 영상 따라가기는 15초에 몇 분 걸려요.</p><div id="jobs"></div></aside></div>
+<datalist id="teachers"></datalist><datalist id="genres"></datalist>
+<script>
+const $=s=>document.querySelector(s), INFO={}, FILES={}, PICK={};
+const api=(u,b)=>fetch(u,b===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
+const TABS=[['story','스토리 시간표'],['teacher','쌤 15초'],['trackpad','TRACKPAD 릴스'],['music','음원 싱크'],['lut','LUT']];
+$('#tabs').innerHTML=TABS.map(([k,n])=>`<button data-k="${k}">${n}</button>`).join('');
+const show=k=>{TABS.forEach(([t])=>{$('#t-'+t).hidden=t!==k;}); document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k)); try{localStorage.rawTab=k}catch(e){}};
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>show(b.dataset.k)); show((()=>{try{return localStorage.rawTab}catch(e){}})()||'story');
+const DAYS=['MON','TUE','WED','THU','FRI','SAT','SUN'],KR={MON:'월',TUE:'화',WED:'수',THU:'목',FRI:'금',SAT:'토',SUN:'일'};
+$('#tc-day').innerHTML=DAYS.map(d=>`<option value="${d}">${KR[d]} (${d})</option>`).join('');
+
+// 파일 올리기 + (영상이면) 쌤 고르기 사진
+function fileBox(key, opts){
+  const el=$('#'+key), accept=opts.audio?'audio/*,.mp3,.wav,.m4a':'video/*,.mp4,.mov,.MP4,.MOV';
+  el.innerHTML=`<div class="drop" id="${key}-d">${opts.label} — 눌러서 고르거나 끌어다 놓기<input type="file" accept="${accept}" hidden></div>`;
+  const d=$('#'+key+'-d'), inp=d.querySelector('input');
+  d.onclick=()=>inp.click(); d.ondragover=e=>{e.preventDefault()}; d.ondrop=e=>{e.preventDefault(); if(e.dataTransfer.files[0]) up(e.dataTransfer.files[0])};
+  inp.onchange=()=>inp.files[0]&&up(inp.files[0]);
+  function up(f){
+    d.classList.add('has'); d.innerHTML=`<b>${f.name}</b> 올리는 중…<div class="bar"><i></i></div>`;
+    const x=new XMLHttpRequest(), fd=new FormData(); fd.append('file',f); x.open('POST','/api/upload');
+    x.upload.onprogress=e=>{const b=d.querySelector('.bar i'); if(b&&e.total) b.style.width=(e.loaded/e.total*100)+'%'};
+    x.onload=()=>{const r=JSON.parse(x.responseText); if(r.error){d.innerHTML=`<span class="err">${r.error}</span>`;return}
+      FILES[key]=r; d.innerHTML=`<b>${r.name}</b> · ${opts.audio?'음원':`${r.w}×${r.h} · ${r.dur.toFixed(1)}초${r.h>r.w?' · 세로 영상(따라가기 없이 그대로)':''}`} <button class="sm" style="float:right">바꾸기</button>`;
+      d.querySelector('button').onclick=e=>{e.stopPropagation(); inp.value=''; inp.click()};
+      if(opts.pick&&r.h<=r.w) pickBox(key, opts.pick);};
+    x.send(fd);
+  }
+}
+function pickBox(key, startSel){
+  let box=$('#'+key+'-pick'); if(!box){box=document.createElement('div'); box.id=key+'-pick'; $('#'+key).appendChild(box);}
+  const st=+($(startSel).value||0);
+  box.innerHTML=`<p class="hint" style="margin:10px 0 6px">쌤을 눌러 주세요 (보라 동그라미). 슬라이더로 장면을 옮길 수 있어요. 쌤이 혼자면 안 눌러도 돼요.</p>
+   <div class="row"><input type="range" min="0" max="${FILES[key].dur.toFixed(1)}" step="0.1" value="${st+0.5}" style="flex:1"><span class="tt"></span><button class="sm">이 장면을 시작으로</button></div>
+   <div class="pick"><img><div class="mk" hidden></div></div>`;
+  const rg=box.querySelector('input'), img=box.querySelector('img'), mk=box.querySelector('.mk'), tt=box.querySelector('.tt');
+  const load=()=>{tt.textContent=(+rg.value).toFixed(1)+'초'; img.src=`/api/frame?id=${FILES[key].id}&t=${rg.value}`};
+  rg.oninput=()=>{tt.textContent=(+rg.value).toFixed(1)+'초'}; rg.onchange=load; load();
+  box.querySelector('button').onclick=()=>{$(startSel).value=(+rg.value).toFixed(1)};
+  img.onclick=e=>{const r=img.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+    mk.hidden=false; mk.style.left=(x*100)+'%'; mk.style.top=(y*100)+'%';
+    PICK[key]={x:+x.toFixed(3), t:Math.max(0,+rg.value-(+$(startSel).value||0))}};
+}
+function lutBox(key){ $('#'+key).innerHTML=`<div class="grid"><label class="f">색감 LUT<select id="${key}-s"><option value="">없음</option>${INFO.luts.map(l=>`<option>${l}</option>`).join('')}</select></label>
+  <label class="f">강도 (%)<input type="number" id="${key}-v" value="100" min="0" max="100" step="5"></label></div>`; }
+const lutVal=k=>({lut:$('#'+k+'-s').value, strength:+$('#'+k+'-v').value||100});
+const need=(k,msg)=>{if(!FILES[k]){alert(msg);throw 0}return FILES[k].id};
+const go=(kind,p,title)=>api('/api/run',{kind,_title:title,...p}).then(()=>poll());
+
+api('/api/info').then(i=>{Object.assign(INFO,i); $('#outp').textContent='결과 폴더: '+i.out;
+  $('#teachers').innerHTML=i.teachers.map(t=>`<option value="${t}">`).join(''); $('#genres').innerHTML=i.genres.map(t=>`<option value="${t}">`).join('');
+  ['teacher-lut','trackpad-lut','music-lut','lut-lut'].forEach(lutBox);
+  const t=new Date(i.today+'T00:00:00'), dw=(t.getDay()+6)%7, mon=new Date(t); mon.setDate(t.getDate()-dw+7); const fri=new Date(mon); fri.setDate(mon.getDate()+4);
+  const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); $('#s-from').value=iso(mon); $('#s-to').value=iso(fri); $('#d-date').value=iso(mon);});
+fileBox('teacher-file',{label:'수업 영상',pick:'#tc-start'}); fileBox('trackpad-file',{label:'수업 영상',pick:'#tp-start'}); fileBox('trackpad-song',{label:'음원 (선택)',audio:1});
+fileBox('music-file',{label:'영상'}); fileBox('music-song',{label:'음원',audio:1}); fileBox('lut-file',{label:'영상'});
+
+// 스토리
+let DAY=null;
+function loadDay(){ const d=$('#d-date').value; api('/api/day?date='+d).then(r=>{ if(r.error){$('#d-box').innerHTML=`<span class="err">${r.error}</span>`;return}
+  DAY={date:d,...r}; $('#d-box').innerHTML=`<p class="hint">${d} (${r.kr}) · 원래 시간표에서 강사·수업명을 바꾸면 그날만 바뀌어요</p>
+  <table><tr><th>시간</th><th>수업</th><th>강사</th><th>팝업</th><th>휴강</th></tr>${r.rows.map((x,i)=>`<tr><td>${x.start}</td><td><input data-i="${i}" data-k="name" value="${x.name}"></td><td><input data-i="${i}" data-k="teacher" value="${x.teacher}"></td><td><input type="checkbox" data-i="${i}" data-k="popup" ${x.popup?'checked':''}></td><td><input type="checkbox" data-i="${i}" data-k="removed" ${x.removed?'checked':''}></td></tr>`).join('')}</table>
+  <div class="row" style="margin-top:10px"><button class="sm" onclick="saveDay()">이 날짜 저장</button><span id="d-msg" class="hint"></span></div>`;
+  $('#d-box').querySelectorAll('input[data-i]').forEach(e=>e.onchange=()=>{const x=DAY.rows[e.dataset.i]; x[e.dataset.k]=e.type==='checkbox'?e.checked:e.value;});});}
+function saveDay(){ api('/api/day',{date:DAY.date,rows:DAY.rows,added:DAY.added}).then(r=>$('#d-msg').textContent=r.ok?'저장했어요 ✓':r.error); }
+function runStory(){ const a=new Date($('#s-from').value+'T00:00:00'), b=new Date($('#s-to').value+'T00:00:00'), ds=[];
+  for(const d=new Date(a); d<=b; d.setDate(d.getDate()+1)){ if(d.getDay()===0||d.getDay()===6) continue; ds.push(new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)); }
+  if(!ds.length) return alert('평일 날짜를 골라 주세요'); go('story',{dates:ds},`스토리 ${ds[0]}~${ds[ds.length-1]}`); }
+// 쌤 15초
+function runTeacher(){ const id=need('teacher-file','수업 영상을 먼저 올려 주세요'); const n=$('#tc-name').value.trim(), g=$('#tc-genre').value.trim(), tm=$('#tc-time').value.trim(), dy=$('#tc-day').value;
+  if(!n||!g||!tm) return alert('강사·장르·시간을 넣어 주세요');
+  const p={file:id,start:+$('#tc-start').value,dur:+$('#tc-dur').value,name:n,genre:g,when:`${dy} ${tm}`,whenKr:$('#tc-kr').value.trim()||`매주 ${KR[dy]} ${tm}`,hall:$('#tc-hall').value,popup:$('#tc-pop').checked,
+    pickx:(PICK['teacher-file']||{}).x??.5,pickt:(PICK['teacher-file']||{}).t??.5,...lutVal('teacher-lut')};
+  go('teacher',p,`쌤 15초 · ${n} ${g}`); }
+// TRACKPAD
+function runTrackpad(){ const id=need('trackpad-file','수업 영상을 먼저 올려 주세요'); const t=$('#tp-teacher').value.trim(), g=$('#tp-genre').value.trim(); if(!t||!g) return alert('강사·장르를 넣어 주세요');
+  const p={file:id,start:+$('#tp-start').value,dur:+$('#tp-dur').value,teacher:t,genre:g,track:$('#tp-track').value.trim(),at:+$('#tp-at').value||0,
+    song:FILES['trackpad-song']?.id||'',trim:$('#tp-trim').checked,offset:$('#tp-off').value.trim(),pickx:(PICK['trackpad-file']||{}).x??.5,pickt:(PICK['trackpad-file']||{}).t??.5,...lutVal('trackpad-lut')};
+  go('trackpad',p,`TRACKPAD · ${t} ${g}`); }
+function runMusic(){ const id=need('music-file','영상을 먼저 올려 주세요'), s=need('music-song','음원을 올려 주세요');
+  go('music',{file:id,song:s,start:$('#mu-start').value.trim(),end:$('#mu-end').value.trim(),offset:$('#mu-off').value.trim(),trim:$('#mu-trim').checked,name:FILES['music-file'].name.replace(/\.[^.]+$/,''),...lutVal('music-lut')},'음원 싱크'); }
+function runLut(){ const id=need('lut-file','영상을 먼저 올려 주세요'); const l=lutVal('lut-lut'); if(!l.lut) return alert('LUT를 골라 주세요'); go('lut',{file:id,...l},'LUT · '+l.lut); }
+// 작업 목록
+let timer=null;
+let LAST='';
+function poll(){ api('/api/jobs').then(js=>{ const sig=JSON.stringify(js); if(sig!==LAST){ LAST=sig; $('#jobs').innerHTML=js.length?js.map(j=>`<div class="job"><div class="row"><span class="st ${j.status.split(' ')[0]}">${j.status}</span><b>${j.title}</b></div>
+  ${j.err?`<div class="err">${j.err}</div>`:''}${j.status!=='완료'?`<pre>${j.log.join('\n')}</pre>`:''}
+  ${j.outs.map(o=>`<div class="hint" style="margin-top:8px">${o.label}</div>${o.url.endsWith('.jpg')?`<img src="${o.url}">`:`<video src="${o.url}" controls playsinline></video>`}<button class="sm" style="margin-top:6px" data-p="${o.path}">파인더에서 보기</button>`).join('')}</div>`).join(''):'<p class="hint">아직 없어요</p>';
+  $('#jobs').querySelectorAll('button[data-p]').forEach(b=>b.onclick=()=>api('/api/reveal',{path:b.dataset.p})); }
+  clearTimeout(timer); if(js.some(j=>j.status==='대기'||j.status==='작업 중')) timer=setTimeout(poll,2000); }); }
+poll();
+</script></body></html>

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 카드·포스터·영상 렌더용 글꼴 설치 (새 작업 환경에서 한 번). 이미 있으면 건너뜀.
 set -e
-DIR="$HOME/.local/share/fonts"; mkdir -p "$DIR"
+if [ "$(uname)" = "Darwin" ]; then DIR="$HOME/Library/Fonts"; else DIR="$HOME/.local/share/fonts"; fi; mkdir -p "$DIR"   # 맥은 사용자 글꼴 폴더
 get() { # 패밀리(URL 표기) 굵기 파일명
   [ -s "$DIR/$3" ] && return 0
   url=$(curl -sS -m 20 "https://fonts.googleapis.com/css2?family=$1:wght@$2&display=swap" | grep -o 'https://fonts.gstatic.com[^)]*' | head -1)

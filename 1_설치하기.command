@@ -13,7 +13,10 @@ echo "▶ 파이썬 · 노드 · ffmpeg"
 brew install python@3.12 node ffmpeg
 PY="$(brew --prefix python@3.12)/bin/python3.12"
 echo "▶ 쌤 찾는 AI (YOLO) · 화면 서버"
-[ -x .venv/bin/python ] || "$PY" -m venv .venv
+if [ ! -x .venv/bin/python ]; then
+  "$PY" -m venv .venv || { echo "  (pip 기본 설치가 안 돼서 다른 방법으로 해요)"; rm -rf .venv; "$PY" -m venv --without-pip .venv; curl -sS https://bootstrap.pypa.io/get-pip.py | .venv/bin/python; }
+fi
+.venv/bin/python -m pip --version >/dev/null 2>&1 || curl -sS https://bootstrap.pypa.io/get-pip.py | .venv/bin/python
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install ultralytics lap flask numpy
 echo "▶ 자막 만드는 브라우저"

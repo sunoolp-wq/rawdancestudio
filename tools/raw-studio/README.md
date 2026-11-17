@@ -45,5 +45,5 @@
 
 ## 만든 사람 메모 (Claude용)
 - 서버 `server.py`(Flask, 127.0.0.1:5577) + 화면 `index.html`. 작업은 한 줄 큐로 순서대로. 결과 폴더는 환경 변수 `RAW_OUT`로 바꿀 수 있음
-- 맥 설치: Homebrew → python@3.12·node·ffmpeg → `.venv`(ultralytics, lap, flask, numpy) → `npm install`(playwright) + `npx playwright install chromium` → `tools/fonts/install.sh`(맥은 ~/Library/Fonts)
+- 맥 설치: Homebrew → node·ffmpeg·uv → `.venv` = uv가 받은 파이썬 3.12(`uv venv --managed-python`, Homebrew 파이썬은 macOS 26.2에서 맥 버전을 못 읽어 pip이 멈춤) + ultralytics, lap, flask, numpy → `npm install`(playwright) + `npx playwright install chromium` → `tools/fonts/install.sh`(맥은 ~/Library/Fonts)
 - 스토리는 기존대로 `content/날짜_daily-story/story.mp4`를 만들고 결과 폴더로 복사. 대강·팝업은 `tools/daily-story/extra.json`에 저장 → 원장님 맥의 extra.json은 저장소와 따로 놀 수 있음 (Claude에게 부탁할 땐 바뀐 내용 알려 주기)

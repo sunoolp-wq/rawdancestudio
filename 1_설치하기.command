@@ -10,12 +10,11 @@ if ! command -v brew >/dev/null 2>&1; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   for b in /opt/homebrew/bin/brew /usr/local/bin/brew; do [ -x "$b" ] && eval "$("$b" shellenv)"; done
 fi
-echo "▶ 파이썬 · 노드 · ffmpeg · uv"
-brew install python@3.12 node ffmpeg uv
-PY="$(brew --prefix python@3.12)/bin/python3.12"
+echo "▶ 노드 · ffmpeg · uv"
+brew install node ffmpeg uv
 echo "▶ 쌤 찾는 AI (YOLO) · 화면 서버"
-# pip 대신 uv로 설치: macOS 26(Tahoe)에서 파이썬이 맥 버전을 빈칸으로 읽어 pip이 멈춤 (원장님 맥 2026-11-17)
-[ -x .venv/bin/python ] || uv venv --python "$PY" .venv
+# 파이썬은 uv가 받은 것 사용: macOS 26.2에서 Homebrew python@3.12가 맥 버전을 빈칸으로 읽어 pip·uv가 못 씀 (원장님 맥 2026-11-17)
+if ! .venv/bin/python -c "import platform,sys; sys.exit(0 if platform.mac_ver()[0] else 1)" 2>/dev/null; then rm -rf .venv; uv venv --python 3.12 --managed-python .venv; fi
 uv pip install --python .venv/bin/python ultralytics lap flask numpy
 echo "▶ 자막 만드는 브라우저"
 npm install --no-audit --no-fund

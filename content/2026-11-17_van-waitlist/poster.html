@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;overflow:hidden}
+.p{position:relative;width:1080px;height:1350px;overflow:hidden;background:radial-gradient(90% 70% at 30% 20%,#d9d9dc 0%,#a9a9ae 55%,#86868c 100%)}
+.p.s{height:1920px}
+.logo{position:absolute;left:50%;transform:translateX(-50%);top:22px;height:92px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
+.panel{position:absolute;left:96px;right:96px;background:#141317 center/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.shade{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(12,11,15,.82) 0%,rgba(12,11,15,0) 22%,rgba(12,11,15,0) 48%,rgba(12,11,15,.88) 78%,rgba(12,11,15,.95) 100%)}
+.y{color:#f2c230}
+.top{position:absolute;left:0;right:0;text-align:center;font:400 78px "Black Han Sans";letter-spacing:.01em}
+.big{position:absolute;left:0;right:0;text-align:center;font:400 196px "Black Han Sans";line-height:1;letter-spacing:-.01em}
+.w1{position:absolute;left:0;right:0;text-align:center;color:#fff;font:700 64px "IBM Plex Sans KR";letter-spacing:.01em}
+.info{position:absolute;left:0;right:0;text-align:center;color:#e9e7ee;font:400 34px "Gothic A1 ExtraBold";line-height:1.6}
+.bot{position:absolute;left:0;right:0;text-align:center;color:#fff;font:400 50px "Black Han Sans";letter-spacing:.02em;text-shadow:0 3px 14px rgba(0,0,0,.45)}
+.link{position:absolute;left:150px;right:150px;height:120px;border:4px dashed rgba(242,194,48,.9);border-radius:20px;display:grid;place-items:center;color:#f2c230;font:400 40px "Black Han Sans"}
+</style></head><body><div id="r"></div><script>
+const story=location.hash==='#s';
+document.getElementById('r').innerHTML=story?`<div class="p s"><img class="logo" src="raw-logo-tight.png">
+<div class="panel" style="top:150px;bottom:150px;background-image:url(photo.jpg)"><div class="shade"></div>
+<div class="top y" style="top:56px">K-POP CLASS 등·하원</div>
+<div class="big y" style="top:1020px">차량 운행</div>
+<div class="w1" style="top:1236px">대기 신청 받아요</div>
+<div class="info" style="top:1340px">노선은 신청 지역 보고 정해요<br>신청 인원이 모이면 시작 예정 · 차량비 추후 안내</div>
+<div class="link" style="top:1470px">대기 신청서 링크</div></div>
+<div class="bot" style="bottom:52px">로우댄스학원 수원점</div></div>`
+:`<div class="p"><img class="logo" src="raw-logo-tight.png">
+<div class="panel" style="top:140px;bottom:120px;background-image:url(photo.jpg)"><div class="shade"></div>
+<div class="top y" style="top:40px">K-POP CLASS 등·하원</div>
+<div class="big y" style="top:640px">차량 운행</div>
+<div class="w1" style="top:850px">대기 신청 받아요</div>
+<div class="info" style="top:938px;font-size:32px">노선은 신청 지역 보고 정해요<br>인원이 모이면 시작 예정 · 차량비 추후 안내</div></div>
+<div class="bot" style="bottom:36px">신청 · 프로필 링크 / DM '차량'</div></div>`;
+</script></body></html>

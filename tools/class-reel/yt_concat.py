@@ -80,10 +80,15 @@ def make(P):
                "--len", f"{max(1.0, pre):.2f}", "--title", T["title"], "--name", T.get("name") or ""]
         if T.get("track"): cmd += ["--track", T["track"]]
         if subprocess.run(cmd, stdin=subprocess.DEVNULL).returncode: sys.exit("자막 그리기 실패")
+    OUT = float(P.get("outro") or 0); odir = None
+    if OUT > 0:   # 끝 RAW 로고 (2026-11-17 "유튜브도"): 마지막 영상을 로고 길이만큼 더 써서 그 위를 덮음 → 음악이 끊기지 않음
+        odir = tempfile.mkdtemp(prefix="raw-yt-outro-"); say("끝 로고 그리는 중…")
+        if subprocess.run(["node", os.path.join(os.path.dirname(os.path.abspath(__file__)), "add_title.js"), "--frames", odir, "--page", "outro",
+                           "--fps", str(FPS), "--w", "1920", "--h", "1080", "--len", str(OUT)], stdin=subprocess.DEVNULL).returncode: sys.exit("끝 로고 그리기 실패")
     if P.get("height"): H2 = int(P["height"]); W, H = int(round(W * H2 / H / 2)) * 2, H2
     f = pick_song(P); sx = load(f, SR) if f else None
     # 영상마다: 디졸브가 겹치는 만큼 뒤를 X초 더 씀 (마지막 제외) → 각 그룹 춤이 디졸브에 잘리지 않음
-    L = [c["dur"] + (X if i < n - 1 else 0) for i, c in enumerate(C)]
+    L = [c["dur"] + (X if i < n - 1 else OUT) for i, c in enumerate(C)]
     ins, fc = [], []
     lut = P.get("lut") or ""; s = max(0, min(100, int(P.get("strength") or 100))) / 100
     lpe = lut.replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
@@ -93,6 +98,7 @@ def make(P):
         if lut:
             v += (f",format=gbrp16le,lut3d=file='{lpe}':interp=tetrahedral" if s >= 0.999 else
                   f",format=gbrp16le,split[a{i}][b{i}];[b{i}]lut3d=file='{lpe}':interp=tetrahedral[l{i}];[a{i}][l{i}]blend=all_mode=normal:all_opacity={s:.2f}")
+        if i == n - 1 and OUT > 0: v += f",tpad=stop_mode=clone:stop_duration={OUT + 1},trim=0:{L[i]:.3f}"   # 원본이 모자라면 마지막 장면 유지
         fc.append(v + f",format=yuv420p,setpts=PTS-STARTPTS[v{i}]")
     if tdir:   # 자막(1920x1080으로 그림 → 영상 크기에 맞춤)을 1번 영상 맨 앞에
         ins += ["-framerate", FR, "-i", os.path.join(tdir, "%05d.png")]
@@ -128,7 +134,7 @@ def make(P):
     if X > 0 and n > 1:
         cur, t = V0, L[0]
         for i in range(1, n):
-            nxt = f"vx{i}" if i < n - 1 else "vout"
+            nxt = f"vx{i}" if i < n - 1 else "vcat"
             fc.append(f"[{cur}][v{i}]xfade=transition=fade:duration={X}:offset={t - X:.3f}[{nxt}]"); cur = nxt; t += L[i] - X
         cur = "a0"
         for i in range(1, n):
@@ -136,19 +142,34 @@ def make(P):
             fc.append(f"[{cur}][a{i}]acrossfade=d={X}:c1=tri:c2=tri[{nxt}]"); cur = nxt
         total = t
     else:
-        fc.append("".join(f"[{V0 if i == 0 else f'v{i}'}][a{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=1[vout][am]"); total = sum(L)
+        fc.append("".join(f"[{V0 if i == 0 else f'v{i}'}][a{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=1[vcat][am]"); total = sum(L)
+    fc.append("[vcat]null[vout]")
     fc.append(f"[am]afade=t=in:st=0:d=0.05,afade=t=out:st={max(0, total - 1.5):.3f}:d=1.5[aout]")
     nf = int(total * FPS); say(f"총 {total:.1f}초 · {W}x{H} · 영상 {n}개")
-    cmd = ["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-nostats", "-progress", "pipe:1", "-y", *ins, "-filter_complex", ";".join(fc),
-           "-map", "[vout]", "-map", "[aout]", "-t", f"{total:.3f}", "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p",
-           "-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart", P["out"]]
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.DEVNULL, text=True); last = -1
-    for line in p.stdout:
-        if line.startswith("frame="):
-            fr = int(line.split("=")[1] or 0)
-            if fr - last >= max(60, nf // 20): last = fr; say(f"영상 합치는 중 {fr}/{nf}")
-    rc = p.wait()
-    if tdir: shutil.rmtree(tdir, ignore_errors=True)
+    def ff(cmd, nf, label):
+        if os.environ.get("RAW_DEBUG"): say(" ".join(cmd))
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.DEVNULL, text=True); last = -1
+        for line in p.stdout:
+            if line.startswith("frame="):
+                fr = int(line.split("=")[1] or 0)
+                if fr - last >= max(60, nf // 20): last = fr; say(f"{label} {fr}/{nf}")
+        return p.wait()
+    head = ["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-nostats", "-progress", "pipe:1", "-y"]
+    # 끝 로고는 따로 한 번 더 (같은 그래프에서 소리 크로스페이드와 같이 쓰면 ffmpeg가 멈춤, 2026-11-17 확인)
+    # → 1단계는 거의 무손실(crf 10)로 이어 붙이고, 2단계에서 로고만 얹으며 최종 압축. 소리는 그대로 복사
+    mid = P["out"] + ".tmp.mp4" if odir else P["out"]
+    rc = ff([*head, *ins, "-filter_complex", ";".join(fc), "-map", "[vout]", "-map", "[aout]", "-t", f"{total:.3f}", "-c:v", "libx264",
+             "-crf", "10" if odir else "16", "-preset", "fast" if odir else "medium", "-pix_fmt", "yuv420p",
+             "-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart", mid], nf, "영상 합치는 중")
+    if not rc and odir:
+        rc = ff([*head, "-i", mid, "-framerate", FR, "-i", os.path.join(odir, "%05d.png"), "-filter_complex",
+                 f"[1:v]scale={W}:{H},format=rgba,setpts=PTS+{max(0, total - OUT):.3f}/TB[oo];[0:v][oo]overlay=0:0:eof_action=repeat,format=yuv420p[vout]",
+                 "-map", "[vout]", "-map", "0:a", "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-c:a", "copy", "-movflags", "+faststart", P["out"]],
+                nf, "끝 로고 넣는 중")
+        try: os.remove(mid)
+        except OSError: pass
+    for d in (tdir, odir):
+        if d: shutil.rmtree(d, ignore_errors=True)
     if rc: sys.exit("ffmpeg 실패 (영상 합치기)")
     say(P["out"])
 

@@ -9,7 +9,7 @@
 </style></head><body><div id="bg"></div><div id="gl"></div><img id="lg" src="raw-logo-tight.png">
 <script>
 const $=id=>document.getElementById(id), cl=x=>Math.min(1,Math.max(0,x)), eo=x=>1-Math.pow(1-cl(x),3);
-window.setup=o=>{};
+window.setup=o=>{ if(o&&o.w){ for(const e of [document.documentElement,document.body]){ e.style.width=o.w+'px'; e.style.height=o.h+'px'; } } };  // 가로(유튜브 1920x1080)도 같은 로고
 window.render=t=>{
   $('bg').style.opacity=eo(t/0.4);
   const a=eo((t-0.15)/0.6); $('lg').style.opacity=a;

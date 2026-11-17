@@ -99,6 +99,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
  <div class="grid"><label class="f">전환<select id="yt-x"><option value="0.5" selected>교차 디졸브 0.5초</option><option value="1">교차 디졸브 1초</option><option value="0">컷</option></select></label>
   <label class="f">크기<select id="yt-h"><option value="0">원본 크기 (4K면 4K)</option><option value="1080">1080p (빠르게)</option></select></label>
   <label class="f">파일 이름<input id="yt-name" placeholder="AD LA - HIPHOP"></label></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="yt-outro" checked>끝에 RAW 로고 2.5초 (음악은 이어짐)</label></div>
  <div id="youtube-lut"></div>
  <div class="row"><button class="go" onclick="runYoutube()">만들기</button><span class="hint" id="yt-total"></span></div>
 </section>
@@ -217,7 +218,7 @@ function runMusic(){ const id=need('music-file','영상을 먼저 올려 주세�
 // 유튜브 이어붙이기 (원장님 2026-11-17)
 let YT=[], YTN=0;
 const ytNum=()=>{ YT.forEach((k,i)=>{ $('#'+k+' .no').textContent=i+1; }); ytTotal(); };
-const ytTotal=()=>{ const ok=YT.filter(k=>FILES[k]); const t=ok.reduce((a,k)=>a+(+$('#'+k+'-d').value||0),0)+($('#yt-teacher').value.trim()?+$('#yt-pre').value:0); // 디졸브만큼 뒤를 더 써서 각 영상 길이는 그대로
+const ytTotal=()=>{ const ok=YT.filter(k=>FILES[k]); const t=ok.reduce((a,k)=>a+(+$('#'+k+'-d').value||0),0)+($('#yt-teacher').value.trim()?+$('#yt-pre').value:0)+($('#yt-outro').checked?2.5:0); // 디졸브만큼 뒤를 더 써서 각 영상 길이는 그대로
   $('#yt-total').textContent=ok.length?`영상 ${ok.length}개 · 약 ${t.toFixed(1)}초`:''; };
 const ytThumb=k=>{ if(FILES[k]) $('#'+k+' .hd img').src=`/api/frame?id=${FILES[k].id}&t=${(+$('#'+k+'-s').value||0)+0.3}`; };
 function ytAdd(f){
@@ -240,7 +241,7 @@ function ytAdd(f){
 (()=>{ const d=$('#yt-drop'), inp=d.querySelector('input');
   const many=async fs=>{ for(const f of [...fs].sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}))) await ytAdd(f); inp.value=''; };
   d.onclick=()=>inp.click(); d.ondragover=e=>e.preventDefault(); d.ondrop=e=>{ e.preventDefault(); many(e.dataTransfer.files); }; inp.onchange=()=>many(inp.files);
-  $('#yt-x').onchange=ytTotal; $('#yt-pre').onchange=ytTotal; $('#yt-teacher').oninput=ytTotal;
+  $('#yt-x').onchange=ytTotal; $('#yt-pre').onchange=ytTotal; $('#yt-outro').onchange=ytTotal; $('#yt-teacher').oninput=ytTotal;
   $('#yt-align').onclick=()=>{ const ks=YT.filter(k=>FILES[k]); if(ks.length<2) return alert('영상을 2개 이상 올려 주세요');
     const s=FILES['youtube-song']?.id||''; if(!s&&!$('#yt-auto').checked) return alert('음원을 올리거나 음원 폴더 자동 찾기를 켜 주세요');
     const m=$('#yt-amsg'), b=$('#yt-align'); b.disabled=true; m.textContent='맞추는 중… (영상 수에 따라 1~2분)';
@@ -255,7 +256,7 @@ function runYoutube(){ const ks=YT.filter(k=>FILES[k]); if(!ks.length) return al
   const bad=ks.find(k=>!(+$('#'+k+'-d').value>0)); if(bad) return alert('길이가 0인 영상이 있어요');
   const s=FILES['youtube-song']?.id||'', nm=$('#yt-name').value.trim()||FILES[ks[0]].name.replace(/\.[^.]+$/,'');
   go('youtube',{clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value})),song:s,auto_song:!s&&$('#yt-auto').checked,
-    xfade:+$('#yt-x').value,height:+$('#yt-h').value,name:nm,pre:+$('#yt-pre').value,teacher:$('#yt-teacher').value.trim(),genre:$('#yt-genre').value.trim(),track:$('#yt-track').value.trim(),...lutVal('youtube-lut')},`유튜브 · ${nm} (${ks.length}개)`); }
+    xfade:+$('#yt-x').value,height:+$('#yt-h').value,name:nm,outro:$('#yt-outro').checked,pre:+$('#yt-pre').value,teacher:$('#yt-teacher').value.trim(),genre:$('#yt-genre').value.trim(),track:$('#yt-track').value.trim(),...lutVal('youtube-lut')},`유튜브 · ${nm} (${ks.length}개)`); }
 function runLut(){ const id=need('lut-file','영상을 먼저 올려 주세요'); const l=lutVal('lut-lut'); if(!l.lut) return alert('LUT를 골라 주세요'); go('lut',{file:id,...l},'LUT · '+l.lut); }
 // 작업 목록
 let timer=null;

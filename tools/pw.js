@@ -13,7 +13,7 @@ module.exports.renderFrames = async ({ file, setupArg, n, fps, dir, type = 'png'
   // pipe: 순서대로 ffmpeg에 바로 넣음 (그리는 동안 영상도 같이 만들어짐). 먼저 끝난 장면은 순서 올 때까지 잠깐 보관
   const ready = new Map(); let wrote = 0;
   const flush = async () => { while (ready.has(wrote)) { const buf = ready.get(wrote); ready.delete(wrote); wrote++; if (!pipe.write(buf)) await new Promise(r => pipe.once('drain', r)); } };
-  workers = workers || Math.max(2, Math.min(8, os.cpus().length - 2));
+  workers = +process.env.RAW_WORKERS || workers || Math.max(2, Math.min(8, os.cpus().length - 2));
   const b = await module.exports.launch(); let next = 0, done = 0;
   await Promise.all(Array.from({ length: workers }, async () => {
     const p = await b.newPage({ viewport: { width: w, height: h } });

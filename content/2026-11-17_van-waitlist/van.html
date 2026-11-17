@@ -1,0 +1,51 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#0d0b13;color:#f4f2ee;overflow:hidden}
+.p{position:relative;width:1080px;height:1350px;overflow:hidden;background:radial-gradient(120% 70% at 50% 18%,#2a1f4d 0%,#15111f 55%,#0d0b13 100%)}
+.p.s{height:1920px}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(185,166,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(185,166,255,.06) 1px,transparent 1px);background-size:60px 60px;mask-image:linear-gradient(to bottom,#000 0%,transparent 75%)}
+.logo{position:absolute;left:72px;top:64px;height:46px}
+.tag{position:absolute;right:72px;top:70px;font:400 34px "Bebas Neue";letter-spacing:.3em;color:#b9a6ff}
+.road{position:absolute;left:0;right:0;height:10px;background:repeating-linear-gradient(90deg,#b9a6ff 0 70px,transparent 70px 120px);opacity:.55}
+.en{font:400 46px "Bebas Neue";letter-spacing:.42em;color:#b9a6ff}
+.h{font:400 132px "Black Han Sans";line-height:1.04;letter-spacing:-.02em}
+.h em{font-style:normal;color:#b9a6ff}
+.sub{display:inline-block;font:400 46px "Gothic A1 ExtraBold";color:#120f1a;background:#b9a6ff;padding:10px 26px 12px;border-radius:8px}
+.list{display:grid;gap:14px}
+.row{display:grid;grid-template-columns:190px 1fr;align-items:baseline;border-top:2px solid rgba(244,242,238,.16);padding-top:14px}
+.row b{font:700 34px "IBM Plex Sans KR";color:#b9a6ff;letter-spacing:.02em}
+.row span{font:400 42px "Gothic A1 ExtraBold"}
+.cta{font:700 40px "IBM Plex Sans KR"}
+.foot{position:absolute;left:72px;right:72px;bottom:54px;display:flex;justify-content:space-between;font:700 28px "IBM Plex Sans KR";color:rgba(244,242,238,.7)}
+.sticker{border:4px dashed rgba(185,166,255,.8);border-radius:22px;height:150px;display:grid;place-items:center;font:700 34px "IBM Plex Sans KR";color:#b9a6ff}
+</style></head><body>
+<div id="root"></div>
+<script>
+const VAN=`<svg viewBox="0 0 620 300" width="WIDTH" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="b" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4f2ee"/><stop offset="1" stop-color="#d8d2e6"/></linearGradient></defs>
+<path d="M40 230 L40 120 Q40 60 100 56 L410 50 Q450 50 470 74 L560 150 Q585 160 585 190 L585 230 Z" fill="url(#b)"/>
+<path d="M418 70 Q440 70 456 88 L520 152 L418 152 Z" fill="#2a2140"/>
+<rect x="70" y="80" width="100" height="70" rx="10" fill="#2a2140"/><rect x="185" y="80" width="100" height="70" rx="10" fill="#2a2140"/><rect x="300" y="80" width="100" height="70" rx="10" fill="#2a2140"/>
+<rect x="40" y="168" width="545" height="16" fill="#b9a6ff"/>
+<text x="180" y="225" font-family="Montserrat" font-style="italic" font-weight="900" font-size="46" fill="#120f1a">RAW</text>
+<text x="300" y="222" font-family="Bebas Neue" font-size="30" letter-spacing="4" fill="#5b4a99">DANCE STUDIO</text>
+<rect x="560" y="192" width="25" height="16" rx="4" fill="#ffd166"/>
+<circle cx="150" cy="238" r="42" fill="#0d0b13"/><circle cx="150" cy="238" r="20" fill="#9a93ad"/>
+<circle cx="480" cy="238" r="42" fill="#0d0b13"/><circle cx="480" cy="238" r="20" fill="#9a93ad"/>
+<path d="M0 120 h28 M-10 150 h34 M6 180 h22" stroke="#b9a6ff" stroke-width="6" stroke-linecap="round" opacity=".7"/>
+</svg>`;
+const rows=[['대상','K-POP 클래스 수강생'],['운행','등원 · 하원 모두'],['노선','신청 지역 보고 정해요'],['시작','신청 인원이 모이면 시작 예정'],['차량비','추후 안내']];
+const list=`<div class="list">${rows.map(r=>`<div class="row"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('')}</div>`;
+const story=location.hash==='#s';
+document.getElementById('root').innerHTML=story?
+`<div class="p s"><div class="grid"></div><img class="logo" src="raw-logo.png"><div class="tag">SUWON · SHUTTLE</div>
+ <div style="position:absolute;left:72px;right:72px;top:250px"><div class="en">RAW SHUTTLE · WAITLIST</div><div class="h" style="margin-top:18px">차량 운행<br><em>대기 신청</em><br>받아요</div><div class="sub" style="margin-top:30px">K-POP 클래스 등·하원</div></div>
+ <div style="position:absolute;left:190px;top:880px">${VAN.replace('WIDTH','700')}</div><div class="road" style="top:1225px"></div>
+ <div style="position:absolute;left:72px;right:72px;top:1270px">${list}</div>
+ <div style="position:absolute;left:72px;right:72px;top:1690px;height:120px" class="sticker">▼ 대기 신청서 링크 ▼</div>
+ <div class="foot" style="bottom:40px"><span>로우댄스학원 수원점</span><span>@rawdance_suwon</span></div></div>`
+:`<div class="p"><div class="grid"></div><img class="logo" src="raw-logo.png"><div class="tag">SUWON · SHUTTLE</div>
+ <div style="position:absolute;left:72px;right:72px;top:160px"><div class="en">RAW SHUTTLE · WAITLIST</div><div class="h" style="margin-top:14px;font-size:118px">차량 운행<br><em>대기 신청</em> 받아요</div><div class="sub" style="margin-top:26px">K-POP 클래스 등·하원</div></div>
+ <div style="position:absolute;right:40px;top:540px">${VAN.replace('WIDTH','470')}</div><div class="road" style="top:775px"></div>
+ <div style="position:absolute;left:72px;right:72px;top:815px">${list}</div>
+ <div class="foot"><span class="cta" style="color:#f4f2ee">신청은 프로필 링크 · DM '차량'</span><span>로우댄스학원 수원점</span></div></div>`;
+</script></body></html>

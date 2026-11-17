@@ -1,0 +1,107 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;overflow:hidden;background:#0b0a0e}
+.p{position:relative;width:1080px;height:1350px;overflow:hidden;font-family:"IBM Plex Sans KR"}
+.grain{position:absolute;inset:0;opacity:.07;pointer-events:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+.logo{position:absolute;left:50%;transform:translateX(-50%);top:64px;height:64px}
+.lbl{font:400 26px "Bebas Neue";letter-spacing:.25em;color:#8a8494}
+.bb{font-family:"Black Han Sans";font-weight:400}
+.bar{background:repeating-linear-gradient(90deg,#121116 0 4px,transparent 4px 7px,#121116 7px 9px,transparent 9px 14px,#121116 14px 20px,transparent 20px 23px)}
+/* ticket base */
+.tk{position:absolute;background:#f3f1ec;border-radius:26px;box-shadow:0 40px 80px rgba(0,0,0,.5);overflow:hidden;color:#121116}
+.tk .band{height:100px;display:flex;align-items:center;justify-content:space-between;padding:0 40px}
+.tk .band b{font:400 50px "Bebas Neue";letter-spacing:.12em}.tk .band span{font:400 26px "Bebas Neue";letter-spacing:.3em}
+.notch{position:absolute;width:52px;height:52px;border-radius:50%}
+.foot{position:absolute;left:0;right:0;text-align:center}
+</style></head><body><div id="r"></div><script>
+const k=location.hash.slice(1), r=document.getElementById('r');
+const INFO2='노선은 신청 지역 보고 정해요 · 인원이 모이면 시작 예정 · 차량비 추후 안내';
+const L={
+// A2 핑크 배경 + 반듯한 탑승권 (검정 띠, 노란 포인트)
+A2:()=>`<div class="p" style="background:url(photoP.jpg) center/cover"><div style="position:absolute;inset:0;background:rgba(20,6,20,.45)"></div><img class="logo" src="raw-logo-tight.png">
+<div class="tk" style="left:90px;right:90px;top:220px;height:760px">
+ <div class="band" style="background:#121116;color:#f3f1ec"><b>RAW SHUTTLE</b><span style="color:#ff8fc0">BOARDING PASS</span></div>
+ <div style="position:absolute;left:40px;top:150px;right:240px"><div class="lbl">FROM</div><div class="bb" style="font-size:96px;line-height:1.05">우리 동네</div>
+ <div style="height:4px;margin:26px 0;background:repeating-linear-gradient(90deg,#ff5fa8 0 26px,transparent 26px 40px)"></div>
+ <div class="lbl">TO</div><div class="bb" style="font-size:96px;line-height:1.05">RAW 수원점</div></div>
+ <div style="position:absolute;left:40px;right:240px;bottom:44px;display:grid;grid-template-columns:1fr 1fr;gap:22px 26px">
+  ${[['CLASS','K-POP 등·하원'],['ROUTE','신청 보고 결정'],['DEPART','인원 모이면'],['FARE','추후 안내']].map(x=>`<div><div class="lbl">${x[0]}</div><div style="font:700 34px 'IBM Plex Sans KR'">${x[1]}</div></div>`).join('')}</div>
+ <div style="position:absolute;right:0;top:100px;bottom:0;width:210px;border-left:4px dashed #cfc9d4;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:36px 0">
+  <div style="writing-mode:vertical-rl;font:400 52px 'Bebas Neue';letter-spacing:.2em">WAITLIST</div><div class="bar" style="width:140px;height:110px"></div></div></div>
+<div class="foot bb" style="bottom:150px;color:#fff;font-size:56px">차량 운행, 대기 신청 받아요</div>
+<div class="foot" style="bottom:96px;color:#ffd5ea;font:700 32px 'IBM Plex Sans KR'">신청 · 프로필 링크 / DM '차량'</div><div class="grain"></div></div>`,
+// A3 등원/하원 두 장
+A3:()=>{const t=(top,rot,dir,from,to,col)=>`<div class="tk" style="left:120px;right:120px;top:${top}px;height:400px;transform:rotate(${rot}deg)">
+ <div class="band" style="background:${col};color:#121116;height:84px"><b style="font-size:44px">RAW SHUTTLE · ${dir}</b><span>WAITLIST</span></div>
+ <div style="position:absolute;left:40px;top:120px;right:200px;display:flex;align-items:center;gap:26px">
+  <div><div class="lbl">FROM</div><div class="bb" style="font-size:52px;white-space:nowrap">${from}</div></div><div style="font:400 56px 'Bebas Neue';color:#9a94a6">→</div>
+  <div><div class="lbl">TO</div><div class="bb" style="font-size:52px;white-space:nowrap">${to}</div></div></div>
+ <div style="position:absolute;left:40px;bottom:36px;font:700 30px 'IBM Plex Sans KR';color:#5a5466">K-POP 클래스 · 노선 신청 보고 결정</div>
+ <div style="position:absolute;right:0;top:84px;bottom:0;width:170px;border-left:4px dashed #cfc9d4;display:grid;place-items:center"><div class="bar" style="width:110px;height:150px"></div></div></div>`;
+ return `<div class="p" style="background:radial-gradient(100% 80% at 50% 30%,#2a2433,#0d0b11)"><img class="logo" src="raw-logo-tight.png">
+ ${t(190,-4,'등원 DEPART','우리 동네','RAW 수원점','#f2c230')}${t(560,3,'하원 RETURN','RAW 수원점','우리 동네','#b9a6ff')}
+ <div class="foot bb" style="bottom:190px;color:#fff;font-size:62px">등·하원 차량, 대기 신청 받아요</div>
+ <div class="foot" style="bottom:140px;color:#cfcbd8;font:700 30px 'IBM Plex Sans KR'">인원이 모이면 시작 예정 · 차량비 추후 안내</div>
+ <div class="foot" style="bottom:86px;color:#f2c230;font:700 32px 'IBM Plex Sans KR'">신청 · 프로필 링크 / DM '차량'</div><div class="grain"></div></div>`;},
+// B2 전광판 꽉 채움
+B2:()=>`<div class="p" style="background:#050505"><canvas id="cv" width="1080" height="1350"></canvas><div class="grain"></div></div>`,
+// D 노선도
+D:()=>{const st=[['우리 동네 ?',0],['?',1],['?',2],['RAW 수원점',3]];
+ return `<div class="p" style="background:#f4f1ea;color:#16141b"><img class="logo" src="raw-logo-tight.png" style="filter:invert(1)">
+ <div style="position:absolute;left:90px;top:190px;font:400 30px 'Bebas Neue';letter-spacing:.3em;color:#7a62e0">RAW SHUTTLE · ROUTE MAP</div>
+ <div class="bb" style="position:absolute;left:90px;right:90px;top:240px;font-size:104px;line-height:1.08">등·하원 노선,<br>신청 받아서 그려요</div>
+ <svg style="position:absolute;left:90px;top:560px" width="900" height="360" viewBox="0 0 900 360">
+  <path d="M40 260 C 200 260, 220 100, 380 100 S 560 260, 700 200 S 820 90, 860 90" fill="none" stroke="#7a62e0" stroke-width="22" stroke-linecap="round"/>
+  <path d="M40 260 C 200 260, 220 100, 380 100 S 560 260, 700 200" fill="none" stroke="#f4f1ea" stroke-width="6" stroke-dasharray="2 22" stroke-linecap="round"/>
+  ${[[40,260,'우리 동네?',1],[380,100,'?',0],[700,200,'?',0],[860,90,'RAW 수원점',2]].map(([x,y,t,m])=>`<circle cx="${x}" cy="${y}" r="${m===2?30:24}" fill="${m===2?'#16141b':'#fff'}" stroke="#16141b" stroke-width="8"/>
+   <text x="${x}" y="${y+(y>150?78:-50)}" text-anchor="${x>800?'end':x<100?'start':'middle'}" font-family="Black Han Sans" font-size="${t.length>2?44:54}" fill="${m===1?'#7a62e0':'#16141b'}">${t}</text>`).join('')}
+ </svg>
+ <div style="position:absolute;left:90px;right:90px;top:990px;font:700 36px 'IBM Plex Sans KR';line-height:1.7;color:#3a3542">K-POP 클래스 수강생 · 등원 · 하원<br>신청 인원이 모이면 시작 예정 · 차량비 추후 안내</div>
+ <div style="position:absolute;left:90px;bottom:90px;display:inline-block;background:#16141b;color:#f4f1ea;font:400 40px 'Black Han Sans';padding:16px 30px;border-radius:999px">대기 신청 · 프로필 링크 / DM '차량'</div><div class="grain" style="opacity:.05"></div></div>`;},
+// E 배차 대기 화면
+E:()=>`<div class="p" style="background:linear-gradient(160deg,#1b1726,#0b0a0e)"><img class="logo" src="raw-logo-tight.png">
+ <div style="position:absolute;left:170px;right:170px;top:190px;bottom:140px;background:#f6f4f8;border-radius:56px;box-shadow:0 40px 90px rgba(0,0,0,.5),inset 0 0 0 12px #111;overflow:hidden;color:#16141b">
+  <div style="height:330px;background:linear-gradient(135deg,#ddd6f5,#f3eefc);position:relative">
+   <svg width="740" height="330" style="position:absolute;inset:0"><path d="M60 270 Q 260 120 420 190 T 690 70" fill="none" stroke="#7a62e0" stroke-width="12" stroke-dasharray="4 18" stroke-linecap="round"/><circle cx="60" cy="270" r="18" fill="#16141b"/><circle cx="690" cy="70" r="22" fill="#7a62e0"/><text x="690" y="125" text-anchor="end" font-family="Black Han Sans" font-size="34" fill="#16141b">RAW 수원점</text><text x="60" y="235" font-family="Black Han Sans" font-size="34" fill="#16141b">우리 동네</text></svg></div>
+  <div style="padding:40px 46px">
+   <div style="font:400 28px 'Bebas Neue';letter-spacing:.25em;color:#7a62e0">RAW SHUTTLE</div>
+   <div class="bb" style="font-size:66px;line-height:1.15;margin-top:6px">등·하원 차량<br>배차 대기 중…</div>
+   <div style="margin-top:34px;font:700 28px 'IBM Plex Sans KR';color:#6a6475">신청 인원 모이는 중</div>
+   <div style="display:flex;gap:16px;margin-top:16px">${['#7a62e0','#a593ef','#d4cbf7'].map(c=>`<div style="width:26px;height:26px;border-radius:50%;background:${c}"></div>`).join('')}</div>
+   <div style="margin-top:30px;font:700 28px 'IBM Plex Sans KR';color:#3a3542;line-height:1.7">K-POP 클래스 · 노선은 신청 보고 결정<br>인원이 모이면 출발 예정 · 차량비 추후 안내</div>
+   <div class="bb" style="margin-top:34px;background:#16141b;color:#fff;text-align:center;font-size:42px;padding:22px 0;border-radius:22px">대기 신청하기</div>
+   <div style="margin-top:14px;text-align:center;font:700 26px 'IBM Plex Sans KR';color:#6a6475">프로필 링크 / DM '차량'</div></div></div><div class="grain"></div></div>`,
+// F 고속도로 표지판
+F:()=>`<div class="p" style="background:linear-gradient(#8fb4d9,#c9dcec 55%,#3a3d44 55%,#2a2c31)">
+ <div style="position:absolute;left:250px;width:22px;top:780px;height:600px;background:#7c8088"></div><div style="position:absolute;right:250px;width:22px;top:780px;height:600px;background:#7c8088"></div>
+ <div style="position:absolute;left:90px;right:90px;top:170px;height:640px;background:#0b6e4f;border-radius:30px;box-shadow:inset 0 0 0 12px #fff,0 30px 60px rgba(0,0,0,.35);color:#fff">
+  <div style="position:absolute;left:60px;top:60px;font:400 34px 'Bebas Neue';letter-spacing:.3em;opacity:.9">RAW SHUTTLE · WAITLIST</div>
+  <div class="bb" style="position:absolute;left:60px;top:120px;font-size:112px;line-height:1.05">RAW 수원점</div>
+  <div style="position:absolute;right:60px;top:110px;font:400 170px 'Bebas Neue'">↗</div>
+  <div style="position:absolute;left:60px;right:60px;top:290px;height:6px;background:#fff"></div>
+  <div class="bb" style="position:absolute;left:60px;top:325px;font-size:76px">등·하원 차량 대기 신청</div>
+  <div style="position:absolute;left:60px;top:440px;font:700 34px 'IBM Plex Sans KR';line-height:1.6">K-POP 클래스 · 노선은 신청 지역 보고 결정<br>인원이 모이면 시작 예정 · 차량비 추후 안내</div></div>
+ <div style="position:absolute;left:0;right:0;bottom:90px;text-align:center;color:#fff;font:400 48px 'Black Han Sans'">신청 · 프로필 링크 / DM '차량'</div>
+ <div style="position:absolute;left:0;right:0;bottom:200px;height:10px;background:repeating-linear-gradient(90deg,#f2c230 0 90px,transparent 90px 150px)"></div><div class="grain"></div></div>`,
+// C2 수업사진 + 노란 포인트 잡지
+C2:()=>`<div class="p"><div style="position:absolute;inset:0;background:url(photoA.jpg) center/cover"></div><div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,8,12,.2),rgba(10,8,12,0) 30%,rgba(10,8,12,.85) 66%,rgba(10,8,12,.96))"></div>
+ <div style="position:absolute;left:80px;top:80px;color:#fff;font:400 30px 'Bebas Neue';letter-spacing:.35em">RAW DANCE STUDIO SUWON</div>
+ <div style="position:absolute;left:80px;top:850px;background:#f2c230;color:#121116;font:400 34px 'Black Han Sans';padding:8px 18px">K-POP CLASS 등·하원</div>
+ <div style="position:absolute;left:80px;right:80px;top:920px;color:#fff;font:400 100px 'Gothic A1 ExtraBold';line-height:1.12;letter-spacing:-.02em">차량 운행,<br>대기 신청 받아요.</div>
+ <div style="position:absolute;left:80px;right:80px;top:1170px;color:#d9d5e2;font:400 32px 'Gothic A1 Light';line-height:1.6">노선은 신청 지역 보고 정해요 · 인원이 모이면 시작 예정<br>차량비 추후 안내 · <b style="font-family:'Gothic A1 ExtraBold';font-weight:400;color:#f2c230">신청 프로필 링크 / DM '차량'</b></div><div class="grain"></div></div>`,
+// C3 사진 + 흰 종이 공지
+C3:()=>`<div class="p" style="background:#e9e6df"><div style="position:absolute;left:0;right:0;top:0;height:660px;background:url(photoP.jpg) center 35%/cover"></div>
+ <div style="position:absolute;left:70px;right:70px;top:560px;bottom:70px;background:#fbfaf6;box-shadow:0 20px 50px rgba(0,0,0,.18);padding:56px 60px;color:#16141b">
+  <div style="display:flex;justify-content:space-between;font:400 30px 'Bebas Neue';letter-spacing:.3em;color:#8a8494"><span>NOTICE</span><span>RAW DANCE STUDIO SUWON</span></div>
+  <div style="height:3px;background:#16141b;margin:20px 0 34px"></div>
+  <div class="bb" style="font-size:86px;line-height:1.12">K-POP 클래스<br>등·하원 차량 대기 신청</div>
+  <div style="margin-top:34px;font:700 34px 'IBM Plex Sans KR';line-height:1.75;color:#3a3542">· 노선은 신청 지역 보고 정해요<br>· 신청 인원이 모이면 시작 예정<br>· 차량비 추후 안내</div>
+  <div style="position:absolute;left:60px;right:60px;bottom:50px;display:flex;justify-content:space-between;align-items:center"><span class="bb" style="font-size:40px">신청 · 프로필 링크 / DM '차량'</span><img src="raw-logo-tight.png" style="height:54px;filter:invert(1)"></div></div></div>`,
+};
+r.innerHTML=L[k]();
+if(k==='B2'){const cv=document.getElementById('cv'),W=1080,H=1350,P=10,cols=W/P|0,rows=H/P|0,off=document.createElement('canvas');off.width=cols;off.height=rows;const o=off.getContext('2d');
+ o.fillStyle='#000';o.fillRect(0,0,cols,rows);o.fillStyle='#fff';o.textAlign='center';o.textBaseline='middle';
+ const fit=(t,fs,y)=>{do{o.font=`400 ${fs}px "Black Han Sans"`;fs--;}while(o.measureText(t).width>cols-8&&fs>6);o.fillText(t,cols/2,y);};
+ fit('RAW SHUTTLE',22,rows*.12);fit('우리 동네',30,rows*.3);fit('⇅',22,rows*.43);fit('RAW 수원점',30,rows*.56);fit('등·하원 대기 신청 중',16,rows*.74);fit('프로필 링크 · DM 차량',12,rows*.88);
+ const d=o.getImageData(0,0,cols,rows).data,g=cv.getContext('2d');g.fillStyle='#050505';g.fillRect(0,0,W,H);
+ for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const on=d[(y*cols+x)*4]>110;g.beginPath();g.arc(x*P+P/2,y*P+P/2,3.8,0,7);g.fillStyle=on?(y<rows*.2||y>rows*.82?'#ff4f9a':'#ffb000'):'#1a1408';g.shadowBlur=on?10:0;g.shadowColor='#ff9a00';g.fill();}}
+</script></body></html>

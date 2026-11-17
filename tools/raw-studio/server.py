@@ -275,6 +275,7 @@ def reveal():
     return jsonify({"ok": True})
 
 if __name__ == "__main__":
+    import logging; logging.getLogger("werkzeug").setLevel(logging.ERROR)   # 3초마다 오는 진행 확인 기록은 터미널에 안 찍음 (원장님 2026-11-17)
     port = int(os.environ.get("RAW_PORT", 5577))
     print(f"RAW 영상공장: http://127.0.0.1:{port}  (결과 폴더: {OUT})", flush=True)
     app.run(host="127.0.0.1", port=port, threaded=True)

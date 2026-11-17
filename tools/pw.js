@@ -33,16 +33,26 @@ module.exports.renderFrames = async ({ file, setupArg, n, fps, dir, type = 'png'
   return path.join(dir, '%05d' + (type === 'png' ? '.png' : '.jpg'));
 };
 
+// ffmpeg 실행 + 진행 표시. 원장님 맥 2026-11-17: '영상 합치는 중'에서 멈춘 것처럼 보임 → 몇 장째인지 보여 줌
+// total: 전체 장 수(진행 표시용), label: 표시 이름
+module.exports.ffmpeg = (args, total, label = '영상 합치는 중') => new Promise((res, rej) => {
+  const { spawn } = require('child_process');
+  const ff = spawn('ffmpeg', ['-nostdin', '-hide_banner', '-v', 'error', '-nostats', '-progress', 'pipe:1', ...args], { stdio: ['ignore', 'pipe', 'inherit'] });
+  let buf = '', shown = -1;
+  ff.stdout.on('data', d => { buf += d; const m = [...buf.matchAll(/frame=(\d+)/g)]; buf = buf.slice(-200);
+    if (m.length) { const f = +m[m.length - 1][1]; if (f - shown >= 60 || (total && f >= total && shown < total)) { shown = f; console.log(`${label} ${f}${total ? '/' + total : ''}`); } } });
+  ff.on('close', c => c ? rej(new Error(`ffmpeg 실패 (${label})`)) : res());
+  ff.on('error', () => rej(new Error('ffmpeg를 못 찾았어요')));
+});
+
 // 장면을 임시 폴더에 다 그린 뒤 ffmpeg로 합치기 (원장님 맥 2026-11-17 '장면 420/510'에서 멈춤:
-// 그리면서 ffmpeg에 바로 넣는 방식(pipe)이 맥 ffmpeg 9·node 26에서 서로 기다리다 멈춤 → 파이프 없이 파일로)
-// ffArgs(seq): seq = '임시폴더/%05d.png' 를 받아 ffmpeg 인자 배열을 돌려주는 함수
-module.exports.renderToVideo = async ({ ffArgs, type = 'png', ...o }) => {
-  const os = require('os'), path = require('path'), { spawn } = require('child_process');
+// 그리면서 ffmpeg에 바로 넣는 방식(pipe)이 맥 ffmpeg·node 최신판에서 서로 기다리다 멈춤 → 파이프 없이 파일로)
+// steps(seq, tmp): seq = '임시폴더/%05d.png', tmp = 임시 폴더 → [{args, total, label}, ...] 순서대로 실행
+module.exports.renderToVideo = async ({ steps, type = 'png', ...o }) => {
+  const os = require('os'), path = require('path');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'raw-frames-'));
   try {
-    const seq = await module.exports.renderFrames({ ...o, type, dir });
-    console.log('영상 합치는 중...');
-    const code = await new Promise(r => { const ff = spawn('ffmpeg', ['-nostdin', ...ffArgs(seq)], { stdio: ['ignore', 'inherit', 'inherit'] }); ff.on('close', r); ff.on('error', () => r(1)); });
-    if (code) { console.error('ffmpeg 실패'); process.exit(code || 1); }
+    const seq = await module.exports.renderFrames({ ...o, type, dir: path.join(dir, 'f') });
+    for (const st of steps(seq, dir)) await module.exports.ffmpeg(st.args, st.total, st.label);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 };

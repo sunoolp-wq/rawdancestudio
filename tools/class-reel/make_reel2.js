@@ -5,18 +5,23 @@ const { spawn } = require('child_process'); const path = require('path'); const 
 const A = {}; process.argv.slice(2).forEach((v, i, a) => { if (v.startsWith('--')) A[v.slice(2)] = a[i + 1]; });
 const START = +(A.start || 0), DUR = +(A.dur || 15), END = 2.0, FPS = 30, TOT = DUR + END;
 (async () => {
-  const graph = [
-    `[0:v]setpts=PTS-STARTPTS,fps=${FPS},scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1[v]`,
-    // 끝 화면 2초: 검은 바탕(전체 길이)에 영상(끝나면 마지막 장면 유지) → 그 위에 글자·끝 화면. tpad는 파이프가 느리면 끝 2초가 잘림(2026-11-06)
-    `color=c=black:s=1080x1920:r=${FPS}:d=${TOT},format=yuv420p[bg]`, `[bg][v]overlay=0:0:eof_action=repeat[bv]`,
-    `[1:v]format=rgba[o]`, `[bv][o]overlay=0:0:format=auto:eof_action=repeat,format=yuv420p[vout]`,
-    `[0:a]atrim=duration=${DUR},asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.3,afade=t=out:st=${DUR - 1.2}:d=1.2,apad=pad_dur=${END}[aout]`].join(';');
-  // 장면을 여러 탭에서 동시에 그려 임시 폴더에 저장 → ffmpeg로 합침 (원장님 2026-11-17 속도·맥 멈춤)
-  // 원본은 -ss/-t로 필요한 구간만 읽음 (4K 앞부분을 처음부터 풀지 않아 빠름)
-  await renderToVideo({ file: path.join(__dirname, 'style2.html'), n: Math.round(TOT * FPS), fps: FPS,
+  const N = Math.round(TOT * FPS);
+  // 장면을 여러 탭에서 동시에 그려 임시 폴더에 저장 → ffmpeg 두 단계로 합침 (원장님 2026-11-17 속도·맥 멈춤)
+  // 한 번에 복잡하게 합치면 맥 최신 ffmpeg에서 '영상 합치는 중'에 멈춤 → 단순한 두 단계로 나눔
+  await renderToVideo({ file: path.join(__dirname, 'style2.html'), n: N, fps: FPS,
     setupArg: { name: A.name, genre: A.genre, when: A.when, whenKr: A.whenKr || A.when, hall: A.hall, track: A.track, kicker: A.kicker, dur: DUR },
-    ffArgs: seq => ['-y', '-v', 'error', '-ss', String(START), '-t', String(DUR), '-i', A.video, '-framerate', String(FPS), '-i', seq,
-      '-filter_complex', graph, '-map', '[vout]', '-map', '[aout]', '-t', String(TOT),
-      '-c:v', 'libx264', '-crf', '14', '-preset', 'medium', '-c:a', 'aac', '-b:a', '320k', '-movflags', '+faststart', A.out] });
+    steps: (seq, tmp) => {
+      const base = path.join(tmp, 'base.mp4');
+      return [
+        // 1) 원본에서 필요한 구간만(-ss/-t) → 세로 1080x1920, 끝 2초는 마지막 장면 정지, 소리 페이드
+        { label: '영상 준비 중', total: N, args: ['-y', '-ss', String(START), '-t', String(DUR), '-i', A.video,
+          '-vf', `fps=${FPS},scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,tpad=stop_mode=clone:stop_duration=${END},format=yuv420p`,
+          '-af', `afade=t=in:st=0:d=0.3,afade=t=out:st=${DUR - 1.2}:d=1.2,apad=pad_dur=${END}`,
+          '-t', String(TOT), '-c:v', 'libx264', '-crf', '10', '-preset', 'veryfast', '-c:a', 'aac', '-b:a', '320k', base] },
+        // 2) 글자·끝 화면 장면을 얹기
+        { label: '영상 합치는 중', total: N, args: ['-y', '-i', base, '-framerate', String(FPS), '-i', seq,
+          '-filter_complex', '[1:v]format=rgba[o];[0:v][o]overlay=0:0:format=auto,format=yuv420p[vout]', '-map', '[vout]', '-map', '0:a', '-t', String(TOT),
+          '-c:v', 'libx264', '-crf', '14', '-preset', 'medium', '-c:a', 'copy', '-movflags', '+faststart', A.out] }];
+    } });
   console.log(A.out);
 })();

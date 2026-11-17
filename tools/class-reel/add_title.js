@@ -10,8 +10,8 @@ if (A.end) A.at = Math.max(0, +A.end - 4.96);
   const [fn, fd] = fr.split('/').map(Number); const FPS = fn / (fd || 1);
   await renderToVideo({ file: path.join(__dirname, 'title.html'), n: Math.round(T * FPS), fps: FPS,
     setupArg: { title: A.title, name: A.name, track: A.track, y: A.y ? +A.y : undefined, trkdy: A.trkdy ? +A.trkdy : 0 },
-    ffArgs: seq => ['-y', '-v', 'error', '-i', A.video, '-framerate', fr, '-i', seq,
+    steps: seq => [{ args: ['-y', '-i', A.video, '-framerate', fr, '-i', seq,
       '-filter_complex', `[0:v]scale=1080:1920,setsar=1[v];[1:v]format=rgba,setpts=PTS+${+(A.at||0)}/TB[o];[v][o]overlay=0:0:eof_action=pass,format=yuv420p,setsar=1[vout]`,
-      '-map', '[vout]', '-map', '0:a?', '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', A.out] });
+      '-map', '[vout]', '-map', '0:a?', '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', A.out] }] });
   console.log(A.out);
 })();

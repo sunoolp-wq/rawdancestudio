@@ -36,8 +36,8 @@ const out = path.join(outDir, 'story.mp4');
   const af = mus ? ['-af', `afade=t=in:st=0:d=0.4,afade=t=out:st=${SEC - 1.2}:d=1.2,volume=${mus.volume || 1}`] : [];
   // 장면을 여러 탭에서 동시에 그려 임시 폴더에 저장 → ffmpeg로 합침 (원장님 2026-11-17 속도·맥 멈춤)
   await renderToVideo({ file: path.join(__dirname, 'template.html'), setupArg: data, n: SEC * FPS, fps: FPS, type: 'jpeg', omit: false, check: fontCheck,
-    ffArgs: seq => ['-y', '-v', 'error', '-framerate', String(FPS), '-i', seq,
+    steps: seq => [{ total: SEC * FPS, args: ['-y', '-framerate', String(FPS), '-i', seq,
       ...audioIn, '-map', '0:v', '-map', '1:a', '-t', String(SEC), ...af,
-      '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', out] });
+      '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', out] }] });
   console.log(out);
 })();

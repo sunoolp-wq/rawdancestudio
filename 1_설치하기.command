@@ -10,16 +10,13 @@ if ! command -v brew >/dev/null 2>&1; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   for b in /opt/homebrew/bin/brew /usr/local/bin/brew; do [ -x "$b" ] && eval "$("$b" shellenv)"; done
 fi
-echo "▶ 파이썬 · 노드 · ffmpeg"
-brew install python@3.12 node ffmpeg
+echo "▶ 파이썬 · 노드 · ffmpeg · uv"
+brew install python@3.12 node ffmpeg uv
 PY="$(brew --prefix python@3.12)/bin/python3.12"
 echo "▶ 쌤 찾는 AI (YOLO) · 화면 서버"
-if [ ! -x .venv/bin/python ]; then
-  "$PY" -m venv .venv || { echo "  (pip 기본 설치가 안 돼서 다른 방법으로 해요)"; rm -rf .venv; "$PY" -m venv --without-pip .venv; curl -sS https://bootstrap.pypa.io/get-pip.py | .venv/bin/python; }
-fi
-.venv/bin/python -m pip --version >/dev/null 2>&1 || curl -sS https://bootstrap.pypa.io/get-pip.py | .venv/bin/python
-.venv/bin/python -m pip install --upgrade pip
-.venv/bin/python -m pip install ultralytics lap flask numpy
+# pip 대신 uv로 설치: macOS 26(Tahoe)에서 파이썬이 맥 버전을 빈칸으로 읽어 pip이 멈춤 (원장님 맥 2026-11-17)
+[ -x .venv/bin/python ] || uv venv --python "$PY" .venv
+uv pip install --python .venv/bin/python ultralytics lap flask numpy
 echo "▶ 자막 만드는 브라우저"
 npm install --no-audit --no-fund
 npx playwright install chromium

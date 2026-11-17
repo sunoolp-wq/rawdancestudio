@@ -1,5 +1,5 @@
 // 사용: node render.js 2026-11-05 [초=15] → content/2026-11-05_daily-story/story.mp4
-const { launch } = require('../pw.js');
+const { renderFrames } = require('../pw.js');
 const { spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
 const dateStr = process.argv[2]; const SEC = +(process.argv[3] || 15); const FPS = 30;
@@ -25,15 +25,10 @@ const data = { dow: DOW, md: `${String(M).padStart(2,'0')}.${String(Dd).padStart
 const outDir = path.join(__dirname, '../../content', `${dateStr}_daily-story`); fs.mkdirSync(outDir, { recursive: true });
 const out = path.join(outDir, 'story.mp4');
 (async () => {
-  const b = await launch();
-  const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
-  await p.goto('file://' + path.join(__dirname, 'template.html'));
-  await p.evaluate(d => window.setup(d), data);
-  await p.evaluate(() => document.fonts.ready);
   // 글꼴이 없으면 명조체로 나옴(2026-11-07 사고) → 만들지 않고 멈춘다. 해결: bash tools/fonts/install.sh
-  let miss = null; try { miss = require('child_process').execSync('fc-list : family').toString(); } catch (e) { /* 맥에 fc-list가 없으면 아래 브라우저 검사만 */ }
+  let miss = null; try { miss = require('child_process').execSync('fc-list : family').toString(); } catch (e) { /* 맥에 fc-list가 없으면 브라우저 검사만 */ }
   if (miss) for (const f of ['Noto Sans KR', 'Montserrat']) if (!miss.includes(f)) { console.error(`글꼴 없음: ${f} → bash tools/fonts/install.sh 먼저`); process.exit(1); }
-  for (const f of ['Noto Sans KR', 'Montserrat']) if (!(await p.evaluate(n => document.fonts.check(`16px "${n}"`), f))) { console.error(`글꼴 없음: ${f} → bash tools/fonts/install.sh 먼저`); process.exit(1); }
+  const fontCheck = async p => { for (const f of ['Noto Sans KR', 'Montserrat']) if (!(await p.evaluate(n => document.fonts.check(`16px "${n}"`), f))) { console.error(`글꼴 없음: ${f} → bash tools/fonts/install.sh 먼저`); process.exit(1); } };
   // 음악: music.json {"file": "music/xxx.mp3", "start": 초} 또는 날짜별 {"2026-11-05": {...}} / 없으면 무음
   let mus = null; const mp = path.join(__dirname, 'music.json');
   if (fs.existsSync(mp)) { const mj = JSON.parse(fs.readFileSync(mp)); mus = mj[dateStr] || mj.default || null; }
@@ -41,12 +36,11 @@ const out = path.join(outDir, 'story.mp4');
   const af = mus ? ['-af', `afade=t=in:st=0:d=0.4,afade=t=out:st=${SEC - 1.2}:d=1.2,volume=${mus.volume || 1}`] : [];
   const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-i', '-',
     ...audioIn, '-map', '0:v', '-map', '1:a', '-t', String(SEC), ...af,
-    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', out]);
-  for (let f = 0; f < SEC * FPS; f++) {
-    await p.evaluate(t => window.render(t), f / FPS);
-    const buf = await p.screenshot({ type: 'jpeg', quality: 95 });
-    if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
-  }
-  ff.stdin.end(); await new Promise(r => ff.on('close', r)); await b.close();
-  await p; console.log(out);
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
+  const done = new Promise(r => ff.on('close', r));
+  // 장면을 여러 탭에서 동시에 그리면서 순서대로 ffmpeg에 넣음 (원장님 2026-11-17 속도)
+  await renderFrames({ file: path.join(__dirname, 'template.html'), setupArg: data, n: SEC * FPS, fps: FPS, type: 'jpeg', omit: false, check: fontCheck, pipe: ff.stdin });
+  const code = await done;
+  if (code) { console.error('ffmpeg 실패'); process.exit(code); }
+  console.log(out);
 })();

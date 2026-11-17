@@ -26,6 +26,8 @@ W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)); H = int(cap.get(cv2.CAP_PROP_FRAME_H
 cw = int(round(H * 9 / 16)) // 2 * 2
 SW = 1280; sc = SW / W; SH = int(round(H * sc))
 model = YOLO(a.model if os.path.exists(a.model) else "yolo11s.pt")
+import torch   # 맥 M 시리즈 그래픽 칩(MPS)·엔비디아(CUDA)가 있으면 사용 (원장님 2026-11-17 속도)
+DEV = "mps" if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def hist(img, b):  # 상체 색 분포 (옷 색으로 같은 사람 다시 찾기)
     x1, y1, x2, y2 = [int(v) for v in b]
@@ -43,7 +45,7 @@ for i in range(n):
     if not ok: break
     if i % step: continue
     small = cv2.resize(fr, (SW, SH))
-    r = model.track(small, persist=True, classes=[0], imgsz=1280, conf=0.25, verbose=False, tracker="bytetrack.yaml")[0]
+    r = model.track(small, persist=True, classes=[0], imgsz=1280, conf=0.25, verbose=False, tracker="bytetrack.yaml", device=DEV)[0]
     bx = r.boxes.xyxy.cpu().numpy() if r.boxes is not None else np.zeros((0, 4))
     ids = r.boxes.id.cpu().numpy().astype(int) if (r.boxes is not None and r.boxes.id is not None) else -np.ones(len(bx), int)
     rec.append((i / fps, bx, ids, small))

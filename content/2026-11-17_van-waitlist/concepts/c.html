@@ -1,0 +1,68 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;overflow:hidden;background:#0b0a0e}
+.p{position:relative;width:1080px;height:1350px;overflow:hidden}
+/* A 탑승권 */
+.A{background:#0b0a0e}
+.A .bg{position:absolute;inset:-40px;background:url(photoA.jpg) center/cover;filter:blur(14px) brightness(.45) saturate(.9)}
+.tk{position:absolute;left:110px;top:250px;width:860px;height:780px;transform:rotate(-3deg);background:#f3f1ec;border-radius:28px;box-shadow:0 40px 80px rgba(0,0,0,.55);overflow:hidden}
+.tk .band{height:120px;background:#121116;color:#f3f1ec;display:flex;align-items:center;justify-content:space-between;padding:0 46px}
+.tk .band b{font:400 58px "Bebas Neue";letter-spacing:.12em}
+.tk .band span{font:400 30px "Bebas Neue";letter-spacing:.3em;color:#b9a6ff}
+.tk .main{position:absolute;left:46px;top:160px;right:250px}
+.lbl{font:400 28px "Bebas Neue";letter-spacing:.25em;color:#8a8494}
+.city{font:400 92px "Black Han Sans";color:#121116;line-height:1.05}
+.arrow{font:400 40px "Bebas Neue";color:#7a62e0;letter-spacing:.2em;margin:16px 0}
+.fields{position:absolute;left:46px;right:250px;bottom:50px;display:grid;grid-template-columns:1fr 1fr;gap:26px 30px}
+.fields div b{display:block;font:400 26px "Bebas Neue";letter-spacing:.25em;color:#8a8494}
+.fields div span{font:700 36px "IBM Plex Sans KR";color:#121116}
+.stub{position:absolute;right:0;top:120px;bottom:0;width:220px;border-left:4px dashed #c9c4cf;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:40px 0}
+.stub .v{writing-mode:vertical-rl;font:400 54px "Bebas Neue";letter-spacing:.2em;color:#121116}
+.bar{width:150px;height:120px;background:repeating-linear-gradient(90deg,#121116 0 4px,transparent 4px 7px,#121116 7px 9px,transparent 9px 14px,#121116 14px 20px,transparent 20px 23px)}
+.notch{position:absolute;width:56px;height:56px;border-radius:50%;background:#0b0a0e;right:192px}
+.A .cap{position:absolute;left:0;right:0;bottom:120px;text-align:center;color:#f3f1ec;font:400 52px "Black Han Sans"}
+.A .cap2{position:absolute;left:0;right:0;bottom:70px;text-align:center;color:#c9c4d6;font:700 32px "IBM Plex Sans KR"}
+.logo{position:absolute;left:50%;transform:translateX(-50%);top:70px;height:70px}
+/* B LED */
+.B{background:#101012}
+.bus{position:absolute;left:60px;right:60px;top:150px;height:560px;background:#1b1b1f;border-radius:40px 40px 24px 24px;box-shadow:inset 0 0 0 10px #2a2a30}
+.led{position:absolute;left:50px;right:50px;top:50px;height:300px;background:#050505;border-radius:14px;box-shadow:inset 0 0 0 4px #000,0 0 0 6px #333}
+.B canvas{position:absolute;left:0;top:0}
+.ws{position:absolute;left:50px;right:50px;top:380px;height:140px;border-radius:12px;background:linear-gradient(#3a3b44,#26262c)}
+.B .t1{position:absolute;left:80px;right:80px;top:790px;color:#f4f2ee;font:400 96px "Black Han Sans";line-height:1.1}
+.B .t1 em{font-style:normal;color:#ffb000}
+.B .t2{position:absolute;left:80px;right:80px;top:1035px;color:#cfcbd8;font:700 34px "IBM Plex Sans KR";line-height:1.65}
+.B .ft{position:absolute;left:80px;right:80px;bottom:60px;display:flex;justify-content:space-between;color:#8e8a99;font:400 30px "Bebas Neue";letter-spacing:.25em}
+/* C 잡지 */
+.C .bg{position:absolute;inset:0;background:url(photoP.jpg) center/cover}
+.C .g{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,8,12,.15) 0%,rgba(10,8,12,0) 35%,rgba(10,8,12,.82) 68%,rgba(10,8,12,.95) 100%)}
+.C .k{position:absolute;left:80px;top:80px;color:#fff;font:400 30px "Bebas Neue";letter-spacing:.35em;opacity:.9}
+.C .k2{position:absolute;right:80px;top:80px;color:#fff;font:400 30px "Bebas Neue";letter-spacing:.35em;opacity:.9}
+.C .h{position:absolute;left:80px;right:80px;top:860px;color:#fff;font:400 92px "Gothic A1 ExtraBold";line-height:1.15;letter-spacing:-.02em}
+.C .rule{position:absolute;left:80px;width:120px;top:1110px;height:4px;background:#fff}
+.C .i{position:absolute;left:80px;right:80px;top:1140px;color:#e6e2ec;font:400 34px "Gothic A1 Light";line-height:1.6}
+.C .i b{font-family:"Gothic A1 ExtraBold";font-weight:400;color:#fff}
+.grain{position:absolute;inset:0;opacity:.07;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+</style></head><body><div id="r"></div><script>
+const k=location.hash.slice(1)||'A', r=document.getElementById('r');
+if(k==='A') r.innerHTML=`<div class="p A"><div class="bg"></div><img class="logo" src="raw-logo-tight.png">
+<div class="tk"><div class="band"><b>RAW SHUTTLE</b><span>BOARDING PASS</span></div>
+<div class="main"><div class="lbl">FROM</div><div class="city">우리 동네</div><div class="arrow">— — — — →</div><div class="lbl">TO</div><div class="city">RAW 수원점</div></div>
+<div class="fields"><div><b>CLASS</b><span>K-POP 등·하원</span></div><div><b>ROUTE</b><span>신청 보고 결정</span></div><div><b>DEPART</b><span>인원 모이면</span></div><div><b>FARE</b><span>추후 안내</span></div></div>
+<div class="stub"><div class="v">WAITLIST</div><div class="bar"></div></div><div class="notch" style="top:92px"></div><div class="notch" style="bottom:-28px"></div></div>
+<div class="cap">차량 운행, 대기 신청 받아요</div><div class="cap2">신청 · 프로필 링크 / DM '차량'</div><div class="grain"></div></div>`;
+if(k==='B'){ r.innerHTML=`<div class="p B"><div class="bus"><div class="led"><canvas id="cv"></canvas></div><div class="ws"></div></div>
+<div class="t1">K-POP 클래스<br><em>등·하원 차량</em> 대기 신청</div>
+<div class="t2">노선은 신청 지역 보고 정해요<br>신청 인원이 모이면 시작 예정 · 차량비 추후 안내<br>신청 · 프로필 링크 / DM '차량'</div>
+<div class="ft"><span>RAW DANCE STUDIO SUWON</span><span>WAITLIST OPEN</span></div><div class="grain"></div></div>`;
+ const led=document.querySelector('.led'), W=led.clientWidth, H=led.clientHeight, cv=document.getElementById('cv'); cv.width=W; cv.height=H;
+ const P=6, off=document.createElement('canvas'), cols=Math.floor(W/P), rows=Math.floor(H/P); off.width=cols; off.height=rows; const o=off.getContext('2d');
+ o.fillStyle='#000'; o.fillRect(0,0,cols,rows); o.fillStyle='#fff'; o.textAlign='center'; o.textBaseline='middle';
+ const fit=(t,fs,y)=>{ do{ o.font=`400 ${fs}px "Black Han Sans"`; fs-=1; } while(o.measureText(t).width>cols-8 && fs>6); o.fillText(t,cols/2,y); };
+ fit('RAW 수원점 ⇄ 우리 동네',20,rows*0.3); fit('등·하원 차량 대기 신청 중',16,rows*0.74);
+ const d=o.getImageData(0,0,cols,rows).data, g=cv.getContext('2d'); g.fillStyle='#050505'; g.fillRect(0,0,W,H);
+ for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const v=d[(y*cols+x)*4]; const on=v>110; g.beginPath(); g.arc(x*P+P/2,y*P+P/2,2.3,0,7);
+ g.fillStyle=on?'#ffb000':'#1d1608'; if(on){g.shadowColor='#ff9a00';g.shadowBlur=8;} else g.shadowBlur=0; g.fill();} }
+if(k==='C') r.innerHTML=`<div class="p C"><div class="bg"></div><div class="g"></div><div class="k">RAW DANCE STUDIO</div><div class="k2">NOTICE · SHUTTLE</div>
+<div class="h">등·하원 차량,<br>대기 신청 받아요.</div><div class="rule"></div>
+<div class="i"><b>K-POP 클래스</b> 수강생 대상 · 노선은 신청 지역 보고 정해요<br>신청 인원이 모이면 시작 예정 · 차량비 추후 안내<br><b>신청</b> 프로필 링크 / DM '차량'</div><div class="grain"></div></div>`;
+</script></body></html>

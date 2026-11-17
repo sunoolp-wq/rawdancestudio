@@ -7,6 +7,16 @@ const { renderFrames, ffmpeg } = require('../pw.js'); const fs = require('fs'), 
 const { execFileSync } = require('child_process');
 const A = {}; process.argv.slice(2).forEach((v, i, a) => { if (v.startsWith('--')) A[v.slice(2)] = a[i + 1]; });
 const LEN = Math.min(5, Math.max(1, +(A.len || 5))), OUTRO = +(A.outro || 0);
+//   --frames 폴더 --fps 30 --w 1920 --h 1080 : 자막 장면만 그려서 폴더에 저장하고 끝 (유튜브 이어붙이기가 한 번에 합칠 때 씀)
+if (A.frames) {
+  (async () => {
+    const W = +(A.w || 1080), H = +(A.h || 1920), FPS = +(A.fps || 30);
+    await renderFrames({ file: path.join(__dirname, 'title.html'), n: Math.round(LEN * FPS), fps: FPS, dir: A.frames, w: W, h: H,
+      setupArg: { title: A.title, name: A.name, track: A.track, len: LEN, w: W, h: H } });
+    console.log(A.frames);
+  })();
+  return;
+}
 if (A.end) A.at = Math.max(0, +A.end - LEN + 0.04);
 const AT = +(A.at || 0);
 const probe = (args) => execFileSync('ffprobe', ['-v', 'error', ...args, A.video]).toString().trim();

@@ -32,7 +32,11 @@ function mk(el,txt,cfg){el.innerHTML="";
   ord.forEach((c,i)=>{c.off=cfg.out0+(last-cfg.out0)*(ord.length>1?i/(ord.length-1):0)+(rnd()-.5)*0.012;});
   LINES.push({el,chars,cfg});
 }
-window.setup=o=>{O=o;const y=o.y||862, k=o.offset||0; // y: 큰 줄 글자 윗선
+window.setup=o=>{O=o;
+  // 가로 영상(유튜브 1920x1080)도 같은 자막 (2026-11-17): 화면 크기만 바꾸고 세로 위치는 같은 비율(862/1920)
+  if(o.w){ for(const e of [document.documentElement,document.body]){ e.style.width=o.w+'px'; e.style.height=o.h+'px'; } }
+  const H=o.h||1920, MAXW=(o.w||1080)-70;
+  const y=o.y||Math.round(862*H/1920), k=o.offset||0; // y: 큰 줄 글자 윗선
   mk($("t"),o.title,{in0:0.04,in1:0.42,out0:4.585,out1:4.96,pg:0.4,pgo:0.12,
     keys:[[0,0.015,"lin"],[0.25,0.015,"out"],[0.50,0.043,"step"],[0.563,0.043,"step"],[0.5631,0.007,"lin"],[0.667,0.013,"lin"]]});
   mk($("n"),o.name,{in0:0.55,in1:0.585,out0:4.545,out1:4.72,pg:0.0,pgo:0,ls1:0.168});
@@ -40,7 +44,7 @@ window.setup=o=>{O=o;const y=o.y||862, k=o.offset||0; // y: 큰 줄 글자 윗�
   // 세로 배치 (원본 비율: 곡명 윗선 776 / 큰 줄 862 / 이름 996, 1080x1920 기준)
   const t=$("t"); let fs=150; t.style.letterSpacing="0em";
   const tw=()=>{const sp=t.querySelectorAll("span");return sp[sp.length-1].getBoundingClientRect().right-sp[0].getBoundingClientRect().left;};
-  while(tw()>1010&&fs>80){fs-=4;t.style.fontSize=fs+"px";}
+  while(tw()>MAXW&&fs>80){fs-=4;t.style.fontSize=fs+"px";}
   const capTop=v=>v; // 글꼴 윗여백 보정
   $("t").style.top=(y-4-0.2*fs)+"px"; $("n").style.top=(y+134-0.2*58)+"px"; $("trk").style.top=(y-86-0.27*38+(o.trkdy||0))+"px";
 };

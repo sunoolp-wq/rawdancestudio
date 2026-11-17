@@ -219,7 +219,9 @@ def yt_plan(P, out=None):
     song = upath(P["song"]) if P.get("song") else (MUSIC if P.get("auto_song") and song_files(MUSIC) else "")
     plan = {"clips": [{"video": upath(c["file"]), "start": float(c["start"]), "dur": float(c["dur"])} for c in P["clips"]], "song": song,
             "xfade": float(P.get("xfade", 0.5)), "lut": lut_path(P["lut"]) if P.get("lut") else "", "strength": P.get("strength", 100),
-            "height": int(P.get("height") or 0), "out": out}
+            "height": int(P.get("height") or 0), "out": out,
+            "title": ({"len": float(P.get("pre") or 5), "title": P["teacher"], "name": P.get("genre", ""), "track": P.get("track", "")}
+                      if (P.get("teacher") or "").strip() and float(P.get("pre") or 0) > 0 else None)}
     f = os.path.join(WORK, f"yt_{uuid.uuid4().hex[:8]}.json"); json.dump(plan, open(f, "w", encoding="utf-8"), ensure_ascii=False); return f
 
 def p_youtube(job, P):

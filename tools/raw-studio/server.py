@@ -215,7 +215,22 @@ def p_lut(job, P):
     out = outfile("LUT_" + os.path.splitext(P["lut"])[0], orig)
     apply_lut(job, src, out, P["lut"], P.get("strength", 100)); keep(job, out, "LUT 입힌 영상")
 
-PIPES = {"story": p_story, "teacher": p_teacher, "trackpad": p_trackpad, "music": p_music, "lut": p_lut}
+def yt_plan(P, out=None):
+    song = upath(P["song"]) if P.get("song") else (MUSIC if P.get("auto_song") and song_files(MUSIC) else "")
+    plan = {"clips": [{"video": upath(c["file"]), "start": float(c["start"]), "dur": float(c["dur"])} for c in P["clips"]], "song": song,
+            "xfade": float(P.get("xfade", 0.5)), "lut": lut_path(P["lut"]) if P.get("lut") else "", "strength": P.get("strength", 100),
+            "height": int(P.get("height") or 0), "out": out}
+    f = os.path.join(WORK, f"yt_{uuid.uuid4().hex[:8]}.json"); json.dump(plan, open(f, "w", encoding="utf-8"), ensure_ascii=False); return f
+
+def p_youtube(job, P):
+    """유튜브용 이어 붙이기 (원장님 2026-11-17): 같은 곡·같은 구간 A그룹 → B그룹 → 쌤 솔로 → 단체, 가로, 깨끗한 음원, 교차 디졸브"""
+    if len(P.get("clips") or []) < 1: raise RuntimeError("영상을 올려 주세요")
+    out = outfile("유튜브", P.get("name") or "이어붙이기")
+    n0 = len(job.log); job.run([PY, os.path.join(CR, "yt_concat.py"), "--make", yt_plan(P, out)])
+    if any(l.startswith("확인필요") for l in job.log[n0:]): job.warn = "⚠️ 음원 확인필요(작업 기록 보기) · "
+    keep(job, out, "유튜브 영상")
+
+PIPES = {"youtube": p_youtube, "story": p_story, "teacher": p_teacher, "trackpad": p_trackpad, "music": p_music, "lut": p_lut}
 
 # ── 시간표 (스토리) ───────────────────────────────────
 def sched_for(date):
@@ -250,6 +265,15 @@ def info():
     luts = sorted(f for f in os.listdir(LUTS) if f.endswith(".cube"))
     return jsonify({"teachers": sorted(teachers), "genres": sorted(genres), "luts": luts, "out": OUT, "today": datetime.date.today().isoformat(),
                     "music": MUSIC, "songs": [os.path.relpath(f, MUSIC) for f in song_files(MUSIC)]})
+
+@app.post("/api/align")
+def align_api():
+    """1번 영상의 노래 구간과 같은 구간을 나머지 영상에서 찾기"""
+    P = request.get_json()
+    r = subprocess.run([PY, os.path.join(CR, "yt_concat.py"), "--align", yt_plan(P)], capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=900)
+    last = (r.stdout.strip().splitlines() or [""])[-1]
+    if r.returncode or not last.startswith("{"): return jsonify({"error": (r.stderr.strip().splitlines() or ["맞추다가 멈췄어요"])[-1]}), 500
+    j = json.loads(last); j["log"] = [l for l in r.stdout.splitlines()[:-1] if l.startswith(("곡:", "확인필요", "기준"))]; return jsonify(j)
 
 FS_CACHE = {}
 @app.get("/api/findstart")

@@ -34,6 +34,9 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
 .cands{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px}
 .cand{border:2px solid var(--ln);border-radius:12px;overflow:hidden;cursor:pointer;background:#0e0d12;padding:0;color:var(--fg);text-align:left;font:inherit}
 .cand.on{border-color:var(--ac)}.cand img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.clip{border:1px solid var(--ln);border-radius:12px;padding:12px;background:#120f19;display:flex;flex-direction:column;gap:8px}
+.clip .hd{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.clip .hd img{width:160px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;background:#000}
+.clip .no{font:italic 900 22px Montserrat,sans-serif;color:var(--ac);width:28px}.clip input[type=number]{width:90px}
 .cand div{padding:6px 8px;font-size:12px;color:var(--mu)}.cand b{color:var(--fg);font-size:14px}.cand .rec{color:var(--ac);font-weight:800}
 </style></head><body>
 <header><b>RAW</b><div><div style="font-weight:800;font-size:18px">영상공장</div><span id="outp">결과 폴더: …</span></div><button class="sm" style="margin-left:auto" id="musicbtn" onclick="api('/api/reveal',{path:INFO.music})">음원 폴더 열기</button><button class="sm" onclick="api('/api/reveal',{})">결과 폴더 열기</button></header>
@@ -83,6 +86,19 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
  <div id="music-lut"></div>
  <div class="row"><button class="go" onclick="runMusic()">만들기</button></div>
 </section>
+<section id="t-youtube" class="card" hidden>
+ <h2>유튜브 이어붙이기</h2><p class="hint">같은 곡·같은 구간을 A그룹 → B그룹 → 쌤 솔로 → 단체처럼 이어 붙여요. 가로 그대로, 영상마다 깨끗한 음원으로 맞추고 사이는 교차 디졸브.<br><b>1번 영상의 시작·끝만 정하고</b> [🎵 같은 구간으로 맞추기]를 누르면 나머지 영상은 자동으로 같은 노래 구간으로 잘려요.</p>
+ <div class="drop" id="yt-drop">영상 여러 개 — 눌러서 고르거나 끌어다 놓기 (순서는 아래 ▲▼로)<input type="file" multiple accept="video/*,.mp4,.mov,.MP4,.MOV" hidden></div>
+ <div id="yt-list" style="display:flex;flex-direction:column;gap:10px"></div>
+ <div id="youtube-song"></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="yt-auto" checked>음원을 안 올리면 음원 폴더에서 같은 곡 자동으로 찾기</label></div>
+ <div class="row"><button class="sm" id="yt-align">🎵 1번과 같은 노래 구간으로 나머지 맞추기</button><span class="hint" id="yt-amsg"></span></div>
+ <div class="grid"><label class="f">전환<select id="yt-x"><option value="0.5" selected>교차 디졸브 0.5초</option><option value="1">교차 디졸브 1초</option><option value="0">컷</option></select></label>
+  <label class="f">크기<select id="yt-h"><option value="0">원본 크기 (4K면 4K)</option><option value="1080">1080p (빠르게)</option></select></label>
+  <label class="f">파일 이름<input id="yt-name" placeholder="AD LA - HIPHOP"></label></div>
+ <div id="youtube-lut"></div>
+ <div class="row"><button class="go" onclick="runYoutube()">만들기</button><span class="hint" id="yt-total"></span></div>
+</section>
 <section id="t-lut" class="card" hidden>
  <h2>LUT만 입히기</h2><p class="hint">완성된 영상에 색감(LUT)만 입혀요. 강도 100% = 프리미어에서 그대로 입힌 것과 같아요.</p>
  <div id="lut-file"></div><div id="lut-lut"></div>
@@ -94,7 +110,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
 <script>
 const $=s=>document.querySelector(s), INFO={}, FILES={}, PICK={};
 const api=(u,b)=>fetch(u,b===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
-const TABS=[['story','스토리 시간표'],['teacher','쌤 15초'],['trackpad','TRACKPAD 릴스'],['music','음원 싱크'],['lut','LUT']];
+const TABS=[['story','스토리 시간표'],['teacher','쌤 15초'],['trackpad','TRACKPAD 릴스'],['music','음원 싱크'],['youtube','유튜브 이어붙이기'],['lut','LUT']];
 $('#tabs').innerHTML=TABS.map(([k,n])=>`<button data-k="${k}">${n}</button>`).join('');
 const show=k=>{TABS.forEach(([t])=>{$('#t-'+t).hidden=t!==k;}); document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k)); try{localStorage.rawTab=k}catch(e){}};
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>show(b.dataset.k)); show((()=>{try{return localStorage.rawTab}catch(e){}})()||'story');
@@ -123,7 +139,7 @@ function pickBox(key, startSel, durSel, vertical){
   let box=$('#'+key+'-pick'); if(!box){box=document.createElement('div'); box.id=key+'-pick'; $('#'+key).appendChild(box);}
   const st=+($(startSel).value||0);
   box.innerHTML=`<div class="row" style="margin-top:10px"><button class="sm fs">🎯 춤 시작 자동 찾기</button><span class="hint fsm">음원 폴더에 이 노래가 있으면 더 정확해요. 1~2분 걸려요</span></div><div class="cands"></div>
-   <p class="hint" style="margin:10px 0 6px">${vertical?'슬라이더·◀▶ 버튼으로 장면을 옮기고 [여기부터]·[여기까지]를 누르면 시작·길이가 들어가요.':'쌤을 눌러 주세요 (보라 동그라미, 쌤이 혼자면 안 눌러도 돼요). 슬라이더·◀▶ 버튼으로 장면을 옮기고 [여기부터]·[여기까지]를 누르면 시작·길이가 들어가요.'}</p>
+   <p class="hint" style="margin:10px 0 6px">${vertical||key.startsWith('yt-')?'슬라이더·◀▶ 버튼으로 장면을 옮기고 [여기부터]·[여기까지]를 누르면 시작·길이가 들어가요.':'쌤을 눌러 주세요 (보라 동그라미, 쌤이 혼자면 안 눌러도 돼요). 슬라이더·◀▶ 버튼으로 장면을 옮기고 [여기부터]·[여기까지]를 누르면 시작·길이가 들어가요.'}</p>
    <div class="row"><input type="range" min="0" max="${FILES[key].dur.toFixed(1)}" step="0.1" value="${st+0.5}" style="flex:1"><span class="tt"></span></div>
    <div class="row"><button class="sm" data-d="-1">◀ 1초</button><button class="sm" data-d="-0.1">◀ 0.1</button><button class="sm" data-d="0.1">0.1 ▶</button><button class="sm" data-d="1">1초 ▶</button>
     <button class="sm stb">▶ 여기부터 (시작)</button><button class="sm enb">■ 여기까지 (끝)</button><button class="sm goe">끝 장면 보기</button></div>
@@ -137,7 +153,7 @@ function pickBox(key, startSel, durSel, vertical){
   const upd=()=>{ sum.textContent=`시작 ${S0().toFixed(1)}초 → 끝 ${(S0()+DU()).toFixed(1)}초 (${DU().toFixed(1)}초)`; };
   const seek=t=>{ rg.value=Math.max(0,Math.min(FILES[key].dur,t)).toFixed(1); load(); };
   box.querySelectorAll('button[data-d]').forEach(b=>b.onclick=()=>seek(+rg.value+(+b.dataset.d)));
-  box.querySelector('.stb').onclick=()=>{ const e=S0()+DU(); $(startSel).value=(+rg.value).toFixed(1); if(e>+rg.value+1&&key.startsWith('trackpad')) $(durSel).value=(e-+rg.value).toFixed(1); upd(); };
+  box.querySelector('.stb').onclick=()=>{ const e=S0()+DU(); $(startSel).value=(+rg.value).toFixed(1); if(e>+rg.value+1&&(key.startsWith('trackpad')||key.startsWith('yt-'))) $(durSel).value=(e-+rg.value).toFixed(1); upd(); };
   box.querySelector('.enb').onclick=()=>{ const d=+rg.value-S0(); if(d<1) return alert('끝은 시작보다 뒤여야 해요. 장면을 뒤로 옮겨 주세요'); $(durSel).value=d.toFixed(1); upd(); };
   box.querySelector('.goe').onclick=()=>seek(S0()+DU()-0.1);
   [startSel,durSel].forEach(sel=>$(sel).addEventListener('input',upd)); upd();
@@ -149,7 +165,7 @@ function pickBox(key, startSel, durSel, vertical){
       m.textContent=(r.log||[]).filter(l=>l.startsWith('곡:')).join(' ')||(r.how==='반복'?`같은 구간을 ${r.period.toFixed(1)}초마다 반복한 영상이에요`:'사진을 눌러 고르세요');
       cs.innerHTML=r.cands.map((c,i)=>`<button class="cand" data-i="${i}"><img src="/api/frame?id=${FILES[key].id}&t=${c.t+0.3}"><div><b>${c.t.toFixed(1)}초</b> ${c.best?'<span class="rec">추천</span>':''}<br>${c.why}${c.end?` · ~${c.end.toFixed(1)}초`:''}</div></button>`).join('');
       cs.querySelectorAll('.cand').forEach(el=>el.onclick=()=>{ const c=r.cands[+el.dataset.i]; cs.querySelectorAll('.cand').forEach(x=>x.classList.toggle('on',x===el));
-        $(startSel).value=c.t.toFixed(1); if(c.end&&key.startsWith('trackpad')) $(durSel).value=(c.end-c.t).toFixed(1); upd();
+        $(startSel).value=c.t.toFixed(1); if(c.end&&(key.startsWith('trackpad')||key.startsWith('yt-'))) $(durSel).value=(c.end-c.t).toFixed(1); upd();
         rg.value=(c.t+0.5).toFixed(1); load(); mk.hidden=true; delete PICK[key]; });
     }).catch(()=>{ b.disabled=false; m.innerHTML='<span class="err">찾다가 멈췄어요. 슬라이더로 골라 주세요</span>'; }); };
   img.onclick=e=>{const r=img.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
@@ -164,7 +180,7 @@ const go=(kind,p,title)=>api('/api/run',{kind,_title:title,...p}).then(()=>poll(
 
 api('/api/info').then(i=>{Object.assign(INFO,i); $('#outp').textContent='결과 폴더: '+i.out; $('#musicbtn').textContent=`음원 폴더 열기 (${i.songs.length}곡)`;
   $('#teachers').innerHTML=i.teachers.map(t=>`<option value="${t}">`).join(''); $('#genres').innerHTML=i.genres.map(t=>`<option value="${t}">`).join('');
-  ['teacher-lut','trackpad-lut','music-lut','lut-lut'].forEach(lutBox);
+  ['teacher-lut','trackpad-lut','music-lut','youtube-lut','lut-lut'].forEach(lutBox);
   const t=new Date(i.today+'T00:00:00'), dw=(t.getDay()+6)%7, mon=new Date(t); mon.setDate(t.getDate()-dw+7); const fri=new Date(mon); fri.setDate(mon.getDate()+4);
   const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); $('#s-from').value=iso(mon); $('#s-to').value=iso(fri); $('#d-date').value=iso(mon);});
 fileBox('teacher-file',{label:'수업 영상',pick:'#tc-start',dur:'#tc-dur'}); fileBox('trackpad-file',{label:'수업 영상',pick:'#tp-start',dur:'#tp-dur'}); fileBox('trackpad-song',{label:'음원 (선택)',audio:1});
@@ -195,6 +211,48 @@ function runTrackpad(){ const id=need('trackpad-file','수업 영상을 먼저 �
 function runMusic(){ const id=need('music-file','영상을 먼저 올려 주세요'), s=FILES['music-song']?.id||'';
   if(!s&&!$('#mu-auto').checked) return alert('음원을 올리거나 \'음원 폴더에서 자동으로 찾기\'를 켜 주세요');
   go('music',{file:id,song:s,auto_song:!s&&$('#mu-auto').checked,start:$('#mu-start').value.trim(),end:$('#mu-end').value.trim(),offset:$('#mu-off').value.trim(),trim:$('#mu-trim').checked,name:FILES['music-file'].name.replace(/\.[^.]+$/,''),...lutVal('music-lut')},'음원 싱크'); }
+// 유튜브 이어붙이기 (원장님 2026-11-17)
+let YT=[], YTN=0;
+const ytNum=()=>{ YT.forEach((k,i)=>{ $('#'+k+' .no').textContent=i+1; }); ytTotal(); };
+const ytTotal=()=>{ const ok=YT.filter(k=>FILES[k]); const t=ok.reduce((a,k)=>a+(+$('#'+k+'-d').value||0),0); // 디졸브만큼 뒤를 더 써서 각 영상 길이는 그대로
+  $('#yt-total').textContent=ok.length?`영상 ${ok.length}개 · 약 ${t.toFixed(1)}초`:''; };
+const ytThumb=k=>{ if(FILES[k]) $('#'+k+' .hd img').src=`/api/frame?id=${FILES[k].id}&t=${(+$('#'+k+'-s').value||0)+0.3}`; };
+function ytAdd(f){
+  const k='yt-'+(++YTN); YT.push(k); const el=document.createElement('div'); el.className='clip'; el.id=k;
+  el.innerHTML=`<div class="hd"><span class="no"></span><img><div style="flex:1;min-width:160px"><b class="nm">${f.name}</b><div class="hint st">올리는 중…</div><div class="bar"><i></i></div></div>
+    <label class="f">시작 (초)<input type="number" step="0.1" id="${k}-s" value="0"></label><label class="f">길이 (초)<input type="number" step="0.1" id="${k}-d" value="0"></label>
+    <button class="sm up">▲</button><button class="sm dn">▼</button><button class="sm pk">장면 고르기</button><button class="sm rm">✕</button></div>`;
+  $('#yt-list').appendChild(el); ytNum();
+  el.querySelector('.up').onclick=()=>{ const i=YT.indexOf(k); if(i>0){ [YT[i-1],YT[i]]=[YT[i],YT[i-1]]; el.parentNode.insertBefore(el,el.previousSibling); ytNum(); } };
+  el.querySelector('.dn').onclick=()=>{ const i=YT.indexOf(k); if(i<YT.length-1){ [YT[i+1],YT[i]]=[YT[i],YT[i+1]]; el.parentNode.insertBefore(el.nextSibling,el); ytNum(); } };
+  el.querySelector('.rm').onclick=()=>{ YT=YT.filter(x=>x!==k); delete FILES[k]; el.remove(); ytNum(); };
+  el.querySelector('.pk').onclick=()=>{ if(!FILES[k]) return; const b=$('#'+k+'-pick'); if(b){ b.hidden=!b.hidden; return; } pickBox(k,'#'+k+'-s','#'+k+'-d',FILES[k].h>FILES[k].w); };
+  ['-s','-d'].forEach(x=>$('#'+k+x).addEventListener('input',()=>{ ytTotal(); if(x==='-s') ytThumb(k); }));
+  const xh=new XMLHttpRequest(), fd=new FormData(); fd.append('file',f); xh.open('POST','/api/upload');
+  xh.upload.onprogress=e=>{ const b=el.querySelector('.bar i'); if(b&&e.total) b.style.width=(e.loaded/e.total*100)+'%'; };
+  return new Promise(res=>{ xh.onload=()=>{ const r=JSON.parse(xh.responseText); el.querySelector('.bar')?.remove();
+    if(r.error){ el.querySelector('.st').innerHTML=`<span class="err">${r.error}</span>`; return res(); }
+    FILES[k]=r; el.querySelector('.st').textContent=`${r.w}×${r.h} · ${r.dur.toFixed(1)}초`; $('#'+k+'-d').value=r.dur.toFixed(1); ytThumb(k); ytTotal(); res(); }; xh.send(fd); });
+}
+(()=>{ const d=$('#yt-drop'), inp=d.querySelector('input');
+  const many=async fs=>{ for(const f of [...fs].sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}))) await ytAdd(f); inp.value=''; };
+  d.onclick=()=>inp.click(); d.ondragover=e=>e.preventDefault(); d.ondrop=e=>{ e.preventDefault(); many(e.dataTransfer.files); }; inp.onchange=()=>many(inp.files);
+  $('#yt-x').onchange=ytTotal;
+  $('#yt-align').onclick=()=>{ const ks=YT.filter(k=>FILES[k]); if(ks.length<2) return alert('영상을 2개 이상 올려 주세요');
+    const s=FILES['youtube-song']?.id||''; if(!s&&!$('#yt-auto').checked) return alert('음원을 올리거나 음원 폴더 자동 찾기를 켜 주세요');
+    const m=$('#yt-amsg'), b=$('#yt-align'); b.disabled=true; m.textContent='맞추는 중… (영상 수에 따라 1~2분)';
+    api('/api/align',{song:s,auto_song:!s,clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value}))}).then(r=>{ b.disabled=false;
+      if(r.error){ m.innerHTML=`<span class="err">${r.error}</span>`; return; }
+      r.clips.forEach((c,i)=>{ const k=ks[i]; $('#'+k+'-s').value=c.start.toFixed(2); $('#'+k+'-d').value=c.dur.toFixed(2); ytThumb(k);
+        $('#'+k+' .st').innerHTML=`${FILES[k].w}×${FILES[k].h} · ${FILES[k].dur.toFixed(1)}초 · `+(c.ok?'✓ 맞춤':'<span class="err">⚠️ 못 찾음 — 직접 골라 주세요</span>'); });
+      m.textContent=`곡: ${r.song} · 쌤 솔로처럼 더 긴 영상은 길이만 늘려 주세요`; ytTotal(); }).catch(()=>{ b.disabled=false; m.innerHTML='<span class="err">맞추다가 멈췄어요</span>'; }); };
+})();
+fileBox('youtube-song',{label:'음원 (선택 — 안 올리면 음원 폴더에서 찾음)',audio:1});
+function runYoutube(){ const ks=YT.filter(k=>FILES[k]); if(!ks.length) return alert('영상을 올려 주세요');
+  const bad=ks.find(k=>!(+$('#'+k+'-d').value>0)); if(bad) return alert('길이가 0인 영상이 있어요');
+  const s=FILES['youtube-song']?.id||'', nm=$('#yt-name').value.trim()||FILES[ks[0]].name.replace(/\.[^.]+$/,'');
+  go('youtube',{clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value})),song:s,auto_song:!s&&$('#yt-auto').checked,
+    xfade:+$('#yt-x').value,height:+$('#yt-h').value,name:nm,...lutVal('youtube-lut')},`유튜브 · ${nm} (${ks.length}개)`); }
 function runLut(){ const id=need('lut-file','영상을 먼저 올려 주세요'); const l=lutVal('lut-lut'); if(!l.lut) return alert('LUT를 골라 주세요'); go('lut',{file:id,...l},'LUT · '+l.lut); }
 // 작업 목록
 let timer=null;

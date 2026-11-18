@@ -64,6 +64,23 @@
      "teacher": "TENA",
      "mark": "popup"
     }
+   },
+   {
+    "start": "19:40",
+    "name": "HIP HOP",
+    "set": {
+     "name": "POPPING",
+     "teacher": "SUNGMI",
+     "mark": "popup"
+    }
+   },
+   {
+    "start": "20:50",
+    "name": "CHOREO",
+    "set": {
+     "teacher": "MAX TO",
+     "mark": "popup"
+    }
    }
   ]
  }

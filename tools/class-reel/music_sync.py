@@ -55,17 +55,18 @@ T0 = max(a.start, off) if a.trim_to_song else a.start
 T1 = min(a.end, VD) if a.end else VD
 D = T1 - T0
 s0 = T0 - off                                  # 결과 0초 때 노래 위치
-pre = ["-ss", f"{s0:.4f}"] if s0 >= 0 else []
+pre = []   # 음원은 -ss로 바로 가지 않고 처음부터 읽어 atrim으로 자름 (VBR mp3는 바로 가기가 부정확할 수 있음, 2026-11-18)
+cut = f"atrim=start={s0:.4f},asetpts=PTS-STARTPTS," if s0 > 0 else ""
 delay = int(round(-s0 * 1000)) if s0 < 0 else 0
 fo = f",afade=t=out:st={max(0, D - a.fade_out):.3f}:d={a.fade_out}" if a.fade_out > 0 else ""
 if delay and a.pre_room:
     # 노래 시작 0.3초 전부터 연습실 소리를 줄이고 음원을 올림 (원장님 2026-11-17 TRACKPAD 춤 시작 전 자막 구간)
     d = delay / 1000
     fc = (f"[0:a]atrim=0:{d + 0.05:.3f},afade=t=out:st={max(0, d - 0.3):.3f}:d=0.35,apad[r];"
-          f"[1:a]adelay={delay}|{delay},afade=t=in:st={max(0, d - 0.05):.3f}:d=0.1,apad[m];"
+          f"[1:a]{cut}adelay={delay}|{delay},afade=t=in:st={max(0, d - 0.05):.3f}:d=0.1,apad[m];"
           f"[r][m]amix=inputs=2:normalize=0:duration=longest,atrim=0:{D:.3f}{fo}[a]")
 else:
-    fc = "[1:a]" + (f"adelay={delay}|{delay}," if delay else "") + f"apad,atrim=0:{D:.3f},afade=t=in:st=0:d=0.05{fo}[a]"
+    fc = "[1:a]" + cut + (f"adelay={delay}|{delay}," if delay else "") + f"apad,atrim=0:{D:.3f},afade=t=in:st=0:d=0.05{fo}[a]"
 whole = T0 <= 0.001 and abs(T1 - VD) < 0.05         # 자르지 않으면 영상은 다시 압축하지 않고 그대로 (화질 보존)
 vin = ["-i", a.video] if whole else ["-ss", f"{T0:.4f}", "-t", f"{D:.4f}", "-i", a.video]
 venc = ["-c:v", "copy"] if whole else ["-c:v", "libx264", "-crf", "14", "-preset", "medium", "-pix_fmt", "yuv420p"]

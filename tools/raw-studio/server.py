@@ -60,7 +60,7 @@ JOBS, QUEUE, LOCK = {}, [], threading.Lock()
 class Job:
     def __init__(self, kind, params):
         self.id = uuid.uuid4().hex[:8]; self.kind = kind; self.params = params
-        self.status = "대기"; self.log = []; self.outs = []; self.created = time.time(); self.err = ""; self.warn = ""
+        self.status = "대기"; self.log = []; self.outs = []; self.created = time.time(); self.err = ""; self.warn = ""; self.sync = ""
     def say(self, s):
         for line in str(s).splitlines():
             if line.strip(): self.log.append(line.rstrip())
@@ -80,7 +80,7 @@ class Job:
             if stuck[0]: raise RuntimeError("15분 동안 진행이 없어 멈췄어요. 검은 창을 닫고 2_RAW영상공장_열기를 다시 실행한 뒤 다시 만들어 주세요")
             raise RuntimeError((self.log[-1] if self.log else "") or f"실패: {os.path.basename(cmd[0])}")
     def view(self):
-        return {"id": self.id, "kind": self.kind, "status": self.status, "log": self.log[-12:], "outs": self.outs, "err": self.err,
+        return {"id": self.id, "kind": self.kind, "status": self.status, "log": self.log[-12:], "outs": self.outs, "err": self.err, "sync": self.sync or next((l for l in reversed(self.log) if l.startswith(("음원:", "1번 ", "곡:"))), ""),
                 "title": self.params.get("_title", self.kind), "created": self.created}
 
 def worker():
@@ -142,6 +142,7 @@ def music(job, src, out, P, auto_ok=False, orig=None, cs=0.0):
             job.run(cmd)
             f = next(json.loads(l) for l in reversed(job.log) if l.startswith('{"find"'))
             song, off = f["song"], f["offset"] - cs
+            job.sync = f"음원 {os.path.basename(song)[:30]} · 노래 0:00 = 원본 {f['offset']:.2f}초" + ("" if f.get("sure", True) else " (애매)")
         cmd = [PY, os.path.join(CR, "music_sync.py"), "--video", src, "--song", song, "--out", out]
         if P.get("trim"): cmd.append("--trim-to-song")
         if P.get("pre_room"): cmd.append("--pre-room")
@@ -205,6 +206,18 @@ def p_trackpad(job, P):
     if P.get("outro", True): cmd += ["--outro", str(OUTRO)]
     if P.get("track"): cmd += ["--track", P["track"]]
     job.run(cmd); keep(job, out, "TRACKPAD 릴스")
+    # 썸네일 세로·가로 (원장님 2026-11-18): 춤 구간에서 가장 역동적이고 또렷한 장면 + TRACKPAD 글자 다 켜진 상태
+    tv, th = outfile("썸네일_세로", base, "jpg"), outfile("썸네일_가로", base, "jpg")
+    tcmd = [PY, os.path.join(CR, "thumb.py"), "--video", out, "--a", f"{start - cs:.2f}", "--b", f"{start - cs + dur:.2f}",
+            "--title", P["teacher"], "--name", P["genre"], "--out-v", tv, "--out-h", th]
+    if P.get("track"): tcmd += ["--track", P["track"]]
+    si = probe(src)
+    if si["w"] > si["h"]: tcmd += ["--src-h", src, "--src-off", f"{cs:.3f}"]   # 가로 썸네일은 가로 원본의 같은 순간
+    try:
+        job.run(tcmd)
+        for f_, lab in ((tv, "썸네일 세로 (인스타 릴스)"), (th, "썸네일 가로 (유튜브)")):
+            if os.path.exists(f_): keep(job, f_, lab)
+    except RuntimeError: job.say("썸네일은 못 만들었어요 (영상은 정상)")
 
 def p_music(job, P):
     src = upath(P["file"]); out = outfile("음원싱크", P.get("name") or "영상")
@@ -218,11 +231,11 @@ def p_lut(job, P):
     out = outfile("LUT_" + os.path.splitext(P["lut"])[0], orig)
     apply_lut(job, src, out, P["lut"], P.get("strength", 100)); keep(job, out, "LUT 입힌 영상")
 
-def yt_plan(P, out=None):
+def yt_plan(P, out=None, thumb_v=None, thumb_h=None):
     song = upath(P["song"]) if P.get("song") else (MUSIC if P.get("auto_song") and song_files(MUSIC) else "")
     plan = {"clips": [{"video": upath(c["file"]), "start": float(c["start"]), "dur": float(c["dur"])} for c in P["clips"]], "song": song,
             "xfade": float(P.get("xfade", 0.5)), "lut": lut_path(P["lut"]) if P.get("lut") else "", "strength": P.get("strength", 100),
-            "height": int(P.get("height") or 0), "out": out, "outro": 2.5 if P.get("outro", True) else 0, "layout": P.get("layout") or "concat",
+            "height": int(P.get("height") or 0), "out": out, "outro": 2.5 if P.get("outro", True) else 0, "layout": P.get("layout") or "concat", "thumb_v": thumb_v, "thumb_h": thumb_h,
             "title": ({"len": float(P.get("pre") or 5), "title": P["teacher"], "name": P.get("genre", ""), "track": P.get("track", "")}
                       if (P.get("teacher") or "").strip() and float(P.get("pre") or 0) > 0 else None)}
     f = os.path.join(WORK, f"yt_{uuid.uuid4().hex[:8]}.json"); json.dump(plan, open(f, "w", encoding="utf-8"), ensure_ascii=False); return f
@@ -233,9 +246,13 @@ def p_youtube(job, P):
     s3 = P.get("layout") == "stack3"
     if s3 and len(P["clips"]) != 3: raise RuntimeError("3분할은 영상이 딱 3개 필요해요 (위 · 가운데 · 아래)")
     out = outfile("3분할" if s3 else "유튜브", P.get("name") or ("3분할" if s3 else "이어붙이기"))
-    n0 = len(job.log); job.run([PY, os.path.join(CR, "yt_concat.py"), "--make", yt_plan(P, out)])
+    base = os.path.splitext(os.path.basename(out))[0]
+    tv, th = outfile("썸네일_세로", base, "jpg"), outfile("썸네일_가로", base, "jpg")
+    n0 = len(job.log); job.run([PY, os.path.join(CR, "yt_concat.py"), "--make", yt_plan(P, out, tv, th)])
     if any(l.startswith("확인필요") for l in job.log[n0:]): job.warn = "⚠️ 음원 확인필요(작업 기록 보기) · "
     keep(job, out, "3분할 영상" if s3 else "유튜브 영상")
+    for f_, lab in ((tv, "썸네일 세로 (인스타 릴스)"), (th, "썸네일 가로 (유튜브)")):
+        if os.path.exists(f_): keep(job, f_, lab)
 
 PIPES = {"youtube": p_youtube, "story": p_story, "teacher": p_teacher, "trackpad": p_trackpad, "music": p_music, "lut": p_lut}
 

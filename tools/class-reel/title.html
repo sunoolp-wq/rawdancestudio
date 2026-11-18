@@ -53,14 +53,10 @@ window.setup=o=>{O=o;
   $("n").style.top=(Y+0.673*fs+G-0.2*58)+"px";
   $("trk").style.top=(Y-G-0.70*38-0.27*38+(o.trkdy||0))+"px";
 };
-// 자막 길이(len초, 1~5)에 맞추기 (원장님 2026-11-17 "초에 따라 속도가 알아서"): 원래 5초 동작을 그대로 줄이면 1초일 때 너무 정신없음
-// → 등장(0~0.75초)·퇴장(4.33~4.96초)은 √(len/5)배만 빨라지고, 가운데 머무는 시간이 나머지를 맞춤. len=5면 원래와 같음
-const SPD=()=>Math.sqrt(Math.min(5,Math.max(1,(O&&O.len)||5))/5);
-const tmap=u=>{const L=Math.min(5,Math.max(1,(O&&O.len)||5)), k=SPD(), ei=0.75*k, eo=0.63*k;
-  if(L>=4.999) return u;
-  if(u<ei) return u/k;
-  if(u>L-eo) return 4.33+(u-(L-eo))/k;
-  return 0.75+(u-ei)/Math.max(1e-6,L-ei-eo)*(4.33-0.75);};
+// 자막 길이(len초, 1~5)에 맞추기 (원장님 2026-11-18 "통째로 비율, 5초 = 원본"): 5초 동작 전체를 len초에 고르게 압축
+// → 2초면 켜짐·머묾·꺼짐 모두 2.5배 빠름 (예전엔 등장·퇴장만 √배라 짧을수록 '이미 떠 있다가 사라지는' 느낌)
+const SPD=()=>Math.min(5,Math.max(1,(O&&O.len)||5))/5;
+const tmap=u=>u/SPD();
 window.render=(u)=>{ const s=tmap(u);
   LINES.forEach(({el,chars,cfg})=>{
     let ls;

@@ -8,6 +8,18 @@ const { execFileSync } = require('child_process');
 const A = {}; process.argv.slice(2).forEach((v, i, a) => { if (v.startsWith('--')) A[v.slice(2)] = a[i + 1]; });
 const LEN = Math.min(5, Math.max(1, +(A.len || 5))), OUTRO = +(A.outro || 0);
 //   --frames 폴더 --fps 30 --w 1920 --h 1080 [--page outro] : 자막(또는 끝 로고) 장면만 그려서 폴더에 저장하고 끝 (유튜브 이어붙이기가 한 번에 합칠 때 씀)
+//   --still 파일.png --w --h : 자막이 다 켜진 장면 한 장 (썸네일용, 2026-11-18)
+if (A.still) {
+  (async () => {
+    const W = +(A.w || 1080), H = +(A.h || 1920); const b = await require('../pw.js').launch();
+    const p = await b.newPage({ viewport: { width: W, height: H } });
+    await p.goto(require('url').pathToFileURL(path.join(__dirname, 'title.html')).href);
+    await p.evaluate(o => window.setup(o), { title: A.title, name: A.name, track: A.track, len: 5, w: W, h: H }); await p.evaluate(() => document.fonts.ready);
+    await p.evaluate(() => window.render(2.5));     // 5초 자막 가운데 = 글자가 다 켜지고 자간도 자리 잡은 때
+    await p.screenshot({ path: A.still, omitBackground: true }); await b.close(); console.log(A.still);
+  })();
+  return;
+}
 if (A.frames) {
   (async () => {
     const W = +(A.w || 1080), H = +(A.h || 1920), FPS = +(A.fps || 30);

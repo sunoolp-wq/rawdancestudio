@@ -269,7 +269,7 @@ function runLut(){ const id=need('lut-file','영상을 먼저 올려 주세요')
 let timer=null;
 let LAST='';
 function poll(){ api('/api/jobs').then(js=>{ const sig=JSON.stringify(js); if(sig!==LAST){ LAST=sig; $('#jobs').innerHTML=js.length?js.map(j=>`<div class="job"><div class="row"><span class="st ${j.status.split(' ')[0]}">${j.status}</span><b>${j.title}</b></div>
-  ${j.err?`<div class="err">${j.err}</div>`:''}${j.status!=='완료'?`<pre>${j.log.join('\n')}</pre>`:''}
+  ${j.err?`<div class="err">${j.err}</div>`:''}${j.sync?`<div class="hint">🎵 ${j.sync}</div>`:''}${j.status!=='완료'?`<pre>${j.log.join('\n')}</pre>`:''}
   ${j.outs.map(o=>`<div class="hint" style="margin-top:8px">${o.label}</div>${o.url.endsWith('.jpg')?`<img src="${o.url}">`:`<video src="${o.url}" controls playsinline></video>`}<button class="sm" style="margin-top:6px" data-p="${o.path}">파인더에서 보기</button>`).join('')}</div>`).join(''):'<p class="hint">아직 없어요</p>';
   $('#jobs').querySelectorAll('button[data-p]').forEach(b=>b.onclick=()=>api('/api/reveal',{path:b.dataset.p})); }
   clearTimeout(timer); if(js.some(j=>j.status==='대기'||j.status==='작업 중')) timer=setTimeout(poll,2000); }); }

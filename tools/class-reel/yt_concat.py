@@ -64,6 +64,17 @@ def align(P):
         else: out.append({"start": c.get("start", 0), "dur": c.get("dur", ref["dur"]), "ok": False}); say(f"확인필요: {os.path.basename(c['video'])}에서 같은 구간을 못 찾았어요")
     return {"clips": out, "song": os.path.basename(f) if f else "(음원 없음 · 1번 영상 소리로 맞춤)"}
 
+def thumbs(P, video, a, b, src_h=None, src_off=0.0):
+    """썸네일 세로·가로 (원장님 2026-11-18): 자막(강사)이 있을 때만"""
+    T = P.get("title") or None
+    if not (T and (T.get("title") or "").strip() and (P.get("thumb_v") or P.get("thumb_h"))): return
+    say("썸네일 고르는 중…")
+    cmd = [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "thumb.py"), "--video", video, "--a", f"{a:.2f}", "--b", f"{b:.2f}",
+           "--title", T["title"], "--name", T.get("name") or "", "--out-v", P.get("thumb_v") or "", "--out-h", P.get("thumb_h") or ""]
+    if T.get("track"): cmd += ["--track", T["track"]]
+    if src_h: cmd += ["--src-h", src_h, "--src-off", f"{src_off:.3f}"]
+    subprocess.run(cmd, stdin=subprocess.DEVNULL)
+
 def probe(f):
     r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate", "-of", "json", f],
                        capture_output=True, text=True, encoding="utf-8", errors="replace", stdin=subprocess.DEVNULL)
@@ -78,7 +89,7 @@ def make(P):
     C = [dict(c) for c in P["clips"]]; X = float(P.get("xfade", 0.5) or 0); n = len(C)
     DS = [c["start"] for c in C]          # 춤 시작 (자막 때문에 1번 시작이 앞당겨져도 음원 찾기는 춤 구간에서만)
     W, H, FR, FPS = probe(C[0]["video"])
-    T = P.get("title") or None; tdir = None
+    T = P.get("title") or None; tdir = None; pre = 0.0
     if T and (T.get("title") or "").strip():
         # 1번 영상을 자막 길이만큼 앞에서부터 (원본 앞이 모자라면 있는 만큼)
         N = min(5.0, max(1.0, float(T.get("len") or 5))); ns = max(0.0, C[0]["start"] - N); pre = C[0]["start"] - ns
@@ -126,16 +137,16 @@ def make(P):
             if o is not None and ref is None: ref = DS[i] - o          # 1번 춤 시작 때 노래 위치 = 기준
         if o is not None:
             pos = c["start"] - o; say(f"{i + 1}번 {os.path.basename(c['video'])}: 노래 {pos:.2f}초부터")
-            pre = ["-ss", f"{max(0, pos):.4f}"] if pos >= 0 else []
-            ins += [*pre, "-t", f"{L[i] + 1:.3f}", "-i", f]
+            ins += ["-i", f]   # 음원은 처음부터 읽고 atrim으로 자름 (VBR mp3 바로 가기 오차 방지)
+            cut = f"atrim=start={pos:.4f},asetpts=PTS-STARTPTS," if pos > 0 else ""
             d = int(round(-pos * 1000)) if pos < 0 else 0
             if d and has_audio(c["video"]):   # 노래가 영상 중간에 시작(자막 구간 등): 그 전까지 연습실 소리(카운트) → 노래 시작에 음원으로
                 ds = d / 1000
                 fc.append(f"[{i}:a]aresample=48000,atrim=0:{ds + 0.05:.3f},afade=t=out:st={max(0, ds - 0.3):.3f}:d=0.35,apad[r{i}];"
-                          f"[{k}:a]aresample=48000,adelay={d}|{d},afade=t=in:st={max(0, ds - 0.05):.3f}:d=0.1,apad[m{i}];"
+                          f"[{k}:a]{cut}aresample=48000,adelay={d}|{d},afade=t=in:st={max(0, ds - 0.05):.3f}:d=0.1,apad[m{i}];"
                           f"[r{i}][m{i}]amix=inputs=2:normalize=0:duration=longest,atrim=0:{L[i]:.3f},asetpts=PTS-STARTPTS[a{i}]")
             else:
-                fc.append(f"[{k}:a]" + (f"adelay={d}|{d}," if d else "") + f"aresample=48000,apad,atrim=0:{L[i]:.3f},asetpts=PTS-STARTPTS[a{i}]")
+                fc.append(f"[{k}:a]" + cut + (f"adelay={d}|{d}," if d else "") + f"aresample=48000,apad,atrim=0:{L[i]:.3f},asetpts=PTS-STARTPTS[a{i}]")
             k += 1
         elif has_audio(c["video"]):
             if sx is not None: say(f"확인필요: {i + 1}번은 음원 위치를 못 찾아 연습실 소리 그대로")
@@ -184,6 +195,7 @@ def make(P):
     for d in (tdir, odir):
         if d: shutil.rmtree(d, ignore_errors=True)
     if rc: sys.exit("ffmpeg 실패 (영상 합치기)")
+    thumbs(P, P["out"], pre, total - OUT)
     say(P["out"])
 
 # ── 3분할 (원장님 2026-11-18 "가끔 3분할도 필요", 예시: ARIN GIRLISH) ─────────────────────────────
@@ -250,15 +262,15 @@ def make_stack3(P):
                 say(f"확인필요: {j + 1}번 줄이 1번과 {((DS[j] - O[j]) - ref):+.2f}초 어긋나 있어요 → [같은 구간으로 맞추기]를 눌러 주세요")
     for i in [x for x in (1, 0, 2) if O[x] is not None][:1]:   # 소리는 가운데(전체) 영상 기준, 없으면 1·3번
         o = O[i]; pos = C[i]["start"] - o; say(f"음원: {i + 1}번 영상 기준, 노래 {pos:.2f}초부터")
-        ins += (["-ss", f"{pos:.4f}"] if pos >= 0 else []) + ["-t", f"{L + 1:.3f}", "-i", f]
+        ins += ["-i", f]; cut = f"atrim=start={pos:.4f},asetpts=PTS-STARTPTS," if pos > 0 else ""   # VBR mp3 바로 가기 오차 방지
         d = int(round(-pos * 1000)) if pos < 0 else 0
         if d and has_audio(C[i]["video"]):
             ds = d / 1000
             fc.append(f"[{i}:a]aresample=48000,atrim=0:{ds + 0.05:.3f},afade=t=out:st={max(0, ds - 0.3):.3f}:d=0.35,apad[r];"
-                      f"[{k}:a]aresample=48000,adelay={d}|{d},afade=t=in:st={max(0, ds - 0.05):.3f}:d=0.1,apad[m];"
+                      f"[{k}:a]{cut}aresample=48000,adelay={d}|{d},afade=t=in:st={max(0, ds - 0.05):.3f}:d=0.1,apad[m];"
                       f"[r][m]amix=inputs=2:normalize=0:duration=longest,atrim=0:{L:.3f}[am]")
         else:
-            fc.append(f"[{k}:a]" + (f"adelay={d}|{d}," if d else "") + f"aresample=48000,apad,atrim=0:{L:.3f}[am]")
+            fc.append(f"[{k}:a]" + cut + (f"adelay={d}|{d}," if d else "") + f"aresample=48000,apad,atrim=0:{L:.3f}[am]")
         done = True
     if not done:
         if sx is not None: say("확인필요: 음원 위치를 못 찾아 가운데 영상 연습실 소리 그대로")
@@ -280,6 +292,7 @@ def make_stack3(P):
     for d_ in (tdir, odir):
         if d_: shutil.rmtree(d_, ignore_errors=True)
     if rc: sys.exit("ffmpeg 실패 (3분할)")
+    thumbs(P, P["out"], pre, L - OUT, src_h=C[1]["video"], src_off=C[1]["start"])   # 가로 썸네일은 가운데(전체) 영상 원본에서
     say(P["out"])
 
 if __name__ == "__main__":

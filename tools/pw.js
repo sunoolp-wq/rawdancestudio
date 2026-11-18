@@ -17,7 +17,7 @@ module.exports.renderFrames = async ({ file, setupArg, n, fps, dir, type = 'png'
   const b = await module.exports.launch(); let next = 0, done = 0;
   await Promise.all(Array.from({ length: workers }, async () => {
     const p = await b.newPage({ viewport: { width: w, height: h } });
-    await p.goto('file://' + file); await p.evaluate(o => window.setup(o), setupArg); await p.evaluate(() => document.fonts.ready);
+    await p.goto(require('url').pathToFileURL(file).href);   // 윈도우(C:\...)도 되게 await p.evaluate(o => window.setup(o), setupArg); await p.evaluate(() => document.fonts.ready);
     if (check) await check(p);
     for (;;) {
       const i = next++; if (i >= n) break;

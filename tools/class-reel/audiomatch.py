@@ -12,7 +12,7 @@ def load(f, sr, ss=None, t=None):
     return np.frombuffer(subprocess.run(cmd, capture_output=True, stdin=subprocess.DEVNULL).stdout, np.float32)
 
 def dur(f):
-    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f], capture_output=True, text=True, stdin=subprocess.DEVNULL)
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f], capture_output=True, text=True, encoding="utf-8", errors="replace", stdin=subprocess.DEVNULL)
     return float(r.stdout.strip() or 0)
 
 class Song:

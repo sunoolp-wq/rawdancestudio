@@ -12,7 +12,10 @@ PY = sys.executable
 CR = os.path.join(ROOT, "tools", "class-reel")
 DS = os.path.join(ROOT, "tools", "daily-story")
 LUTS = os.path.join(HERE, "luts")
-OUT = os.path.expanduser(os.environ.get("RAW_OUT", "~/Movies/RAW 영상공장"))
+WIN = platform.system() == "Windows"
+# 윈도우: 결과는 '동영상(Videos)', 자식 프로그램 한글 출력이 깨지지 않게 UTF-8로 (2026-11-18 윈도우판)
+os.environ["PYTHONUTF8"] = "1"; os.environ["PYTHONIOENCODING"] = "utf-8"
+OUT = os.path.expanduser(os.environ.get("RAW_OUT", "~/Videos/RAW 영상공장" if WIN else "~/Movies/RAW 영상공장"))
 WORK = os.path.join(OUT, ".작업중")
 UP = os.path.join(WORK, "uploads")
 # 음원 폴더: 원장님이 받은 음원(mp3 등)을 넣어 두면 영상 속 노래와 같은 곡을 자동으로 찾아 입힘 (2026-11-17)
@@ -29,7 +32,7 @@ app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 ** 3   # 8GB까지 올리기
 # ── 유틸 ─────────────────────────────────────────────
 def probe(f):
     r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height:format=duration",
-                        "-of", "json", f], capture_output=True, text=True)
+                        "-of", "json", f], capture_output=True, text=True, encoding="utf-8", errors="replace")
     j = json.loads(r.stdout or "{}"); s = (j.get("streams") or [{}])[0]
     return {"w": s.get("width", 0), "h": s.get("height", 0), "dur": float(j.get("format", {}).get("duration", 0) or 0)}
 
@@ -65,7 +68,7 @@ class Job:
     def run(self, cmd, cwd=ROOT):
         self.say("▶ " + " ".join(os.path.basename(c) if i == 0 else c for i, c in enumerate(cmd))[:300])
         # stdin 없음: ffmpeg 등이 검은 창 키보드 입력을 기다리며 멈추지 않게 (2026-11-17 맥 '장면 420/510' 멈춤)
-        p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+        p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding="utf-8", errors="replace")
         last = [time.time()]; stuck = [False]
         def watch():   # 15분 동안 아무 진행 표시가 없으면 멈춘 것으로 보고 끔
             while p.poll() is None:
@@ -272,7 +275,7 @@ def info():
 def align_api():
     """1번 영상의 노래 구간과 같은 구간을 나머지 영상에서 찾기"""
     P = request.get_json()
-    r = subprocess.run([PY, os.path.join(CR, "yt_concat.py"), "--align", yt_plan(P)], capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=900)
+    r = subprocess.run([PY, os.path.join(CR, "yt_concat.py"), "--align", yt_plan(P)], capture_output=True, text=True, encoding="utf-8", errors="replace", stdin=subprocess.DEVNULL, timeout=900)
     last = (r.stdout.strip().splitlines() or [""])[-1]
     if r.returncode or not last.startswith("{"): return jsonify({"error": (r.stderr.strip().splitlines() or ["맞추다가 멈췄어요"])[-1]}), 500
     j = json.loads(last); j["log"] = [l for l in r.stdout.splitlines()[:-1] if l.startswith(("곡:", "확인필요", "기준"))]; return jsonify(j)
@@ -285,7 +288,7 @@ def findstart():
     if key not in FS_CACHE:
         cmd = [PY, os.path.join(CR, "find_start.py"), "--video", upath(uid), "--dur", str(d), "--n", "4"]
         if song_files(MUSIC): cmd += ["--song", MUSIC]
-        r = subprocess.run(cmd, capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=900)
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", stdin=subprocess.DEVNULL, timeout=900)
         last = (r.stdout.strip().splitlines() or [""])[-1]
         if r.returncode or not last.startswith("{"): return jsonify({"error": (r.stderr.strip().splitlines() or ["후보를 못 찾았어요"])[-1]}), 500
         j = json.loads(last); j["log"] = [l for l in r.stdout.splitlines()[:-1] if l.startswith(("곡:", "음원 폴더"))]; FS_CACHE[key] = j
@@ -365,6 +368,7 @@ def files(p):
 def reveal():
     p = request.get_json().get("path") or OUT
     if platform.system() == "Darwin": subprocess.Popen(["open", "-R", p] if os.path.isfile(p) else ["open", p])
+    elif WIN: subprocess.Popen(f'explorer /select,"{os.path.normpath(p)}"' if os.path.isfile(p) else ["explorer", os.path.normpath(p)])
     return jsonify({"ok": True})
 
 if __name__ == "__main__":

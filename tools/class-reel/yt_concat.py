@@ -58,13 +58,13 @@ def align(P):
 
 def probe(f):
     r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate", "-of", "json", f],
-                       capture_output=True, text=True, stdin=subprocess.DEVNULL)
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", stdin=subprocess.DEVNULL)
     s = json.loads(r.stdout)["streams"][0]; n, d = s["r_frame_rate"].split("/")
     return s["width"], s["height"], s["r_frame_rate"], float(n) / float(d or 1)
 
 def has_audio(f):
     return subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries", "stream=index", "-of", "csv=p=0", f],
-                          capture_output=True, text=True, stdin=subprocess.DEVNULL).stdout.strip() != ""
+                          capture_output=True, text=True, encoding="utf-8", errors="replace", stdin=subprocess.DEVNULL).stdout.strip() != ""
 
 def make(P):
     C = [dict(c) for c in P["clips"]]; X = float(P.get("xfade", 0.5) or 0); n = len(C)

@@ -87,7 +87,9 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
  <div class="row"><button class="go" onclick="runMusic()">만들기</button></div>
 </section>
 <section id="t-youtube" class="card" hidden>
- <h2>유튜브 이어붙이기</h2><p class="hint">같은 곡·같은 구간을 A그룹 → B그룹 → 쌤 솔로 → 단체처럼 이어 붙여요. 가로 그대로, 영상마다 깨끗한 음원으로 맞추고 사이는 교차 디졸브.<br><b>1번 영상의 시작·끝만 정하고</b> [🎵 같은 구간으로 맞추기]를 누르면 나머지 영상은 자동으로 같은 노래 구간으로 잘려요.</p>
+ <h2>유튜브 이어붙이기 · 3분할</h2>
+ <div class="row"><label class="f" style="flex:1">만들 영상<select id="yt-mode"><option value="concat">이어붙이기 (가로 · 유튜브) — A그룹 → B그룹 → 쌤 솔로 → 단체 차례로</option><option value="stack3">3분할 (세로 · 릴스) — 위 · 가운데 · 아래 세 영상이 동시에</option></select></label></div>
+ <p class="hint" id="yt-s3hint" hidden>3분할: 영상 3개 = <b>1번 위 · 2번 가운데 · 3번 아래</b>. 세 영상이 같은 노래 구간을 동시에 춰요 (프리미어에서 '오디오로 동기화' 후 위아래로 나누던 것과 같음). 음원이 없으면 1번 영상 소리로 맞춰요.</p><p class="hint">같은 곡·같은 구간을 A그룹 → B그룹 → 쌤 솔로 → 단체처럼 이어 붙여요. 가로 그대로, 영상마다 깨끗한 음원으로 맞추고 사이는 교차 디졸브.<br><b>1번 영상의 시작·끝만 정하고</b> [🎵 같은 구간으로 맞추기]를 누르면 나머지 영상은 자동으로 같은 노래 구간으로 잘려요.</p>
  <div class="drop" id="yt-drop">영상 여러 개 — 눌러서 고르거나 끌어다 놓기 (순서는 아래 ▲▼로)<input type="file" multiple accept="video/*,.mp4,.mov,.MP4,.MOV" hidden></div>
  <div id="yt-list" style="display:flex;flex-direction:column;gap:10px"></div>
  <div id="youtube-song"></div>
@@ -114,7 +116,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
 <script>
 const $=s=>document.querySelector(s), INFO={}, FILES={}, PICK={};
 const api=(u,b)=>fetch(u,b===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
-const TABS=[['story','스토리 시간표'],['teacher','쌤 15초'],['trackpad','TRACKPAD 릴스'],['music','음원 싱크'],['youtube','유튜브 이어붙이기'],['lut','LUT']];
+const TABS=[['story','스토리 시간표'],['teacher','쌤 15초'],['trackpad','TRACKPAD 릴스'],['music','음원 싱크'],['youtube','유튜브 · 3분할'],['lut','LUT']];
 $('#tabs').innerHTML=TABS.map(([k,n])=>`<button data-k="${k}">${n}</button>`).join('');
 const show=k=>{TABS.forEach(([t])=>{$('#t-'+t).hidden=t!==k;}); document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k)); try{localStorage.rawTab=k}catch(e){}};
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>show(b.dataset.k)); show((()=>{try{return localStorage.rawTab}catch(e){}})()||'story');
@@ -217,8 +219,10 @@ function runMusic(){ const id=need('music-file','영상을 먼저 올려 주세�
   go('music',{file:id,song:s,auto_song:!s&&$('#mu-auto').checked,start:$('#mu-start').value.trim(),end:$('#mu-end').value.trim(),offset:$('#mu-off').value.trim(),trim:$('#mu-trim').checked,name:FILES['music-file'].name.replace(/\.[^.]+$/,''),...lutVal('music-lut')},'음원 싱크'); }
 // 유튜브 이어붙이기 (원장님 2026-11-17)
 let YT=[], YTN=0;
-const ytNum=()=>{ YT.forEach((k,i)=>{ $('#'+k+' .no').textContent=i+1; }); ytTotal(); };
-const ytTotal=()=>{ const ok=YT.filter(k=>FILES[k]); const t=ok.reduce((a,k)=>a+(+$('#'+k+'-d').value||0),0)+($('#yt-teacher').value.trim()?+$('#yt-pre').value:0)+($('#yt-outro').checked?2.5:0); // 디졸브만큼 뒤를 더 써서 각 영상 길이는 그대로
+const ytS3=()=>$('#yt-mode').value==='stack3';
+const ytNum=()=>{ YT.forEach((k,i)=>{ $('#'+k+' .no').textContent=(i+1)+(ytS3()?['위','가운데','아래'][i]||'⚠️':''); }); ytTotal(); };
+const ytTotal=()=>{ const ok=YT.filter(k=>FILES[k]); const ds=ok.map(k=>+$('#'+k+'-d').value||0);
+  const t=(ytS3()?(ds.length?Math.min(...ds):0):ds.reduce((a,b)=>a+b,0))+($('#yt-teacher').value.trim()?+$('#yt-pre').value:0)+($('#yt-outro').checked?2.5:0); // 디졸브만큼 뒤를 더 써서 각 영상 길이는 그대로
   $('#yt-total').textContent=ok.length?`영상 ${ok.length}개 · 약 ${t.toFixed(1)}초`:''; };
 const ytThumb=k=>{ if(FILES[k]) $('#'+k+' .hd img').src=`/api/frame?id=${FILES[k].id}&t=${(+$('#'+k+'-s').value||0)+0.3}`; };
 function ytAdd(f){
@@ -232,9 +236,7 @@ function ytAdd(f){
   el.querySelector('.rm').onclick=()=>{ YT=YT.filter(x=>x!==k); delete FILES[k]; el.remove(); ytNum(); };
   el.querySelector('.pk').onclick=()=>{ if(!FILES[k]) return; const b=$('#'+k+'-pick'); if(b){ b.hidden=!b.hidden; return; } pickBox(k,'#'+k+'-s','#'+k+'-d',FILES[k].h>FILES[k].w); };
   ['-s','-d'].forEach(x=>$('#'+k+x).addEventListener('input',()=>{ ytTotal(); if(x==='-s') ytThumb(k); }));
-  // 시작+길이가 원본 끝을 넘지 않게 (2026-11-18 첫 영상 끝에서 멈춤)
-  ['-s','-d'].forEach(x=>$('#'+k+x).addEventListener('change',()=>{ if(!FILES[k]) return; const s0=+$('#'+k+'-s').value||0, mx=Math.max(0.5,FILES[k].dur-s0);
-    if(+$('#'+k+'-d').value>mx){ $('#'+k+'-d').value=mx.toFixed(1); ytTotal(); } }));
+  // 길이가 원본 끝을 넘으면 만들 때 yt_concat.py가 원본 끝까지로 줄임 (화면에서 바로 고치면 입력 중에 값이 바뀌어 헷갈림, 2026-11-18)
   const xh=new XMLHttpRequest(), fd=new FormData(); fd.append('file',f); xh.open('POST','/api/upload');
   xh.upload.onprogress=e=>{ const b=el.querySelector('.bar i'); if(b&&e.total) b.style.width=(e.loaded/e.total*100)+'%'; };
   return new Promise(res=>{ xh.onload=()=>{ const r=JSON.parse(xh.responseText); el.querySelector('.bar')?.remove();
@@ -244,11 +246,12 @@ function ytAdd(f){
 (()=>{ const d=$('#yt-drop'), inp=d.querySelector('input');
   const many=async fs=>{ for(const f of [...fs].sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}))) await ytAdd(f); inp.value=''; };
   d.onclick=()=>inp.click(); d.ondragover=e=>e.preventDefault(); d.ondrop=e=>{ e.preventDefault(); many(e.dataTransfer.files); }; inp.onchange=()=>many(inp.files);
+  $('#yt-mode').onchange=()=>{ const s3=ytS3(); $('#yt-s3hint').hidden=!s3; $('#yt-x').closest('label').hidden=s3; $('#yt-h').closest('label').hidden=s3; ytNum(); };
   $('#yt-x').onchange=ytTotal; $('#yt-pre').onchange=ytTotal; $('#yt-outro').onchange=ytTotal; $('#yt-teacher').oninput=ytTotal;
   $('#yt-align').onclick=()=>{ const ks=YT.filter(k=>FILES[k]); if(ks.length<2) return alert('영상을 2개 이상 올려 주세요');
-    const s=FILES['youtube-song']?.id||''; if(!s&&!$('#yt-auto').checked) return alert('음원을 올리거나 음원 폴더 자동 찾기를 켜 주세요');
+    const s=FILES['youtube-song']?.id||'';   // 음원이 없으면 1번 영상 소리로 맞춤 (2026-11-18)
     const m=$('#yt-amsg'), b=$('#yt-align'); b.disabled=true; m.textContent='맞추는 중… (영상 수에 따라 1~2분)';
-    api('/api/align',{song:s,auto_song:!s,clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value}))}).then(r=>{ b.disabled=false;
+    api('/api/align',{song:s,auto_song:!s&&$('#yt-auto').checked,clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value}))}).then(r=>{ b.disabled=false;
       if(r.error){ m.innerHTML=`<span class="err">${r.error}</span>`; return; }
       r.clips.forEach((c,i)=>{ const k=ks[i]; $('#'+k+'-s').value=c.start.toFixed(2); $('#'+k+'-d').value=c.dur.toFixed(2); ytThumb(k);
         $('#'+k+' .st').innerHTML=`${FILES[k].w}×${FILES[k].h} · ${FILES[k].dur.toFixed(1)}초 · `+(c.ok?'✓ 맞춤':'<span class="err">⚠️ 못 찾음 — 직접 골라 주세요</span>'); });
@@ -257,9 +260,10 @@ function ytAdd(f){
 fileBox('youtube-song',{label:'음원 (선택 — 안 올리면 음원 폴더에서 찾음)',audio:1});
 function runYoutube(){ const ks=YT.filter(k=>FILES[k]); if(!ks.length) return alert('영상을 올려 주세요');
   const bad=ks.find(k=>!(+$('#'+k+'-d').value>0)); if(bad) return alert('길이가 0인 영상이 있어요');
+  if(ytS3()&&ks.length!==3) return alert('3분할은 영상이 딱 3개 필요해요 (위 · 가운데 · 아래)');
   const s=FILES['youtube-song']?.id||'', nm=$('#yt-name').value.trim()||FILES[ks[0]].name.replace(/\.[^.]+$/,'');
   go('youtube',{clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value})),song:s,auto_song:!s&&$('#yt-auto').checked,
-    xfade:+$('#yt-x').value,height:+$('#yt-h').value,name:nm,outro:$('#yt-outro').checked,pre:+$('#yt-pre').value,teacher:$('#yt-teacher').value.trim(),genre:$('#yt-genre').value.trim(),track:$('#yt-track').value.trim(),...lutVal('youtube-lut')},`유튜브 · ${nm} (${ks.length}개)`); }
+    xfade:+$('#yt-x').value,height:+$('#yt-h').value,name:nm,layout:$('#yt-mode').value,outro:$('#yt-outro').checked,pre:+$('#yt-pre').value,teacher:$('#yt-teacher').value.trim(),genre:$('#yt-genre').value.trim(),track:$('#yt-track').value.trim(),...lutVal('youtube-lut')},(ytS3()?'3분할 · ':'유튜브 · ')+`${nm} (${ks.length}개)`); }
 function runLut(){ const id=need('lut-file','영상을 먼저 올려 주세요'); const l=lutVal('lut-lut'); if(!l.lut) return alert('LUT를 골라 주세요'); go('lut',{file:id,...l},'LUT · '+l.lut); }
 // 작업 목록
 let timer=null;

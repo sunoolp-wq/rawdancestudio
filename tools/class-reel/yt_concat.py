@@ -39,13 +39,21 @@ def offset_in(video, song_x, a, b, near=None):
 
 def align(P):
     """기준(1번) 영상의 노래 구간 [P0, P1]을 다른 영상에서 찾아 시작·길이를 맞춤"""
-    f = pick_song(P)
-    if not f: return {"error": "음원이 있어야 같은 구간을 찾을 수 있어요 (음원을 올리거나 음원 폴더에 넣어 주세요)"}
-    sx = load(f, SR); ref = P["clips"][0]
-    o = offset_in(ref["video"], sx, max(0, ref["start"] - 5), min(fdur(ref["video"]), ref["start"] + ref["dur"] + 5))
-    if o is None: return {"error": "1번 영상에서 노래 위치를 못 찾았어요"}
-    P0, P1 = ref["start"] - o, ref["start"] + ref["dur"] - o
-    say(f"기준 구간: 노래 {P0:.2f}~{P1:.2f}초")
+    f = pick_song(P); ref = P["clips"][0]
+    if f:
+        sx = load(f, SR)
+        o = offset_in(ref["video"], sx, max(0, ref["start"] - 5), min(fdur(ref["video"]), ref["start"] + ref["dur"] + 5))
+        if o is None: return {"error": "1번 영상에서 노래 위치를 못 찾았어요"}
+        P0, P1 = ref["start"] - o, ref["start"] + ref["dur"] - o
+        say(f"기준 구간: 노래 {P0:.2f}~{P1:.2f}초")
+    else:
+        # 음원이 없으면 프리미어 '오디오로 동기화'처럼: 1번 영상의 그 구간 연습실 소리를 기준으로 나머지 영상에서 같은 소리를 찾음 (원장님 2026-11-18)
+        # 춤 시작 앞 4초(쌤 카운트·노래를 다시 트는 순간)도 같이 비교 → 노래가 8마디마다 반복돼도 엉뚱한 반복에 안 맞음 (2026-11-18 테스트)
+        a0 = max(0.0, ref["start"] - 4.0)
+        sx = load(ref["video"], SR, a0, ref["start"] + ref["dur"] - a0)
+        if len(sx) < SR * 5: return {"error": "1번 영상 구간이 너무 짧아요 (5초 이상)"}
+        P0, P1 = ref["start"] - a0, ref["start"] - a0 + ref["dur"]; f = None
+        say("음원 없이 1번 영상 소리로 맞추는 중 (프리미어 '오디오로 동기화'와 같은 방식)")
     out = [{"start": round(ref["start"], 2), "dur": round(ref["dur"], 2), "ok": True}]
     for c in P["clips"][1:]:
         D = fdur(c["video"]); x = load(c["video"], SR)
@@ -54,7 +62,7 @@ def align(P):
             if oo + P0 >= -0.3 and oo + P1 <= D + 0.3 and (best is None or n > best[1]): best = (oo, n)
         if best: out.append({"start": round(max(0, best[0] + P0), 2), "dur": round(P1 - P0, 2), "ok": True})
         else: out.append({"start": c.get("start", 0), "dur": c.get("dur", ref["dur"]), "ok": False}); say(f"확인필요: {os.path.basename(c['video'])}에서 같은 구간을 못 찾았어요")
-    return {"clips": out, "song": os.path.basename(f)}
+    return {"clips": out, "song": os.path.basename(f) if f else "(음원 없음 · 1번 영상 소리로 맞춤)"}
 
 def probe(f):
     r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate", "-of", "json", f],
@@ -178,7 +186,104 @@ def make(P):
     if rc: sys.exit("ffmpeg 실패 (영상 합치기)")
     say(P["out"])
 
+# ── 3분할 (원장님 2026-11-18 "가끔 3분할도 필요", 예시: ARIN GIRLISH) ─────────────────────────────
+# 세로 1080x1920을 1080x640 세 줄로: 위 = 1번, 가운데 = 2번, 아래 = 3번. 세 영상이 같은 노래 구간을 동시에 (음원 기준으로 맞춤)
+# 가운데 줄 위에 TRACKPAD 자막(춤 시작 전 1~5초), 끝에 RAW 로고. 소리는 깨끗한 음원 하나
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+def render_frames(page, fps, w, h, length, T=None):
+    d = tempfile.mkdtemp(prefix=f"raw-{page}-")
+    cmd = ["node", os.path.join(HERE, "add_title.js"), "--frames", d, "--fps", str(fps), "--w", str(w), "--h", str(h), "--len", f"{length:.2f}"]
+    if page == "outro": cmd += ["--page", "outro"]
+    if T: cmd += ["--title", T["title"], "--name", T.get("name") or ""] + (["--track", T["track"]] if T.get("track") else [])
+    if subprocess.run(cmd, stdin=subprocess.DEVNULL).returncode: sys.exit(f"{'끝 로고' if page == 'outro' else '자막'} 그리기 실패")
+    return d
+
+def ff(cmd, nf, label):
+    if os.environ.get("RAW_DEBUG"): say(" ".join(cmd))
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.DEVNULL, text=True); last = -1
+    for line in p.stdout:
+        if line.startswith("frame="):
+            fr = int(line.split("=")[1] or 0)
+            if fr - last >= max(60, nf // 20): last = fr; say(f"{label} {fr}/{nf}")
+    return p.wait()
+
+def make_stack3(P):
+    C = [dict(c) for c in P["clips"]]
+    if len(C) != 3: sys.exit("3분할은 영상이 딱 3개 필요해요 (위 · 가운데 · 아래)")
+    W, H, PH = 1080, 1920, 640
+    _, _, FR, FPS = probe(C[0]["video"])
+    DS = [c["start"] for c in C]; D = min(c["dur"] for c in C)       # 세 줄 길이는 같게 (가장 짧은 것 기준)
+    T = P.get("title") or None; tdir = odir = None; pre = 0.0
+    if T and (T.get("title") or "").strip():
+        N = min(5.0, max(1.0, float(T.get("len") or 5))); pre = min(N, min(DS))      # 세 영상 모두 같은 만큼 앞에서부터 (동시에 움직이게)
+        for c in C: c["start"] -= pre
+        say(f"TRACKPAD 자막 {max(1.0, pre):.1f}초 그리는 중…"); tdir = render_frames("title", FPS, W, H, max(1.0, pre), T)
+    OUT = float(P.get("outro") or 0)
+    if OUT > 0: say("끝 로고 그리는 중…"); odir = render_frames("outro", FPS, W, H, OUT)
+    L = pre + D + OUT
+    f = pick_song(P); sx = load(f, SR) if f else None
+    lut = P.get("lut") or ""; s = max(0, min(100, int(P.get("strength") or 100))) / 100
+    lpe = lut.replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
+    ins, fc = [], []
+    for i, c in enumerate(C):
+        ins += ["-ss", f"{c['start']:.3f}", "-t", f"{L:.3f}", "-i", c["video"]]
+        v = f"[{i}:v]fps={FR},scale={W}:{PH}:force_original_aspect_ratio=increase,crop={W}:{PH},setsar=1"
+        if lut:
+            v += (f",format=gbrp16le,lut3d=file='{lpe}':interp=tetrahedral" if s >= 0.999 else
+                  f",format=gbrp16le,split[a{i}][b{i}];[b{i}]lut3d=file='{lpe}':interp=tetrahedral[l{i}];[a{i}][l{i}]blend=all_mode=normal:all_opacity={s:.2f}")
+        fc.append(v + f",tpad=stop_mode=clone:stop_duration={L + 1:.1f},trim=0:{L:.3f},format=yuv420p,setpts=PTS-STARTPTS[p{i}]")
+    fc.append("[p0][p1][p2]vstack=inputs=3[vs]"); last = "vs"
+    if tdir:
+        ins += ["-framerate", FR, "-i", os.path.join(tdir, "%05d.png")]
+        fc.append(f"[3:v]format=rgba[tt];[vs][tt]overlay=0:0:eof_action=pass,format=yuv420p[vt]"); last = "vt"
+    fc.append(f"[{last}]null[vout]")
+    # 소리: 가운데(전체) 영상 기준으로 깨끗한 음원. 못 찾으면 1·3번 순서로, 그래도 없으면 가운데 연습실 소리
+    k = 3 + (1 if tdir else 0); done = False
+    O = [None, None, None]; ref = None
+    if sx is not None:
+        for i in range(3):   # 1번에서 기준 노래 위치를 찾고, 나머지는 '같은 구간'인 후보로
+            O[i] = offset_in(C[i]["video"], sx, max(0, DS[i] - 0.5), min(fdur(C[i]["video"]), DS[i] + D + 0.5), near=(DS[i], ref) if ref is not None else None)
+            if O[i] is not None and ref is None: ref = DS[i] - O[i]
+        for j in range(3):
+            if O[j] is not None and abs((DS[j] - O[j]) - ref) > 0.15:
+                say(f"확인필요: {j + 1}번 줄이 1번과 {((DS[j] - O[j]) - ref):+.2f}초 어긋나 있어요 → [같은 구간으로 맞추기]를 눌러 주세요")
+    for i in [x for x in (1, 0, 2) if O[x] is not None][:1]:   # 소리는 가운데(전체) 영상 기준, 없으면 1·3번
+        o = O[i]; pos = C[i]["start"] - o; say(f"음원: {i + 1}번 영상 기준, 노래 {pos:.2f}초부터")
+        ins += (["-ss", f"{pos:.4f}"] if pos >= 0 else []) + ["-t", f"{L + 1:.3f}", "-i", f]
+        d = int(round(-pos * 1000)) if pos < 0 else 0
+        if d and has_audio(C[i]["video"]):
+            ds = d / 1000
+            fc.append(f"[{i}:a]aresample=48000,atrim=0:{ds + 0.05:.3f},afade=t=out:st={max(0, ds - 0.3):.3f}:d=0.35,apad[r];"
+                      f"[{k}:a]aresample=48000,adelay={d}|{d},afade=t=in:st={max(0, ds - 0.05):.3f}:d=0.1,apad[m];"
+                      f"[r][m]amix=inputs=2:normalize=0:duration=longest,atrim=0:{L:.3f}[am]")
+        else:
+            fc.append(f"[{k}:a]" + (f"adelay={d}|{d}," if d else "") + f"aresample=48000,apad,atrim=0:{L:.3f}[am]")
+        done = True
+    if not done:
+        if sx is not None: say("확인필요: 음원 위치를 못 찾아 가운데 영상 연습실 소리 그대로")
+        fc.append(f"[1:a]aresample=48000,apad,atrim=0:{L:.3f}[am]" if has_audio(C[1]["video"]) else f"anullsrc=r=48000:cl=stereo,atrim=0:{L:.3f}[am]")
+    fc.append(f"[am]afade=t=in:st=0:d=0.05,afade=t=out:st={max(0, L - 1.5):.3f}:d=1.5[aout]")
+    nf = int(L * FPS); say(f"총 {L:.1f}초 · 3분할 {W}x{H}")
+    head = ["ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-nostats", "-progress", "pipe:1", "-y"]
+    mid = P["out"] + ".tmp.mp4" if odir else P["out"]
+    rc = ff([*head, *ins, "-filter_complex", ";".join(fc), "-map", "[vout]", "-map", "[aout]", "-t", f"{L:.3f}", "-c:v", "libx264",
+             "-crf", "10" if odir else "16", "-preset", "fast" if odir else "medium", "-pix_fmt", "yuv420p",
+             "-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart", mid], nf, "영상 합치는 중")
+    if not rc and odir:   # 끝 로고는 따로 (같은 그래프에 넣으면 ffmpeg가 멈출 수 있음, 2026-11-17)
+        rc = ff([*head, "-i", mid, "-framerate", FR, "-i", os.path.join(odir, "%05d.png"), "-filter_complex",
+                 f"[1:v]format=rgba,setpts=PTS+{max(0, L - OUT):.3f}/TB[oo];[0:v][oo]overlay=0:0:eof_action=repeat,format=yuv420p[vout]",
+                 "-map", "[vout]", "-map", "0:a", "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-c:a", "copy", "-movflags", "+faststart", P["out"]],
+                nf, "끝 로고 넣는 중")
+        try: os.remove(mid)
+        except OSError: pass
+    for d_ in (tdir, odir):
+        if d_: shutil.rmtree(d_, ignore_errors=True)
+    if rc: sys.exit("ffmpeg 실패 (3분할)")
+    say(P["out"])
+
 if __name__ == "__main__":
     mode, f = sys.argv[1], sys.argv[2]; P = json.load(open(f, encoding="utf-8"))
     if mode == "--align": print(json.dumps(align(P), ensure_ascii=False))
+    elif P.get("layout") == "stack3": make_stack3(P)
     else: make(P)

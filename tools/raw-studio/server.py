@@ -222,7 +222,7 @@ def yt_plan(P, out=None):
     song = upath(P["song"]) if P.get("song") else (MUSIC if P.get("auto_song") and song_files(MUSIC) else "")
     plan = {"clips": [{"video": upath(c["file"]), "start": float(c["start"]), "dur": float(c["dur"])} for c in P["clips"]], "song": song,
             "xfade": float(P.get("xfade", 0.5)), "lut": lut_path(P["lut"]) if P.get("lut") else "", "strength": P.get("strength", 100),
-            "height": int(P.get("height") or 0), "out": out, "outro": 2.5 if P.get("outro", True) else 0,
+            "height": int(P.get("height") or 0), "out": out, "outro": 2.5 if P.get("outro", True) else 0, "layout": P.get("layout") or "concat",
             "title": ({"len": float(P.get("pre") or 5), "title": P["teacher"], "name": P.get("genre", ""), "track": P.get("track", "")}
                       if (P.get("teacher") or "").strip() and float(P.get("pre") or 0) > 0 else None)}
     f = os.path.join(WORK, f"yt_{uuid.uuid4().hex[:8]}.json"); json.dump(plan, open(f, "w", encoding="utf-8"), ensure_ascii=False); return f
@@ -230,10 +230,12 @@ def yt_plan(P, out=None):
 def p_youtube(job, P):
     """유튜브용 이어 붙이기 (원장님 2026-11-17): 같은 곡·같은 구간 A그룹 → B그룹 → 쌤 솔로 → 단체, 가로, 깨끗한 음원, 교차 디졸브"""
     if len(P.get("clips") or []) < 1: raise RuntimeError("영상을 올려 주세요")
-    out = outfile("유튜브", P.get("name") or "이어붙이기")
+    s3 = P.get("layout") == "stack3"
+    if s3 and len(P["clips"]) != 3: raise RuntimeError("3분할은 영상이 딱 3개 필요해요 (위 · 가운데 · 아래)")
+    out = outfile("3분할" if s3 else "유튜브", P.get("name") or ("3분할" if s3 else "이어붙이기"))
     n0 = len(job.log); job.run([PY, os.path.join(CR, "yt_concat.py"), "--make", yt_plan(P, out)])
     if any(l.startswith("확인필요") for l in job.log[n0:]): job.warn = "⚠️ 음원 확인필요(작업 기록 보기) · "
-    keep(job, out, "유튜브 영상")
+    keep(job, out, "3분할 영상" if s3 else "유튜브 영상")
 
 PIPES = {"youtube": p_youtube, "story": p_story, "teacher": p_teacher, "trackpad": p_trackpad, "music": p_music, "lut": p_lut}
 

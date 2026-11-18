@@ -24,6 +24,11 @@ def pick_song(P):
         say(f"곡: {os.path.basename(f)}"); return f
     return s if os.path.isfile(s) else None
 
+def clip_off(c, song_x, a, b, near=None):
+    """영상에 '직접 맞추기'로 정한 값(노래 0:00 = 영상 몇 초)이 있으면 그걸, 없으면 자동으로 찾음"""
+    if c.get("offset") is not None: say(f"{os.path.basename(c['video'])}: 직접 맞춘 값 노래 0:00 = {c['offset']:.2f}초"); return float(c["offset"])
+    return offset_in(c["video"], song_x, a, b, near)
+
 def offset_in(video, song_x, a, b, near=None):
     """영상 a~b초 구간에서 '노래 0:00 = 영상 몇 초' (못 찾으면 None)
     near=(영상 시각 t, 기대 노래 위치 p): 애매하면 't초에 노래가 p초쯤'인 후보를 고름 (모든 그룹이 같은 구간이라서)"""
@@ -42,7 +47,7 @@ def align(P):
     f = pick_song(P); ref = P["clips"][0]
     if f:
         sx = load(f, SR)
-        o = offset_in(ref["video"], sx, max(0, ref["start"] - 5), min(fdur(ref["video"]), ref["start"] + ref["dur"] + 5))
+        o = clip_off(ref, sx, max(0, ref["start"] - 5), min(fdur(ref["video"]), ref["start"] + ref["dur"] + 5))
         if o is None: return {"error": "1번 영상에서 노래 위치를 못 찾았어요"}
         P0, P1 = ref["start"] - o, ref["start"] + ref["dur"] - o
         say(f"기준 구간: 노래 {P0:.2f}~{P1:.2f}초")
@@ -56,6 +61,8 @@ def align(P):
         say("음원 없이 1번 영상 소리로 맞추는 중 (프리미어 '오디오로 동기화'와 같은 방식)")
     out = [{"start": round(ref["start"], 2), "dur": round(ref["dur"], 2), "ok": True}]
     for c in P["clips"][1:]:
+        if c.get("offset") is not None and f:   # 직접 맞춘 영상은 계산 없이 바로
+            out.append({"start": round(max(0, float(c["offset"]) + P0), 2), "dur": round(P1 - P0, 2), "ok": True}); continue
         D = fdur(c["video"]); x = load(c["video"], SR)
         best = None
         for oo, n in candidates(x, sx, SR, 0.0, min_votes=3):       # 한 영상 안에서 노래를 여러 번 틀었을 수도 있음 → 이 구간이 통째로 들어 있는 후보 중 표 많은 것
@@ -133,7 +140,7 @@ def make(P):
         o = None
         if sx is not None:
             a0, b0 = max(0, DS[i] - 0.5), min(fdur(c["video"]), c["start"] + L[i] + 0.5)
-            o = offset_in(c["video"], sx, a0, b0, near=(DS[i], ref) if ref is not None else None)
+            o = clip_off(c, sx, a0, b0, near=(DS[i], ref) if ref is not None else None)
             if o is not None and ref is None: ref = DS[i] - o          # 1번 춤 시작 때 노래 위치 = 기준
         if o is not None:
             pos = c["start"] - o; say(f"{i + 1}번 {os.path.basename(c['video'])}: 노래 {pos:.2f}초부터")
@@ -255,7 +262,7 @@ def make_stack3(P):
     O = [None, None, None]; ref = None
     if sx is not None:
         for i in range(3):   # 1번에서 기준 노래 위치를 찾고, 나머지는 '같은 구간'인 후보로
-            O[i] = offset_in(C[i]["video"], sx, max(0, DS[i] - 0.5), min(fdur(C[i]["video"]), DS[i] + D + 0.5), near=(DS[i], ref) if ref is not None else None)
+            O[i] = clip_off(C[i], sx, max(0, DS[i] - 0.5), min(fdur(C[i]["video"]), DS[i] + D + 0.5), near=(DS[i], ref) if ref is not None else None)
             if O[i] is not None and ref is None: ref = DS[i] - O[i]
         for j in range(3):
             if O[j] is not None and abs((DS[j] - O[j]) - ref) > 0.15:

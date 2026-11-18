@@ -31,7 +31,10 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
 .job pre{white-space:pre-wrap;font-size:11px;color:var(--mu);max-height:120px;overflow:auto;margin:6px 0 0}
 .job video{width:100%;border-radius:8px;margin-top:8px;background:#000}.job img{width:100%;border-radius:8px;margin-top:8px}
 .err{color:var(--bad);font-weight:700}
-.cands{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;z-index:50;padding:24px}
+.modal .box{background:var(--pn);border:1px solid var(--ln);border-radius:16px;padding:20px;width:min(1040px,100%);display:flex;flex-direction:column;gap:12px}
+#sy-v{width:100%;max-height:48vh;background:#000;border-radius:10px}#sy-wave{width:100%;height:170px;background:#0e0d12;border-radius:10px;cursor:ew-resize;touch-action:none}
+#sy-off{font-size:20px}.cands{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px}
 .cand{border:2px solid var(--ln);border-radius:12px;overflow:hidden;cursor:pointer;background:#0e0d12;padding:0;color:var(--fg);text-align:left;font:inherit}
 .cand.on{border-color:var(--ac)}.cand img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
 .clip{border:1px solid var(--ln);border-radius:12px;padding:12px;background:#120f19;display:flex;flex-direction:column;gap:8px}
@@ -60,7 +63,8 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
   <label class="f">홀<select id="tc-hall"><option>A</option><option>B</option><option>C</option><option value="">(표시 안 함)</option></select></label>
   <label class="f">끝 화면 문구<input id="tc-kr" placeholder="매주 월 19:40"></label></div>
  <div class="row"><label class="chk"><input type="checkbox" id="tc-pop">팝업 수업 (POP-UP CLASS 표시)</label>
-  <label class="chk"><input type="checkbox" id="tc-auto" checked>음원 폴더에 같은 곡이 있으면 깨끗한 음원으로 (없으면 원래 소리)</label></div>
+  <label class="chk"><input type="checkbox" id="tc-auto" checked>음원 폴더에 같은 곡이 있으면 깨끗한 음원으로 (없으면 원래 소리)</label>
+  <label class="f" style="flex-direction:row;align-items:center">노래 0:00 = 원본 몇 초 (자동이 안 되면)<input id="tc-off" style="width:90px"></label><button class="sm" id="tc-sync">🎧 직접 맞추기</button></div>
  <div id="teacher-lut"></div>
  <div class="row"><button class="go" onclick="runTeacher()">만들기</button><span class="hint">끝 화면 문구가 비면 '매주 요일 시간'으로 들어가요</span></div>
 </section>
@@ -72,7 +76,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
   <label class="f">곡명 (작게, 비워도 됨)<input id="tp-track" placeholder="AD LA - Ain't In LA"></label><label class="f">자막 (춤 시작 전 몇 초)<select id="tp-pre"><option value="1">1초 (빠르게)</option><option value="2">2초</option><option value="3">3초</option><option value="4">4초</option><option value="5" selected>5초 (기본)</option></select></label></div>
  <div id="trackpad-song"></div>
  <div class="row"><label class="chk"><input type="checkbox" id="tp-auto" checked>음원을 안 올리면 음원 폴더에서 같은 곡 자동으로 찾기</label></div>
- <div class="row"><label class="chk"><input type="checkbox" id="tp-outro" checked>끝에 RAW 로고 2.5초 (음악은 이어짐)</label><label class="f" style="flex-direction:row;align-items:center">노래 0:00 = 원본 몇 초 (자동이 안 되면)<input id="tp-off" style="width:90px"></label></div>
+ <div class="row"><label class="chk"><input type="checkbox" id="tp-outro" checked>끝에 RAW 로고 2.5초 (음악은 이어짐)</label><label class="f" style="flex-direction:row;align-items:center">노래 0:00 = 원본 몇 초 (자동이 안 되면)<input id="tp-off" style="width:90px"></label><button class="sm" id="tp-sync">🎧 직접 맞추기</button></div>
  <div id="trackpad-lut"></div>
  <div class="row"><button class="go" onclick="runTrackpad()">만들기</button></div>
 </section>
@@ -82,6 +86,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
  <div class="row"><label class="chk"><input type="checkbox" id="mu-auto" checked>음원을 안 올리면 음원 폴더에서 같은 곡 자동으로 찾기</label></div>
  <div class="grid"><label class="f">쓸 구간 시작 (초)<input id="mu-start" placeholder="0"></label><label class="f">쓸 구간 끝 (초)<input id="mu-end" placeholder="끝까지"></label>
   <label class="f">노래 0:00 = 영상 몇 초 (자동이 안 되면)<input id="mu-off"></label></div>
+ <div class="row"><button class="sm" id="mu-sync">🎧 직접 맞추기 (플레이어로 듣고 맞추기)</button></div>
  <div class="row"><label class="chk"><input type="checkbox" id="mu-trim" checked>노래 시작(0:00)부터 자르기</label></div>
  <div id="music-lut"></div>
  <div class="row"><button class="go" onclick="runMusic()">만들기</button></div>
@@ -113,6 +118,21 @@ table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;borde
 </main>
 <aside class="jobs card"><h2>작업</h2><p class="hint">하나씩 차례로 만들어요. 4K 영상 따라가기는 15초에 몇 분 걸려요.</p><div id="jobs"></div></aside></div>
 <datalist id="teachers"></datalist><datalist id="genres"></datalist>
+<div id="sync" class="modal" hidden><div class="box">
+ <div class="row"><h2 style="flex:1">🎧 음원 직접 맞추기</h2><button class="sm" id="sy-x">닫기</button></div>
+ <p class="hint">① 아래 <b>후보</b>를 눌러 들어 보기 — 또는 영상을 보다가 노래가 시작되는 순간 <b>[👆 지금 노래 시작!]</b><br>
+ ② <b>[▶ 같이 듣기]</b>: 연습실 소리와 깨끗한 음원이 <b>한 소리처럼 겹치면</b> 맞은 것. 메아리처럼 두 번 들리면 어긋난 것<br>
+ ③ 음원이 늦게 들리면 ◀, 빨리 들리면 ▶ (아래 그래프: 위 = 영상 소리, 아래 = 음원. 뾰족한 박자가 위아래로 줄 서면 맞음. 아래 그래프를 끌어서 옮겨도 돼요) ④ <b>[이 값으로 쓰기]</b></p>
+ <div class="row"><label class="f" style="flex-direction:row;align-items:center;gap:8px">곡<select id="sy-song" style="min-width:280px"></select></label><span id="sy-msg" class="hint"></span></div>
+ <div id="sy-cands" class="row"></div>
+ <video id="sy-v" controls playsinline preload="auto"></video><audio id="sy-a" preload="auto"></audio>
+ <canvas id="sy-wave" width="1000" height="170"></canvas>
+ <div class="row"><b id="sy-off"></b><button class="sm" data-n="-0.1">◀ 0.1</button><button class="sm" data-n="-0.02">◀ 0.02</button><button class="sm" data-n="0.02">0.02 ▶</button><button class="sm" data-n="0.1">0.1 ▶</button>
+  <button class="sm" id="sy-tap">👆 지금 노래 시작!</button><button class="sm" id="sy-play">▶ 같이 듣기</button></div>
+ <div class="row"><label class="f" style="flex-direction:row;align-items:center;gap:8px">연습실 소리<input type="range" id="sy-rv" min="0" max="1" step="0.05" value="0.6"></label>
+  <label class="f" style="flex-direction:row;align-items:center;gap:8px">음원<input type="range" id="sy-sv" min="0" max="1" step="0.05" value="0.8"></label></div>
+ <div class="row"><button class="go" id="sy-ok">이 값으로 쓰기</button><span class="hint">노래 0:00 = 영상 몇 초 (영상에서 노래 첫 소리가 나오는 시각)</span></div>
+</div></div>
 <script>
 const $=s=>document.querySelector(s), INFO={}, FILES={}, PICK={};
 const api=(u,b)=>fetch(u,b===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
@@ -206,17 +226,66 @@ function runStory(){ const a=new Date($('#s-from').value+'T00:00:00'), b=new Dat
 // 쌤 15초
 function runTeacher(){ const id=need('teacher-file','수업 영상을 먼저 올려 주세요'); const n=$('#tc-name').value.trim(), g=$('#tc-genre').value.trim(), tm=$('#tc-time').value.trim(), dy=$('#tc-day').value;
   if(!n||!g||!tm) return alert('강사·장르·시간을 넣어 주세요');
-  const p={file:id,start:+$('#tc-start').value,dur:+$('#tc-dur').value,name:n,genre:g,when:`${dy} ${tm}`,whenKr:$('#tc-kr').value.trim()||`매주 ${KR[dy]} ${tm}`,hall:$('#tc-hall').value,popup:$('#tc-pop').checked,auto_song:$('#tc-auto').checked,
+  const p={file:id,start:+$('#tc-start').value,dur:+$('#tc-dur').value,name:n,genre:g,when:`${dy} ${tm}`,whenKr:$('#tc-kr').value.trim()||`매주 ${KR[dy]} ${tm}`,hall:$('#tc-hall').value,popup:$('#tc-pop').checked,auto_song:$('#tc-auto').checked,offset:$('#tc-off').value.trim(),song_name:TCSONG,
     pickx:(PICK['teacher-file']||{}).x??.5,pickt:(PICK['teacher-file']||{}).t??.5,...lutVal('teacher-lut')};
   go('teacher',p,`쌤 15초 · ${n} ${g}`); }
 // TRACKPAD
 function runTrackpad(){ const id=need('trackpad-file','수업 영상을 먼저 올려 주세요'); const t=$('#tp-teacher').value.trim(), g=$('#tp-genre').value.trim(); if(!t||!g) return alert('강사·장르를 넣어 주세요');
   const p={file:id,start:+$('#tp-start').value,dur:+$('#tp-dur').value,teacher:t,genre:g,track:$('#tp-track').value.trim(),pre:+$('#tp-pre').value,outro:$('#tp-outro').checked,
-    song:FILES['trackpad-song']?.id||'',auto_song:$('#tp-auto').checked,offset:$('#tp-off').value.trim(),pickx:(PICK['trackpad-file']||{}).x??.5,pickt:(PICK['trackpad-file']||{}).t??.5,...lutVal('trackpad-lut')};
+    song:FILES['trackpad-song']?.id||'',auto_song:$('#tp-auto').checked,song_name:FILES['trackpad-song']?'':TPSONG,offset:$('#tp-off').value.trim(),pickx:(PICK['trackpad-file']||{}).x??.5,pickt:(PICK['trackpad-file']||{}).t??.5,...lutVal('trackpad-lut')};
   go('trackpad',p,`TRACKPAD · ${t} ${g}`); }
 function runMusic(){ const id=need('music-file','영상을 먼저 올려 주세요'), s=FILES['music-song']?.id||'';
-  if(!s&&!$('#mu-auto').checked) return alert('음원을 올리거나 \'음원 폴더에서 자동으로 찾기\'를 켜 주세요');
-  go('music',{file:id,song:s,auto_song:!s&&$('#mu-auto').checked,start:$('#mu-start').value.trim(),end:$('#mu-end').value.trim(),offset:$('#mu-off').value.trim(),trim:$('#mu-trim').checked,name:FILES['music-file'].name.replace(/\.[^.]+$/,''),...lutVal('music-lut')},'음원 싱크'); }
+  if(!s&&!$('#mu-auto').checked&&!MUSONG) return alert('음원을 올리거나 \'음원 폴더에서 자동으로 찾기\'를 켜 주세요');
+  go('music',{file:id,song:s,song_name:s?'':MUSONG,auto_song:!s&&!MUSONG&&$('#mu-auto').checked,start:$('#mu-start').value.trim(),end:$('#mu-end').value.trim(),offset:$('#mu-off').value.trim(),trim:$('#mu-trim').checked,name:FILES['music-file'].name.replace(/\.[^.]+$/,''),...lutVal('music-lut')},'음원 싱크'); }
+// 음원 직접 맞추기 (원장님 2026-11-18 "못 찾았을 땐 내가 맞춰야 하는데 방법을 모르겠어, 플레이어도 없고")
+// O = '노래 0:00이 영상 몇 초인지'. 영상 t초일 때 노래는 t-O초
+const SY={O:0,onApply:null,vEnv:null,sEnv:null,raf:0,together:false};
+function openSync(o, onApply){
+  const m=$('#sync'), v=$('#sy-v'), au=$('#sy-a'), sel=$('#sy-song'); SY.onApply=onApply; SY.O=+o.offset||0; SY.vEnv=null; SY.sEnv=null;
+  v.src=`/api/media?id=${o.vid}`; v.volume=+$('#sy-rv').value; m.hidden=false;
+  sel.innerHTML=(o.songId?`<option value="id:${o.songId}">올린 음원</option>`:'')+INFO.songs.map(n=>`<option value="name:${n}">${n}</option>`).join('');
+  if(o.songName) sel.value='name:'+o.songName; else if(o.songId) sel.value='id:'+o.songId;
+  fetch(`/api/env?id=${o.vid}`).then(r=>r.json()).then(j=>{SY.vEnv=j.env});
+  const setSong=()=>{ const [k,val]=sel.value.split(/:(.*)/s); if(!val){ $('#sy-msg').textContent='음원 폴더에 곡을 넣거나 음원을 올려 주세요'; return; }
+    const q=k==='id'?`id=${val}`:`name=${encodeURIComponent(val)}`; au.src=`/api/media?${q}`; SY.sEnv=null; fetch(`/api/env?${q}`).then(r=>r.json()).then(j=>{SY.sEnv=j.env}); };
+  sel.onchange=()=>{ setSong(); findC(); };
+  const findC=()=>{ const [k,val]=sel.value.split(/:(.*)/s); $('#sy-cands').innerHTML='<span class="hint">자동 후보 찾는 중…</span>';
+    api('/api/syncfind',{id:o.vid,...(k==='id'?{song:val}:val?{song_name:val}:{})}).then(r=>{
+      if(r.song_name&&sel.value!=='name:'+r.song_name){ sel.value='name:'+r.song_name; setSong(); }
+      $('#sy-cands').innerHTML=r.cands.length?'<span class="hint">자동 후보:</span>'+r.cands.map((c,i)=>`<button class="sm" data-o="${c.offset}">${i+1}. ${c.offset.toFixed(2)}초 (${c.votes}표)</button>`).join(''):`<span class="hint">${r.msg||'자동 후보 없음 — 👆 버튼으로 직접'}</span>`;
+      $('#sy-cands').querySelectorAll('button').forEach(b=>b.onclick=()=>{ SY.O=+b.dataset.o; syShow(); v.currentTime=Math.max(0,SY.O-1.5); together(true); }); }); };
+  if(!sel.value&&!o.songId&&INFO.songs.length) sel.selectedIndex=0;
+  setSong(); findC(); syShow();
+  cancelAnimationFrame(SY.raf); const loop=()=>{ draw(); syncAudio(); SY.raf=requestAnimationFrame(loop); }; loop();
+}
+function syShow(){ $('#sy-off').textContent=`노래 0:00 = 영상 ${SY.O.toFixed(2)}초`; }
+function syncAudio(){ const v=$('#sy-v'), au=$('#sy-a'); au.volume=+$('#sy-sv').value; v.volume=+$('#sy-rv').value;
+  if(!SY.together||v.paused){ if(!au.paused) au.pause(); return; }
+  const want=v.currentTime-SY.O;
+  if(want<0||want>(au.duration||1e9)){ if(!au.paused) au.pause(); return; }
+  if(au.paused){ au.currentTime=want; au.play().catch(()=>{}); } else if(Math.abs(au.currentTime-want)>0.04) au.currentTime=want; }
+function together(on){ SY.together=on; const v=$('#sy-v'); $('#sy-play').textContent=on?'■ 멈춤':'▶ 같이 듣기'; if(on) v.play(); else { v.pause(); $('#sy-a').pause(); } }
+function draw(){ const c=$('#sy-wave'), g=c.getContext('2d'), W=c.width, H=c.height, v=$('#sy-v'); g.clearRect(0,0,W,H);
+  const span=6, t0=v.currentTime-span/2, pps=W/span, half=H/2;
+  const lane=(env,off,y,col)=>{ if(!env) return; g.fillStyle=col; for(let x=0;x<W;x+=2){ const t=t0+x/pps-off, i=Math.floor(t*100); if(i<0||i>=env.length) continue; const h=env[i]/255*(half-14); g.fillRect(x,y-h,2,h); } };
+  lane(SY.vEnv,0,half-4,'#7ce0c3'); lane(SY.sEnv,SY.O,H-4,'#b9a6ff');
+  g.fillStyle='#fff'; g.fillRect(W/2,0,1,H); g.fillStyle='#a39db5'; g.font='12px sans-serif'; g.fillText('영상 소리',6,14); g.fillText('음원',6,half+14);
+  for(let s=Math.ceil(t0);s<t0+span;s++){ const x=(s-t0)*pps; g.fillRect(x,half-2,1,4); g.fillText(s+'초',x+2,half+2); } }
+(()=>{ const c=$('#sy-wave'); let d=null;
+  c.onpointerdown=e=>{ d={x:e.clientX,O:SY.O}; c.setPointerCapture(e.pointerId); };
+  c.onpointermove=e=>{ if(!d) return; const r=c.getBoundingClientRect(); SY.O=+(d.O+(e.clientX-d.x)/r.width*6).toFixed(2); syShow(); };
+  c.onpointerup=()=>{ d=null; };
+  document.querySelectorAll('#sync button[data-n]').forEach(b=>b.onclick=()=>{ SY.O=+(SY.O+(+b.dataset.n)).toFixed(2); syShow(); });
+  $('#sy-tap').onclick=()=>{ SY.O=+Math.max(0,$('#sy-v').currentTime-0.15).toFixed(2); syShow(); };   // 누르는 반응 시간 0.15초 빼기
+  $('#sy-play').onclick=()=>{ if(SY.together){ together(false); } else { const v=$('#sy-v'); if(v.currentTime<SY.O-3||v.currentTime>SY.O+20) v.currentTime=Math.max(0,SY.O-1.5); together(true); } };
+  $('#sy-v').onseeked=()=>{ if(SY.together) $('#sy-a').currentTime=Math.max(0,$('#sy-v').currentTime-SY.O); };
+  const close=()=>{ together(false); cancelAnimationFrame(SY.raf); $('#sync').hidden=true; $('#sy-v').removeAttribute('src'); $('#sy-a').removeAttribute('src'); };
+  $('#sy-x').onclick=close;
+  $('#sy-ok').onclick=()=>{ const [k,val]=$('#sy-song').value.split(/:(.*)/s); SY.onApply&&SY.onApply(SY.O.toFixed(2), k==='name'?val:''); close(); };
+})();
+const syBtn=(label)=>`<button class="sm">${label||'🎧 직접 맞추기'}</button>`;
+let TPSONG='', MUSONG='', TCSONG='', YTSONG='';
+
 // 유튜브 이어붙이기 (원장님 2026-11-17)
 let YT=[], YTN=0;
 const ytS3=()=>$('#yt-mode').value==='stack3';
@@ -229,10 +298,12 @@ function ytAdd(f){
   const k='yt-'+(++YTN); YT.push(k); const el=document.createElement('div'); el.className='clip'; el.id=k;
   el.innerHTML=`<div class="hd"><span class="no"></span><img><div style="flex:1;min-width:160px"><b class="nm">${f.name}</b><div class="hint st">올리는 중…</div><div class="bar"><i></i></div></div>
     <label class="f">시작 (초)<input type="number" step="0.1" id="${k}-s" value="0"></label><label class="f">길이 (초)<input type="number" step="0.1" id="${k}-d" value="0"></label>
-    <button class="sm up">▲</button><button class="sm dn">▼</button><button class="sm pk">장면 고르기</button><button class="sm rm">✕</button></div>`;
+    <button class="sm sy" title="음원 직접 맞추기">🎧</button><button class="sm up">▲</button><button class="sm dn">▼</button><button class="sm pk">장면 고르기</button><button class="sm rm">✕</button></div>`;
   $('#yt-list').appendChild(el); ytNum();
   el.querySelector('.up').onclick=()=>{ const i=YT.indexOf(k); if(i>0){ [YT[i-1],YT[i]]=[YT[i],YT[i-1]]; el.parentNode.insertBefore(el,el.previousSibling); ytNum(); } };
   el.querySelector('.dn').onclick=()=>{ const i=YT.indexOf(k); if(i<YT.length-1){ [YT[i+1],YT[i]]=[YT[i],YT[i+1]]; el.parentNode.insertBefore(el.nextSibling,el); ytNum(); } };
+  el.querySelector('.sy').onclick=()=>{ if(!FILES[k]) return; openSync({vid:FILES[k].id,songId:FILES['youtube-song']?.id,songName:YTSONG,offset:el.dataset.off||$('#'+k+'-s').value},(o,n)=>{
+    el.dataset.off=o; if(n) YTSONG=n; el.querySelector('.st').innerHTML=`${FILES[k].w}×${FILES[k].h} · ${FILES[k].dur.toFixed(1)}초 · 🎧 노래 0:00 = ${o}초 (직접)`; }); };
   el.querySelector('.rm').onclick=()=>{ YT=YT.filter(x=>x!==k); delete FILES[k]; el.remove(); ytNum(); };
   el.querySelector('.pk').onclick=()=>{ if(!FILES[k]) return; const b=$('#'+k+'-pick'); if(b){ b.hidden=!b.hidden; return; } pickBox(k,'#'+k+'-s','#'+k+'-d',FILES[k].h>FILES[k].w); };
   ['-s','-d'].forEach(x=>$('#'+k+x).addEventListener('input',()=>{ ytTotal(); if(x==='-s') ytThumb(k); }));
@@ -251,18 +322,21 @@ function ytAdd(f){
   $('#yt-align').onclick=()=>{ const ks=YT.filter(k=>FILES[k]); if(ks.length<2) return alert('영상을 2개 이상 올려 주세요');
     const s=FILES['youtube-song']?.id||'';   // 음원이 없으면 1번 영상 소리로 맞춤 (2026-11-18)
     const m=$('#yt-amsg'), b=$('#yt-align'); b.disabled=true; m.textContent='맞추는 중… (영상 수에 따라 1~2분)';
-    api('/api/align',{song:s,auto_song:!s&&$('#yt-auto').checked,clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value}))}).then(r=>{ b.disabled=false;
+    api('/api/align',{song:s,song_name:s?'':YTSONG,auto_song:!s&&!YTSONG&&$('#yt-auto').checked,clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value,offset:$('#'+k).dataset.off||''}))}).then(r=>{ b.disabled=false;
       if(r.error){ m.innerHTML=`<span class="err">${r.error}</span>`; return; }
       r.clips.forEach((c,i)=>{ const k=ks[i]; $('#'+k+'-s').value=c.start.toFixed(2); $('#'+k+'-d').value=c.dur.toFixed(2); ytThumb(k);
         $('#'+k+' .st').innerHTML=`${FILES[k].w}×${FILES[k].h} · ${FILES[k].dur.toFixed(1)}초 · `+(c.ok?'✓ 맞춤':'<span class="err">⚠️ 못 찾음 — 직접 골라 주세요</span>'); });
       m.textContent=`곡: ${r.song} · 쌤 솔로처럼 더 긴 영상은 길이만 늘려 주세요`; ytTotal(); }).catch(()=>{ b.disabled=false; m.innerHTML='<span class="err">맞추다가 멈췄어요</span>'; }); };
 })();
 fileBox('youtube-song',{label:'음원 (선택 — 안 올리면 음원 폴더에서 찾음)',audio:1});
+$('#tp-sync').onclick=()=>{ const id=need('trackpad-file','수업 영상을 먼저 올려 주세요'); openSync({vid:id,songId:FILES['trackpad-song']?.id,songName:TPSONG,offset:$('#tp-off').value||$('#tp-start').value},(o,n)=>{ $('#tp-off').value=o; TPSONG=n; }); };
+$('#mu-sync').onclick=()=>{ const id=need('music-file','영상을 먼저 올려 주세요'); openSync({vid:id,songId:FILES['music-song']?.id,songName:MUSONG,offset:$('#mu-off').value||0},(o,n)=>{ $('#mu-off').value=o; MUSONG=n; }); };
+$('#tc-sync').onclick=()=>{ const id=need('teacher-file','수업 영상을 먼저 올려 주세요'); openSync({vid:id,songName:TCSONG,offset:$('#tc-off').value||$('#tc-start').value},(o,n)=>{ $('#tc-off').value=o; TCSONG=n; }); };
 function runYoutube(){ const ks=YT.filter(k=>FILES[k]); if(!ks.length) return alert('영상을 올려 주세요');
   const bad=ks.find(k=>!(+$('#'+k+'-d').value>0)); if(bad) return alert('길이가 0인 영상이 있어요');
   if(ytS3()&&ks.length!==3) return alert('3분할은 영상이 딱 3개 필요해요 (위 · 가운데 · 아래)');
   const s=FILES['youtube-song']?.id||'', nm=$('#yt-name').value.trim()||FILES[ks[0]].name.replace(/\.[^.]+$/,'');
-  go('youtube',{clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value})),song:s,auto_song:!s&&$('#yt-auto').checked,
+  go('youtube',{clips:ks.map(k=>({file:FILES[k].id,start:+$('#'+k+'-s').value,dur:+$('#'+k+'-d').value,offset:$('#'+k).dataset.off||''})),song:s,song_name:s?'':YTSONG,auto_song:!s&&!YTSONG&&$('#yt-auto').checked,
     xfade:+$('#yt-x').value,height:+$('#yt-h').value,name:nm,layout:$('#yt-mode').value,outro:$('#yt-outro').checked,pre:+$('#yt-pre').value,teacher:$('#yt-teacher').value.trim(),genre:$('#yt-genre').value.trim(),track:$('#yt-track').value.trim(),...lutVal('youtube-lut')},(ytS3()?'3분할 · ':'유튜브 · ')+`${nm} (${ks.length}개)`); }
 function runLut(){ const id=need('lut-file','영상을 먼저 올려 주세요'); const l=lutVal('lut-lut'); if(!l.lut) return alert('LUT를 골라 주세요'); go('lut',{file:id,...l},'LUT · '+l.lut); }
 // 작업 목록

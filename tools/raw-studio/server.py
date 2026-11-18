@@ -22,7 +22,7 @@ UP = os.path.join(WORK, "uploads")
 MUSIC = os.path.expanduser(os.environ.get("RAW_MUSIC", "~/Music/RAW 음원"))
 for d in (OUT, WORK, UP, MUSIC): os.makedirs(d, exist_ok=True)
 sys.path.insert(0, os.path.join(ROOT, "tools", "class-reel"))
-from audiomatch import song_files
+from audiomatch import song_files, load as aload, candidates as acands, match_folder
 DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 KR = dict(zip(DAYS, ["월", "화", "수", "목", "금", "토", "일"]))
 
@@ -128,7 +128,7 @@ def music(job, src, out, P, auto_ok=False, orig=None, cs=0.0):
     """음원 입히기. 올린 음원이 있으면 그것, 없고 '음원 폴더에서 자동'이면 폴더에서 같은 곡을 찾음.
     orig/cs: 따라가기 전 원본과 자른 시작 시각. 주면 곡·위치를 원본에서 앞뒤 20초 넓혀 찾음 (짧은 영상도 확실하게, 2026-11-17)
     auto_ok: 못 찾으면 실패하지 않고 원래 소리 그대로 → False 돌려줌"""
-    song = upath(P["song"]) if P.get("song") else (MUSIC if P.get("auto_song") else None)
+    song = upath(P["song"]) if P.get("song") else (music_file(P["song_name"]) if P.get("song_name") else (MUSIC if P.get("auto_song") else None))
     if not song: return False
     if song == MUSIC and not song_files(MUSIC):
         if auto_ok: job.say("음원 폴더가 비어 있어서 원래 소리 그대로 써요"); return False
@@ -171,9 +171,10 @@ def p_teacher(job, P):
     base = f"{P['name']}_{P['genre']}"; chk = outfile("확인사진", base, "jpg")
     v = track(job, src, start, dur + 0.4, P.get("pickx", .5), P.get("pickt", .5), chk)
     if os.path.exists(chk): keep(job, chk, "쌤 확인 사진 (보라 상자 = 쌤)")
-    if P.get("auto_song") or P.get("song"):
+    if P.get("auto_song") or P.get("song") or P.get("song_name"):
         mv = os.path.join(WORK, f"{job.id}_music.mp4")
-        if music(job, v, mv, {"song": P.get("song"), "auto_song": P.get("auto_song"), "fade_out": 0}, auto_ok=True, orig=src, cs=start): v = mv
+        if music(job, v, mv, {"song": P.get("song"), "song_name": P.get("song_name"), "auto_song": P.get("auto_song"), "fade_out": 0, "offset": P.get("offset", "")},
+                 auto_ok=True, orig=src, cs=start): v = mv
     if P.get("lut"):
         lv = os.path.join(WORK, f"{job.id}_lut.mp4"); apply_lut(job, v, lv, P["lut"], P.get("strength", 100)); v = lv
     out = outfile("쌤15초", base)
@@ -194,10 +195,10 @@ def p_trackpad(job, P):
     base = f"{P['teacher']}_{P['genre']}"; chk = outfile("확인사진", base, "jpg")
     v = track(job, src, cs, total, P.get("pickx", .5), float(P.get("pickt", .5)) + (start - cs), chk)
     if os.path.exists(chk): keep(job, chk, "쌤 확인 사진 (보라 상자 = 쌤)")
-    if P.get("song") or P.get("auto_song"):
+    if P.get("song") or P.get("auto_song") or P.get("song_name"):
         mv = os.path.join(WORK, f"{job.id}_music.mp4")
         off = str(P.get("offset", "")).strip()
-        if music(job, v, mv, {"song": P.get("song"), "auto_song": P.get("auto_song"), "pre_room": True, "fade_out": 0, "offset": off},
+        if music(job, v, mv, {"song": P.get("song"), "song_name": P.get("song_name"), "auto_song": P.get("auto_song"), "pre_room": True, "fade_out": 0, "offset": off},
                  auto_ok=True, orig=src, cs=cs): v = mv
     if P.get("lut"):
         lv = os.path.join(WORK, f"{job.id}_lut.mp4"); apply_lut(job, v, lv, P["lut"], P.get("strength", 100)); v = lv
@@ -232,8 +233,9 @@ def p_lut(job, P):
     apply_lut(job, src, out, P["lut"], P.get("strength", 100)); keep(job, out, "LUT 입힌 영상")
 
 def yt_plan(P, out=None, thumb_v=None, thumb_h=None):
-    song = upath(P["song"]) if P.get("song") else (MUSIC if P.get("auto_song") and song_files(MUSIC) else "")
-    plan = {"clips": [{"video": upath(c["file"]), "start": float(c["start"]), "dur": float(c["dur"])} for c in P["clips"]], "song": song,
+    song = upath(P["song"]) if P.get("song") else (music_file(P["song_name"]) if P.get("song_name") else (MUSIC if P.get("auto_song") and song_files(MUSIC) else ""))
+    plan = {"clips": [{"video": upath(c["file"]), "start": float(c["start"]), "dur": float(c["dur"]),
+                       **({"offset": float(c["offset"])} if str(c.get("offset", "")).strip() != "" else {})} for c in P["clips"]], "song": song,
             "xfade": float(P.get("xfade", 0.5)), "lut": lut_path(P["lut"]) if P.get("lut") else "", "strength": P.get("strength", 100),
             "height": int(P.get("height") or 0), "out": out, "outro": 2.5 if P.get("outro", True) else 0, "layout": P.get("layout") or "concat", "thumb_v": thumb_v, "thumb_h": thumb_h,
             "title": ({"len": float(P.get("pre") or 5), "title": P["teacher"], "name": P.get("genre", ""), "track": P.get("track", "")}
@@ -298,6 +300,45 @@ def align_api():
     last = (r.stdout.strip().splitlines() or [""])[-1]
     if r.returncode or not last.startswith("{"): return jsonify({"error": (r.stderr.strip().splitlines() or ["맞추다가 멈췄어요"])[-1]}), 500
     j = json.loads(last); j["log"] = [l for l in r.stdout.splitlines()[:-1] if l.startswith(("곡:", "확인필요", "기준"))]; return jsonify(j)
+
+# ── 직접 맞추기 (원장님 2026-11-18 "못 찾았을 땐 내가 맞춰야 하는데 방법을 모르겠어, 플레이어도 없고") ──
+def music_file(name):
+    f = os.path.realpath(os.path.join(MUSIC, name))
+    if not f.startswith(os.path.realpath(MUSIC)) or not os.path.isfile(f): raise ValueError("음원 폴더에 그 파일이 없어요")
+    return f
+
+def src_of(a):
+    """id=올린 파일 / name=음원 폴더 파일"""
+    return upath(a["id"]) if a.get("id") else music_file(a["name"])
+
+@app.get("/api/media")
+def media():   # 화면 플레이어용 (구간 넘기기 되게 conditional)
+    return send_file(src_of(request.args), conditional=True)
+
+ENV_CACHE = {}
+@app.get("/api/env")
+def env():
+    """소리 크기 그래프 (초당 100칸, 0~255). 박자 위치가 보이게 로그 눌러 줌"""
+    f = src_of(request.args)
+    if f not in ENV_CACHE:
+        import numpy as np
+        x = aload(f, 8000); n = len(x) // 80
+        r = np.sqrt((x[:n * 80].reshape(n, 80) ** 2).mean(1)); r = np.log1p(r * 60); r = r / (r.max() + 1e-9)
+        ENV_CACHE[f] = (r * 255).astype(int).tolist()
+    return jsonify({"rate": 100, "env": ENV_CACHE[f]})
+
+@app.post("/api/syncfind")
+def syncfind():
+    """자동 후보들: 곡(올린 것/폴더 곡/폴더 자동)과 '노래 0:00 = 영상 몇 초' 후보 여러 개"""
+    P = request.get_json(); v = upath(P["id"]); name = None
+    if P.get("song"): f = upath(P["song"])
+    elif P.get("song_name"): f = music_file(P["song_name"]); name = P["song_name"]
+    else:
+        f, n1, n2, _ = match_folder(v, MUSIC, log=lambda s: None) if song_files(MUSIC) else (None, 0, 0, [])
+        if not f: return jsonify({"cands": [], "msg": "음원 폴더에서 같은 곡을 못 찾았어요. 위에서 곡을 직접 골라 주세요"})
+        name = os.path.relpath(f, MUSIC)
+    cs = acands(aload(v, 8000), aload(f, 8000), 8000, 0.0, min_votes=2)[:5]
+    return jsonify({"song_name": name, "cands": [{"offset": round(o, 2), "votes": n} for o, n in cs]})
 
 FS_CACHE = {}
 @app.get("/api/findstart")

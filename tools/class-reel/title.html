@@ -46,7 +46,12 @@ window.setup=o=>{O=o;
   const tw=()=>{const sp=t.querySelectorAll("span");return sp[sp.length-1].getBoundingClientRect().right-sp[0].getBoundingClientRect().left;};
   while(tw()>MAXW&&fs>80){fs-=4;t.style.fontSize=fs+"px";}
   const capTop=v=>v; // 글꼴 윗여백 보정
-  $("t").style.top=(y-4-0.2*fs)+"px"; $("n").style.top=(y+134-0.2*58)+"px"; $("trk").style.top=(y-86-0.27*38+(o.trkdy||0))+"px";
+  // 세 줄 간격을 위아래 똑같이 (원장님 2026-11-18 "위아래 간격이 균일하지 않아 비율이 별로": 예전엔 곡명↔큰 줄 61px, 큰 줄↔이름 32px)
+  // 글꼴별 실제 글자(잉크) 위치 비율로 계산: 큰 줄 잉크 윗선 = 글자 상자 위 + 0.233fs, 높이 0.673fs / 이름 0.2·0.672 / 곡명 0.27·0.70
+  const Y=y+1, G=Math.round(0.3*fs);
+  $("t").style.top=(Y-0.233*fs)+"px";
+  $("n").style.top=(Y+0.673*fs+G-0.2*58)+"px";
+  $("trk").style.top=(Y-G-0.70*38-0.27*38+(o.trkdy||0))+"px";
 };
 // 자막 길이(len초, 1~5)에 맞추기 (원장님 2026-11-17 "초에 따라 속도가 알아서"): 원래 5초 동작을 그대로 줄이면 1초일 때 너무 정신없음
 // → 등장(0~0.75초)·퇴장(4.33~4.96초)은 √(len/5)배만 빨라지고, 가운데 머무는 시간이 나머지를 맞춤. len=5면 원래와 같음

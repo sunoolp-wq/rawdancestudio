@@ -88,6 +88,11 @@ def make(P):
     if P.get("height"): H2 = int(P["height"]); W, H = int(round(W * H2 / H / 2)) * 2, H2
     f = pick_song(P); sx = load(f, SR) if f else None
     # 영상마다: 디졸브가 겹치는 만큼 뒤를 X초 더 씀 (마지막 제외) → 각 그룹 춤이 디졸브에 잘리지 않음
+    # 원장님 2026-11-18 "첫 영상 엔딩에 멈춰서 2분 8초까지 노래만": 길이가 원본 끝을 넘으면(디졸브용 0.5초 포함) 영상이 끊겨 멈춤
+    # → 넣은 길이는 원본 끝까지로 줄이고, 디졸브·로고용 여분이 원본에 없으면 마지막 장면을 잠깐 유지
+    for c in C:
+        src = fdur(c["video"])
+        if c["start"] + c["dur"] > src: say(f"{os.path.basename(c['video'])}: 길이가 원본보다 길어서 원본 끝({src - c['start']:.1f}초)까지로"); c["dur"] = max(0.5, src - c["start"])
     L = [c["dur"] + (X if i < n - 1 else OUT) for i, c in enumerate(C)]
     ins, fc = [], []
     lut = P.get("lut") or ""; s = max(0, min(100, int(P.get("strength") or 100))) / 100
@@ -98,7 +103,7 @@ def make(P):
         if lut:
             v += (f",format=gbrp16le,lut3d=file='{lpe}':interp=tetrahedral" if s >= 0.999 else
                   f",format=gbrp16le,split[a{i}][b{i}];[b{i}]lut3d=file='{lpe}':interp=tetrahedral[l{i}];[a{i}][l{i}]blend=all_mode=normal:all_opacity={s:.2f}")
-        if i == n - 1 and OUT > 0: v += f",tpad=stop_mode=clone:stop_duration={OUT + 1},trim=0:{L[i]:.3f}"   # 원본이 모자라면 마지막 장면 유지
+        v += f",tpad=stop_mode=clone:stop_duration={max(X, OUT) + 1},trim=0:{L[i]:.3f}"   # 모든 영상: 원본이 모자라면 마지막 장면 유지 → 길이가 정확히 L
         fc.append(v + f",format=yuv420p,setpts=PTS-STARTPTS[v{i}]")
     if tdir:   # 자막(1920x1080으로 그림 → 영상 크기에 맞춤)을 1번 영상 맨 앞에
         ins += ["-framerate", FR, "-i", os.path.join(tdir, "%05d.png")]

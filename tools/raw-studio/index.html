@@ -232,11 +232,14 @@ function ytAdd(f){
   el.querySelector('.rm').onclick=()=>{ YT=YT.filter(x=>x!==k); delete FILES[k]; el.remove(); ytNum(); };
   el.querySelector('.pk').onclick=()=>{ if(!FILES[k]) return; const b=$('#'+k+'-pick'); if(b){ b.hidden=!b.hidden; return; } pickBox(k,'#'+k+'-s','#'+k+'-d',FILES[k].h>FILES[k].w); };
   ['-s','-d'].forEach(x=>$('#'+k+x).addEventListener('input',()=>{ ytTotal(); if(x==='-s') ytThumb(k); }));
+  // 시작+길이가 원본 끝을 넘지 않게 (2026-11-18 첫 영상 끝에서 멈춤)
+  ['-s','-d'].forEach(x=>$('#'+k+x).addEventListener('change',()=>{ if(!FILES[k]) return; const s0=+$('#'+k+'-s').value||0, mx=Math.max(0.5,FILES[k].dur-s0);
+    if(+$('#'+k+'-d').value>mx){ $('#'+k+'-d').value=mx.toFixed(1); ytTotal(); } }));
   const xh=new XMLHttpRequest(), fd=new FormData(); fd.append('file',f); xh.open('POST','/api/upload');
   xh.upload.onprogress=e=>{ const b=el.querySelector('.bar i'); if(b&&e.total) b.style.width=(e.loaded/e.total*100)+'%'; };
   return new Promise(res=>{ xh.onload=()=>{ const r=JSON.parse(xh.responseText); el.querySelector('.bar')?.remove();
     if(r.error){ el.querySelector('.st').innerHTML=`<span class="err">${r.error}</span>`; return res(); }
-    FILES[k]=r; el.querySelector('.st').textContent=`${r.w}×${r.h} · ${r.dur.toFixed(1)}초`; $('#'+k+'-d').value=r.dur.toFixed(1); ytThumb(k); ytTotal(); res(); }; xh.send(fd); });
+    FILES[k]=r; el.querySelector('.st').textContent=`${r.w}×${r.h} · ${r.dur.toFixed(1)}초`; $('#'+k+'-d').value=Math.max(0.5,r.dur-0.1).toFixed(1); ytThumb(k); ytTotal(); res(); }; xh.send(fd); });
 }
 (()=>{ const d=$('#yt-drop'), inp=d.querySelector('input');
   const many=async fs=>{ for(const f of [...fs].sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}))) await ytAdd(f); inp.value=''; };

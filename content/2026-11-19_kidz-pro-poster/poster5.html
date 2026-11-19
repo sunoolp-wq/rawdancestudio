@@ -1,0 +1,127 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>RAW KIDZ 키즈전문반 포스터 5</title>
+<style>
+/* 5차 (원장님 2026-11-19: 3차 중 A 기획사 공고 · B 시리즈 포스터 · D 게임 · E 거대 숫자가 괜찮음 → 다듬기). 각 2개씩 */
+*{margin:0;padding:0;box-sizing:border-box}body{background:#ddd}
+.P{width:1080px;height:1350px;position:relative;overflow:hidden;font-family:"Gothic A1","Noto Sans KR",sans-serif;color:#111}
+.logo{height:42px;filter:brightness(0)}.logoW{height:42px;filter:brightness(0) invert(1)}
+.foot{position:absolute;left:64px;right:64px;bottom:40px;font-size:22px;line-height:1.55;font-weight:500}
+.foot b{font-weight:800}.foot small{display:block;font-size:17px;opacity:.65;margin-top:4px}
+.px{font-family:Silkscreen,monospace}
+</style></head><body><div id="r"></div>
+<script>
+const c=new URLSearchParams(location.search).get('c')||'A1';
+const FOOT=(col='#111')=>`<div class="foot" style="color:${col}"><b>상담</b> 인스타 DM @rawdance_suwon · 카카오톡 '로우댄스수원점학원' · 031-225-6600
+<small>로우댄스학원 수원점 · 수원역·매교역 근처 매산로 136, 4층 · 일정은 상담 때 안내 · 교습비 월 35만원 · 공연·대회 의상비 별도</small></div>`;
+const LINE='체계적인 트레이닝 후 RAW KIDZ 팀으로 공연·대회 참여 예정';
+const V={};
+
+// A1 기획사 공고: 꽉 찬 RAW KIDZ + 정보 띠
+V.A1=`<div class="P" style="background:#fff">
+ <div style="position:absolute;left:64px;right:64px;top:56px;display:flex;justify-content:space-between;align-items:center;font:600 18px Inter;letter-spacing:.18em"><img class="logo" src="img/raw-logo-tight.png"><span>KIDS PRO CLASS — 2027 — SUWON</span></div>
+ <div style="position:absolute;left:64px;right:64px;top:128px;border-top:3px solid #111"></div>
+ <div style="position:absolute;left:46px;top:150px;font:400 445px/0.8 Anton;letter-spacing:-.015em;transform:scaleX(1.12);transform-origin:left">RAW<br>KIDZ</div>
+ <div style="position:absolute;right:64px;top:160px;text-align:right;font:600 17px/1.6 Inter;letter-spacing:.12em">NOW<br>RECRUITING<br><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:#FF3B1F;margin-top:10px"></span></div>
+ <div style="position:absolute;left:64px;right:64px;top:905px;border-top:3px solid #111;display:grid;grid-template-columns:1.15fr 1.25fr 1fr">
+  <div style="padding:22px 20px 0 0;border-right:1.5px solid #111"><div style="font:600 15px Inter;letter-spacing:.2em;color:#999">CLASS</div><div style="margin-top:10px;font-size:42px;font-weight:800;line-height:1.15;letter-spacing:-.03em">2027<br>키즈 전문반<br>모집</div></div>
+  <div style="padding:22px 22px 0;border-right:1.5px solid #111"><div style="font:600 15px Inter;letter-spacing:.2em;color:#999">AGE</div><div style="margin-top:6px;font:400 112px/1 Anton;white-space:nowrap">10–13</div><div style="font-size:22px;font-weight:800">세</div></div>
+  <div style="padding:22px 0 0 22px"><div style="font:600 15px Inter;letter-spacing:.2em;color:#999">NEXT</div><div style="margin-top:10px;font-size:25px;font-weight:700;line-height:1.55">트레이닝<br>→ RAW KIDZ 팀<br>→ 공연·대회<br><span style="color:#FF3B1F">*예정</span></div></div></div>
+ ${FOOT()}
+</div>`;
+
+// A2 크림 + 빨간 RAW KIDZ, 세로 표기
+V.A2=`<div class="P" style="background:#F4EFE6">
+ <div style="position:absolute;left:64px;right:64px;top:56px;display:flex;justify-content:space-between;align-items:center;font:600 18px Inter;letter-spacing:.18em"><img class="logo" src="img/raw-logo-tight.png"><span>2027 / SUWON</span></div>
+ <div style="position:absolute;left:30px;top:110px;font:400 560px/0.8 Anton;color:#E8341C;letter-spacing:-.02em">RAW</div>
+ <div style="position:absolute;left:30px;top:540px;font:400 560px/0.8 Anton;color:#E8341C;letter-spacing:-.02em">KIDZ</div>
+ <div style="position:absolute;left:64px;top:1030px;width:420px">
+  <div style="font:600 16px Inter;letter-spacing:.2em">KIDS PRO CLASS</div>
+  <div style="margin-top:10px;font-size:46px;font-weight:800;line-height:1.12;letter-spacing:-.03em">2027<br>키즈 전문반 모집</div></div>
+ <div style="position:absolute;right:64px;top:1036px;text-align:right;width:480px">
+  <div style="display:inline-block;background:#111;color:#F4EFE6;padding:10px 24px;font-size:40px;font-weight:900">10~13세</div>
+  <div style="margin-top:14px;font-size:22px;font-weight:700;line-height:1.5">체계적인 트레이닝 후 RAW KIDZ 팀으로<br>공연·대회 참여 예정</div></div>
+ ${FOOT()}
+</div>`;
+
+// B1 시리즈 포스터 + 크레딧 블록
+V.B1=`<div class="P" style="background:radial-gradient(120% 90% at 50% 30%,#E8202E 0%,#B00F1C 70%,#7E0A14 100%)">
+ <div style="position:absolute;inset:0;opacity:.16;background-image:radial-gradient(#000 1px,transparent 1px);background-size:4px 4px"></div>
+ <div style="position:absolute;left:0;right:0;top:66px;text-align:center;color:#fff;font:600 20px Inter;letter-spacing:.42em;margin-right:-.42em">A RAW DANCE STUDIO ORIGINAL</div>
+ <div style="position:absolute;left:0;right:0;top:130px;text-align:center;color:#fff;font-size:44px;font-weight:300;letter-spacing:-.02em">우리 아이의 <b style="font-weight:800">첫 시즌</b>이 시작됩니다</div>
+ <div style="position:absolute;left:0;right:0;top:220px;text-align:center;color:#fff;font:400 360px/0.84 Anton">RAW<br>KIDZ</div>
+ <div style="position:absolute;left:0;right:0;top:850px;text-align:center;color:#fff">
+  <div style="font:600 26px Inter;letter-spacing:.5em;margin-right:-.5em">SEASON 1 · 2027</div>
+  <div style="margin-top:26px;font-size:56px;font-weight:800;letter-spacing:-.03em">키즈 전문반 모집 <span style="border:2px solid #fff;padding:2px 16px;font-size:44px">10~13세</span></div></div>
+ <div style="position:absolute;left:90px;right:90px;top:1050px;text-align:center;color:#fff;opacity:.85;font:400 22px/1.35 'Bebas Neue';letter-spacing:.12em;transform:scaleY(1.25)">
+  RAW DANCE STUDIO SUWON PRESENTS · KIDS PRO CLASS · AGE 10–13 · TRAINING → RAW KIDZ TEAM → STAGE & COMPETITION (PLANNED) · COMING 2027</div>
+ ${FOOT('#fff')}
+</div>`;
+
+// B2 밝은 바탕 반전판
+V.B2=`<div class="P" style="background:#FFF4EF">
+ <div style="position:absolute;left:0;right:0;top:66px;text-align:center;font:600 20px Inter;letter-spacing:.42em;margin-right:-.42em;color:#D61A2A">A RAW DANCE STUDIO ORIGINAL</div>
+ <div style="position:absolute;left:0;right:0;top:150px;text-align:center;font:400 400px/0.84 Anton;color:#D61A2A">RAW<br>KIDZ</div>
+ <div style="position:absolute;left:390px;top:500px;width:300px;height:56px;background:#111;color:#fff;transform:rotate(-6deg);display:flex;align-items:center;justify-content:center;font:600 24px Inter;letter-spacing:.4em">SEASON 1</div>
+ <div style="position:absolute;left:0;right:0;top:880px;text-align:center">
+  <div style="font-size:60px;font-weight:800;letter-spacing:-.03em">2027 키즈 전문반 모집</div>
+  <div style="margin-top:18px;display:inline-block;background:#D61A2A;color:#fff;padding:10px 28px;font-size:34px;font-weight:800">10~13세</div>
+  <div style="margin-top:22px;font-size:24px;font-weight:600">${LINE}</div></div>
+ ${FOOT()}
+</div>`;
+
+// D1 게임 + 픽셀 댄서
+const SPR=['....kkk.....','...kkkkk....','...kSSSk....','...kSSSk..kk','....SSS..kS.','..ooooooook..','.koooooooo...','k.oooooo.....','..oooooo.....','..bbbbbb.....','..bb..bb.....','..bb...bb....','.bb.....bb...','.kk.....kk...'];
+const PIX=(sz,col)=>`<div style="display:grid;grid-template-columns:repeat(13,${sz}px);gap:0">${SPR.map(r=>r.padEnd(13,'.').split('').map(ch=>`<i style="display:block;width:${sz}px;height:${sz}px;background:${({k:'#111',S:'#FFD0B5',o:col,b:'#4B4B6B'})[ch]||'transparent'}"></i>`).join('')).join('')}</div>`;
+const BOX=(w,h,bg,inner,x,y)=>`<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${bg};box-shadow:0 -6px 0 0 #111,0 6px 0 0 #111,-6px 0 0 0 #111,6px 0 0 0 #111,10px 10px 0 4px rgba(0,0,0,.15)">${inner}</div>`;
+V.D1=`<div class="P" style="background:#C9F0E0;background-image:linear-gradient(rgba(17,17,17,.06) 2px,transparent 2px),linear-gradient(90deg,rgba(17,17,17,.06) 2px,transparent 2px);background-size:40px 40px">
+ <img class="logo" src="img/raw-logo-tight.png" style="position:absolute;left:64px;top:60px">
+ <div class="px" style="position:absolute;right:64px;top:64px;font-size:26px">1P · 2027</div>
+ <div class="px" style="position:absolute;left:0;right:0;top:140px;text-align:center;font-size:118px;line-height:1">PLAYER<br>SELECT</div>
+ ${BOX(380,420,'#FFF4D6',`<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">${PIX(20,'#FF5A36')}<div class="px" style="font-size:26px">YOUR KID</div></div>`,92,420)}
+ ${BOX(480,420,'#FFF',`<div style="padding:28px 30px"><div class="px" style="font-size:26px;color:#999">NEW PLAYER</div>
+   <div style="margin-top:8px;font-size:46px;font-weight:800;letter-spacing:-.03em;line-height:1.15">2027<br>키즈 전문반<br>모집</div>
+   <div class="px" style="margin-top:18px;font-size:34px">AGE 10-13</div>
+   <div style="margin-top:14px;display:flex;gap:6px">${'▮▮▮▮▮▮▯▯▯▯'.split('').map(x=>`<span class="px" style="font-size:26px;color:${x=='▮'?'#FF5A36':'#ccc'}">${x}</span>`).join('')}</div></div>`,508,420)}
+ ${[['LV.1','체계적인 트레이닝','#FFE3A6'],['LV.2','RAW KIDZ 팀 구성 (예정)','#FFC9D9'],['LV.3','공연·대회 참여 (예정)','#D8CCFF']].map(([lv,t,bg],i)=>BOX(896,70,bg,`<div style="display:flex;align-items:center;height:100%;padding:0 26px;gap:26px"><span class="px" style="font-size:28px">${lv}</span><span style="font-size:29px;font-weight:800">${t}</span></div>`,92,900+i*94)).join('')}
+ <div class="px" style="position:absolute;left:0;right:0;top:1182px;text-align:center;font-size:26px">▶ PRESS START = DM</div>
+ ${FOOT()}
+</div>`;
+
+// D2 LEVEL UP!
+V.D2=`<div class="P" style="background:#D8CCFF;background-image:linear-gradient(rgba(17,17,17,.06) 2px,transparent 2px),linear-gradient(90deg,rgba(17,17,17,.06) 2px,transparent 2px);background-size:40px 40px">
+ <img class="logo" src="img/raw-logo-tight.png" style="position:absolute;left:64px;top:60px">
+ <div class="px" style="position:absolute;right:64px;top:64px;font-size:26px">STAGE 2027</div>
+ <div class="px" style="position:absolute;left:0;right:0;top:150px;text-align:center;font-size:150px;line-height:1;color:#fff;text-shadow:8px 8px 0 #111">LEVEL<br>UP!</div>
+ <div style="position:absolute;left:0;right:0;top:500px;display:flex;justify-content:center">${PIX(26,'#FF5A36')}</div>
+ ${BOX(896,170,'#fff',`<div style="padding:24px 30px;display:flex;align-items:center;justify-content:space-between"><div><div class="px" style="font-size:24px;color:#999">QUEST</div><div style="font-size:48px;font-weight:800;letter-spacing:-.03em">2027 키즈 전문반 모집</div></div><div class="px" style="font-size:46px">10-13</div></div>`,92,900)}
+ <div style="position:absolute;left:92px;right:92px;top:1110px;font-size:25px;font-weight:700;text-align:center">${LINE}</div>
+ ${FOOT()}
+</div>`;
+
+// E1 연두 거대 숫자, 더 꽉
+V.E1=`<div class="P" style="background:#D7FF3A">
+ <img class="logo" src="img/raw-logo-tight.png" style="position:absolute;left:64px;top:56px">
+ <div style="position:absolute;right:64px;top:62px;font:700 20px Inter;letter-spacing:.25em">KIDS PRO CLASS 2027</div>
+ <div style="position:absolute;left:-20px;top:130px;font:400 640px/0.78 Anton;letter-spacing:-.04em">10</div>
+ <div style="position:absolute;left:520px;top:420px;font:400 220px/1 Anton">~</div>
+ <div style="position:absolute;right:-30px;top:480px;font:400 640px/0.78 Anton;letter-spacing:-.04em">13</div>
+ <div style="position:absolute;left:64px;top:690px;font-size:150px;font-weight:900;letter-spacing:-.05em;line-height:1">세</div>
+ <div style="position:absolute;left:64px;right:64px;top:1010px;border-top:4px solid #111;padding-top:20px;display:flex;justify-content:space-between;align-items:flex-end">
+  <div style="font-size:54px;font-weight:900;letter-spacing:-.04em;line-height:1.1">2027<br>키즈 전문반 모집</div>
+  <div style="width:420px;text-align:right;font-size:23px;font-weight:700;line-height:1.5">체계적인 트레이닝 후 RAW KIDZ 팀으로<br>공연·대회 참여 예정</div></div>
+ ${FOOT()}
+</div>`;
+
+// E2 주황 거대 숫자
+V.E2=`<div class="P" style="background:#FF5A1F">
+ <img class="logoW" src="img/raw-logo-tight.png" style="position:absolute;left:64px;top:56px">
+ <div style="position:absolute;right:64px;top:62px;font:700 20px Inter;letter-spacing:.25em;color:#fff">KIDS PRO CLASS 2027</div>
+ <div style="position:absolute;left:0;right:0;top:170px;text-align:center;font:400 470px/0.8 Anton;letter-spacing:-.04em;color:#fff">10–13</div>
+ <div style="position:absolute;left:0;right:0;top:560px;text-align:center;font-size:72px;font-weight:900;color:#111;letter-spacing:-.03em">세 친구들, 여기 모여!</div>
+ <div style="position:absolute;left:64px;right:64px;top:760px;border-top:4px solid #111;border-bottom:4px solid #111;padding:28px 0;display:flex;justify-content:space-between;align-items:center">
+  <div style="font-size:54px;font-weight:900;letter-spacing:-.04em">2027 키즈 전문반 모집</div>
+  <div class="logo" style="font:400 70px Anton;letter-spacing:.02em;filter:none">RAW KIDZ</div></div>
+ <div style="position:absolute;left:64px;right:64px;top:930px;font-size:26px;font-weight:700">${LINE}</div>
+ ${FOOT()}
+</div>`;
+document.getElementById('r').innerHTML=V[c];
+</script></body></html>

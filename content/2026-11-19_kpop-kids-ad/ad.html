@@ -61,7 +61,7 @@ const show=(id,on)=>{ $(id).style.display=on?'':'none'; };
 const pop=(el,u,dl=0)=>{ const p=eo((u-dl)/0.22); el.style.opacity=p; el.style.transform=(el.dataset.r||'')+` scale(${1.18-0.18*p})`; };
 // 쌤 카드 (원장님 확인 2026-11-19, 브랜드 가이드 강사 표)
 const TCH={yuni:{d:'MON · WED',n:'T. YUNI',a:'대형 기획사 연습생 출신',b:'',s:'월·수 유아 · 키즈 K-POP'},
-           mink:{d:'TUE · THU',n:'T. MINKYUNG',a:'현역 아이돌 백업 댄서',b:'실전 경험 많은 현역 댄서',s:'화·목 유아 · 키즈 K-POP'}};
+           mink:{d:'TUE · THU',n:'T. MINKYUNG',a:'아이돌 백업 댄서 경력 다수',b:'지금도 활동 중인 현역 댄서',s:'화·목 유아 · 키즈 K-POP'}};
 // 정보 화면 (30초는 3장, 15초는 1장)
 const INFO30=[`<div class="g"><div><div class="ko">유아 K-POP</div><div class="num">5–8<small>세</small></div></div><div><div class="ko">키즈 K-POP</div><div class="num">9–12<small>세</small></div></div></div>`,
   `<div class="big">평일반 · 토요일반</div><div class="lime">월·수 YUNI · 화·목 MINKYUNG</div><div class="s">토요일 REGINA</div>`,

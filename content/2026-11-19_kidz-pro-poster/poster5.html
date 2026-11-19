@@ -11,7 +11,7 @@
 <script>
 const c=new URLSearchParams(location.search).get('c')||'A1';
 const FOOT=(col='#111')=>`<div class="foot" style="color:${col}"><b>상담</b> 인스타 DM @rawdance_suwon · 카카오톡 '로우댄스수원점학원' · 031-225-6600
-<small>로우댄스학원 수원점 · 수원역·매교역 근처 매산로 136, 4층 · 일정은 상담 때 안내 · 교습비 월 35만원 · 공연·대회 의상비 별도</small></div>`;
+<small>로우댄스학원 수원점 · 수원역·매교역 근처 매산로 136, 4층 · 일정은 상담 때 안내</small></div>`;
 const LINE='체계적인 트레이닝 후 RAW KIDZ 팀으로 공연·대회 참여 예정';
 const V={};
 // 시즌 1 띠: RAW와 KIDZ 사이 정가운데 (원장님 2026-11-19 "시즌1이 가운데 박히면 좋겠는데 둘다")
@@ -52,9 +52,10 @@ V.B1=`<div class="P" style="background:radial-gradient(120% 90% at 50% 30%,#E820
  <div style="position:absolute;left:0;right:0;top:220px;text-align:center;color:#fff;font:400 360px/0.84 Anton">RAW<br>KIDZ</div>
  ${BAND(220+360*0.84+4,30,'#111','#fff',470)}
  <div style="position:absolute;left:0;right:0;top:850px;text-align:center;color:#fff">
+  <div style="font-size:32px;font-weight:800;margin-bottom:20px;letter-spacing:-.01em">RAW KIDZ 팀 구성 예정</div>
   <div style="font-size:56px;font-weight:800;letter-spacing:-.03em">2027 키즈 전문반 모집 <span style="border:2px solid #fff;padding:2px 16px;font-size:44px">10~13세</span></div>
   <div style="margin-top:18px;font-size:25px;font-weight:500">${LINE}</div></div>
- <div style="position:absolute;left:90px;right:90px;top:1085px;text-align:center;color:#fff;opacity:.8;font:400 20px/1.35 'Bebas Neue';letter-spacing:.12em;transform:scaleY(1.25)">
+ <div style="position:absolute;left:90px;right:90px;top:1110px;text-align:center;color:#fff;opacity:.8;font:400 20px/1.35 'Bebas Neue';letter-spacing:.12em;transform:scaleY(1.25)">
   RAW DANCE STUDIO SUWON PRESENTS · KIDS PRO CLASS · AGE 10–13 · TRAINING → RAW KIDZ TEAM → STAGE & COMPETITION (PLANNED) · COMING 2027</div>
  ${FOOT('#fff')}
 </div>`;
@@ -64,7 +65,8 @@ V.B2=`<div class="P" style="background:#FFF4EF">
  <div style="position:absolute;left:0;right:0;top:66px;text-align:center;font:600 20px Inter;letter-spacing:.42em;margin-right:-.42em;color:#D61A2A">A RAW DANCE STUDIO ORIGINAL</div>
  <div style="position:absolute;left:0;right:0;top:150px;text-align:center;font:400 400px/0.84 Anton;color:#D61A2A">RAW<br>KIDZ</div>
  ${BAND(150+400*0.84+4,32,'#111','#fff',500)}
- <div style="position:absolute;left:0;right:0;top:880px;text-align:center">
+ <div style="position:absolute;left:0;right:0;top:850px;text-align:center">
+  <div style="font-size:32px;font-weight:800;margin-bottom:20px;letter-spacing:-.01em">RAW KIDZ 팀 구성 예정</div>
   <div style="font-size:60px;font-weight:800;letter-spacing:-.03em">2027 키즈 전문반 모집</div>
   <div style="margin-top:18px;display:inline-block;background:#D61A2A;color:#fff;padding:10px 28px;font-size:34px;font-weight:800">10~13세</div>
   <div style="margin-top:22px;font-size:24px;font-weight:600">${LINE}</div></div>
@@ -73,7 +75,7 @@ V.B2=`<div class="P" style="background:#FFF4EF">
 
 // 스토리(9:16) — 원장님 2026-11-19 "시즌1 좋네". 인스타 스토리 위·아래 UI 피해서 위 220px·아래 300px 비움
 const SFOOT=(col)=>`<div style="position:absolute;left:64px;right:64px;bottom:250px;text-align:center;color:${col};font-size:26px;line-height:1.6;font-weight:500"><b style="font-weight:800">상담</b> 인스타 DM · 카카오톡 '로우댄스수원점학원' · 031-225-6600
- <div style="font-size:19px;opacity:.7;margin-top:6px">로우댄스학원 수원점 · 수원역·매교역 근처 매산로 136, 4층<br>일정은 상담 때 안내 · 교습비 월 35만원 · 공연·대회 의상비 별도</div></div>`;
+ <div style="font-size:19px;opacity:.7;margin-top:6px">로우댄스학원 수원점 · 수원역·매교역 근처 매산로 136, 4층 · 일정은 상담 때 안내</div></div>`;
 V.B1S=`<div class="P" style="height:1920px;background:radial-gradient(120% 80% at 50% 35%,#E8202E 0%,#B00F1C 70%,#7E0A14 100%)">
  <div style="position:absolute;inset:0;opacity:.16;background-image:radial-gradient(#000 1px,transparent 1px);background-size:4px 4px"></div>
  <div style="position:absolute;left:0;right:0;top:240px;text-align:center;color:#fff;font:600 22px Inter;letter-spacing:.42em;margin-right:-.42em">A RAW DANCE STUDIO ORIGINAL</div>
@@ -81,6 +83,7 @@ V.B1S=`<div class="P" style="height:1920px;background:radial-gradient(120% 80% a
  <div style="position:absolute;left:0;right:0;top:420px;text-align:center;color:#fff;font:400 400px/0.84 Anton">RAW<br>KIDZ</div>
  ${BAND(420+400*0.84+4,34,'#111','#fff',520)}
  <div style="position:absolute;left:0;right:0;top:1130px;text-align:center;color:#fff">
+  <div style="font-size:36px;font-weight:800;margin-bottom:20px;letter-spacing:-.01em">RAW KIDZ 팀 구성 예정</div>
   <div style="font-size:64px;font-weight:800;letter-spacing:-.03em">2027 키즈 전문반 모집</div>
   <div style="margin-top:20px;display:inline-block;border:3px solid #fff;padding:6px 26px;font-size:48px;font-weight:800">10~13세</div>
   <div style="margin-top:30px;font-size:28px;font-weight:500;line-height:1.5">체계적인 트레이닝 후 RAW KIDZ 팀으로<br>공연·대회 참여 예정</div></div>
@@ -90,7 +93,8 @@ V.B2S=`<div class="P" style="height:1920px;background:#FFF4EF">
  <div style="position:absolute;left:0;right:0;top:240px;text-align:center;font:600 22px Inter;letter-spacing:.42em;margin-right:-.42em;color:#D61A2A">A RAW DANCE STUDIO ORIGINAL</div>
  <div style="position:absolute;left:0;right:0;top:330px;text-align:center;font:400 440px/0.84 Anton;color:#D61A2A">RAW<br>KIDZ</div>
  ${BAND(330+440*0.84+4,36,'#111','#fff',560)}
- <div style="position:absolute;left:0;right:0;top:1150px;text-align:center">
+ <div style="position:absolute;left:0;right:0;top:1110px;text-align:center">
+  <div style="font-size:36px;font-weight:800;margin-bottom:20px;letter-spacing:-.01em">RAW KIDZ 팀 구성 예정</div>
   <div style="font-size:68px;font-weight:800;letter-spacing:-.03em">2027 키즈 전문반 모집</div>
   <div style="margin-top:22px;display:inline-block;background:#D61A2A;color:#fff;padding:10px 30px;font-size:44px;font-weight:800">10~13세</div>
   <div style="margin-top:30px;font-size:28px;font-weight:600;line-height:1.5">체계적인 트레이닝 후 RAW KIDZ 팀으로<br>공연·대회 참여 예정</div></div>

@@ -1,62 +1,84 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
-/* 유아·키즈 K-POP반 광고 릴스 글자 (원장님 2026-11-19). 영상 위에 얹는 투명 화면, render(t)는 t초 모습만 그림 */
+/* 유아·키즈 K-POP반 광고 릴스 글자 2차 (원장님 2026-11-19 "자막들 왜케 짜쳐졌냐")
+   → 상자·알약 모양 없앰. RAW 스타일: TRACKPAD 글꼴(GoGo Poster) 깜빡이며 켜지는 첫 화면, 상자 없는 흰 글자, 큰 숫자, SEASON 1 포스터의 검은 띠 */
 *{margin:0;padding:0;box-sizing:border-box}html,body{width:1080px;height:1920px;background:transparent;overflow:hidden;font-family:"Gothic A1","Noto Sans KR",sans-serif;color:#fff}
 .a{position:absolute}
-#logo{left:56px;top:250px;height:46px}
-#hook{left:0;right:0;top:1130px;text-align:center}   /* 아이 얼굴 가리지 않게 아래쪽 */
-#hook .big{font:400 190px/0.9 Anton;letter-spacing:.01em;text-shadow:0 8px 30px rgba(0,0,0,.45)}
-#hook .chip{display:inline-block;margin-top:26px;background:#fff;color:#111;padding:14px 30px;border-radius:999px;font-size:46px;font-weight:900;letter-spacing:-.02em}
-#cls{left:56px;top:330px;padding:10px 24px;border-radius:999px;font-size:36px;font-weight:900;color:#111}
-#cap{left:0;right:0;top:1260px;text-align:center}
-#cap span{display:inline-block;background:#111;padding:14px 30px;font-size:62px;font-weight:900;letter-spacing:-.03em;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-#shade{left:0;right:0;bottom:0;height:1150px;background:linear-gradient(transparent,rgba(10,8,14,.88) 45%)}
-#info{left:70px;right:70px;top:930px}
-#info .row{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid rgba(255,255,255,.35);padding:22px 4px;font-size:58px;font-weight:900;letter-spacing:-.03em}
-#info .row small{font-size:46px;font-weight:800;opacity:.9}
-#info .free{margin-top:34px;display:inline-block;background:#D7FF3A;color:#111;padding:16px 34px;border-radius:999px;font-size:54px;font-weight:900}
-#cta{left:0;right:0;top:940px;text-align:center}
-#cta .t{font-size:84px;font-weight:900;letter-spacing:-.04em;line-height:1.15}
-#cta .s{margin-top:22px;font-size:38px;font-weight:700;opacity:.92}
+.sh{text-shadow:0 4px 24px rgba(0,0,0,.55),0 2px 4px rgba(0,0,0,.4)}
+#logo{left:60px;top:250px;height:40px}
+#tag{left:60px;top:312px;font:700 26px Inter;letter-spacing:.22em}
+#tag i{display:block;width:64px;height:6px;margin-top:10px}
+#hook{left:0;right:0;top:1060px;text-align:center}
+#hook .k{font:600 28px Inter;letter-spacing:.42em;text-indent:.42em}
+#hook .t{margin-top:14px;font:italic 400 196px/0.92 "GoGo Poster 2020",Anton;letter-spacing:.01em}
+#hook .t span{display:inline-block;white-space:pre;position:relative}
+#hook .t span i{position:absolute;left:0;top:0;font-style:inherit}
+#hook .n{margin-top:18px;font-size:44px;font-weight:800;letter-spacing:-.01em}
+#cap{left:0;right:0;top:1290px;text-align:center}
+#cap .e{font:400 120px/0.9 Anton;letter-spacing:.02em}
+#cap .k{margin-top:16px;font-size:46px;font-weight:800;letter-spacing:-.02em}
+#shade{left:0;right:0;bottom:0;height:1250px;background:linear-gradient(transparent,rgba(8,7,12,.86) 42%)}
+#info{left:70px;right:70px;top:880px}
+#info .g{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#info .c .l{font:600 24px Inter;letter-spacing:.24em;opacity:.85}
+#info .c .ko{margin-top:6px;font-size:40px;font-weight:800}
+#info .c .num{margin-top:8px;font:400 210px/0.85 Anton;letter-spacing:-.02em}
+#info .c .num small{font-family:"Gothic A1";font-size:52px;font-weight:900;margin-left:6px}
+#info .d{margin-top:40px;border-top:2px solid rgba(255,255,255,.4);padding-top:24px;font-size:42px;font-weight:800;letter-spacing:-.01em}
+.band{display:inline-block;background:#111;color:#fff;transform:rotate(-4deg);box-shadow:0 12px 26px rgba(0,0,0,.35)}
+#free{left:50%;top:1530px;transform:translate(-50%,0) rotate(-4deg);padding:20px 56px;font-size:52px;font-weight:900;white-space:nowrap}
+#cta{left:0;right:0;top:960px;text-align:center}
+#cta .e{font:400 200px/0.86 Anton;letter-spacing:.01em}
+#cta .k{margin-top:26px;font-size:50px;font-weight:900}
+#cta .s{margin-top:18px;font-size:34px;font-weight:600;opacity:.88}
 #end{inset:0;background:#0b0a0f}
-#end .c{position:absolute;left:0;right:0;top:760px;text-align:center}
+#end .c{position:absolute;left:0;right:0;top:780px;text-align:center}
 #end img{width:440px}
-#end .k{margin-top:34px;font-size:40px;font-weight:800}
-#end .f{margin-top:30px;display:inline-block;background:#D7FF3A;color:#111;padding:14px 32px;border-radius:999px;font-size:44px;font-weight:900}
-#end .s{margin-top:24px;font-size:30px;font-weight:600;opacity:.75}
+#end .k{margin-top:30px;font:600 24px Inter;letter-spacing:.32em;text-indent:.32em;opacity:.8}
+#end .b{margin-top:44px;padding:16px 46px;font-size:46px;font-weight:900;background:#fff;color:#111}
+#end .s{margin-top:40px;font-size:28px;font-weight:600;opacity:.7}
 </style></head><body>
 <div id="shade" class="a"></div>
 <img id="logo" class="a" src="logo.png">
-<div id="cls" class="a"></div>
-<div id="hook" class="a"><div class="big">K-POP<br>KIDS</div><div class="chip">유아·키즈 K-POP반 모집</div></div>
-<div id="cap" class="a"><span></span></div>
-<div id="info" class="a">
- <div class="row"><span>유아 K-POP</span><small>5~8세</small></div>
- <div class="row"><span>키즈 K-POP</span><small>9~12세</small></div>
- <div class="row"><span>평일반 · 토요일반</span><small></small></div>
- <div class="free">무료 체험 1회</div></div>
-<div id="cta" class="a"><div class="t">무료 체험 예약은<br>DM 주세요</div><div class="s">수원역·매교역 근처 · 건물 내 무료 주차</div></div>
-<div id="end" class="a"><div class="c"><img src="logo.png"><div class="k">로우댄스학원 수원점 · 유아·키즈 K-POP</div>
- <div class="f">무료 체험 1회</div><div class="s">DM @rawdance_suwon · 카카오톡 '로우댄스수원점학원'</div></div></div>
+<div id="tag" class="a sh"><span></span><i></i></div>
+<div id="hook" class="a sh"><div class="k">RAW DANCE STUDIO · SUWON</div><div class="t" id="ht"></div><div class="n">유아 · 키즈 K-POP반 모집</div></div>
+<div id="cap" class="a sh"><div class="e"></div><div class="k"></div></div>
+<div id="info" class="a sh">
+ <div class="g"><div class="c"><div class="l">KIDS · AGE</div><div class="ko">유아 K-POP</div><div class="num">5–8<small>세</small></div></div>
+  <div class="c"><div class="l">KIDS · AGE</div><div class="ko">키즈 K-POP</div><div class="num">9–12<small>세</small></div></div></div>
+ <div class="d">평일반 · 토요일반</div></div>
+<div id="free" class="a band">무료 체험 1회</div>
+<div id="cta" class="a sh"><div class="e">FREE<br>TRIAL</div><div class="k">무료 체험 1회 · DM으로 예약</div><div class="s">수원역·매교역 근처 · 건물 내 무료 주차</div></div>
+<div id="end" class="a"><div class="c"><img src="logo.png"><div class="k">KIDS K-POP · SUWON</div>
+ <div class="band b">무료 체험 1회</div><div class="s">DM @rawdance_suwon · 카카오톡 '로우댄스수원점학원'</div></div></div>
 <script>
 const $=id=>document.getElementById(id), cl=x=>Math.min(1,Math.max(0,x)), eo=x=>1-Math.pow(1-cl(x),3);
 let TL=[], VER='30';
-const show=(id,on,o)=>{const e=$(id); e.style.display=on?'':'none'; if(on&&o!==undefined) e.style.opacity=o;};
-window.setup=o=>{TL=o.tl; VER=o.ver;};
+// TRACKPAD처럼 글자마다 무작위로 켜짐 (켜지기 직전 회색 엉뚱한 글자 1프레임)
+let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+const AZ="ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let CH=[];
+function mk(txt){ const el=$('ht'); el.innerHTML='';
+  CH=[...txt].map(c=>{ if(c==='\n'){ el.appendChild(document.createElement('br')); return null; }
+    const s=document.createElement('span'); s.textContent=c; const g=document.createElement('i'); s.appendChild(g); el.appendChild(s);
+    return {s,g,c,on:0.05+rnd()*0.45,gh:rnd()<0.45,gc:AZ[Math.floor(rnd()*26)]}; }).filter(Boolean); }
+const show=(id,on)=>{ $(id).style.display=on?'':'none'; };
+window.setup=o=>{ TL=o.tl; VER=o.ver; mk('K-POP\nKIDZ'); };
 window.render=t=>{
-  const seg=TL.find(s=>t>=s.t0&&t<s.t1)||TL[TL.length-1], k=seg.kind, u=t-seg.t0;
+  const seg=TL.find(s=>t>=s.t0&&t<s.t1)||TL[TL.length-1], k=seg.kind;
   const first=kind=>TL.find(s=>s.kind===kind), last=kind=>[...TL].reverse().find(s=>s.kind===kind);
   show('logo',k!=='logo'); show('shade',k==='info'||k==='cta');
-  // 훅: 튀어나오듯
-  show('hook',k==='hook'); if(k==='hook'){ const p=eo(u/0.25); $('hook').style.transform=`scale(${0.85+0.15*p})`; $('hook').style.opacity=p; }
-  // 반 표시 (몽타주·정보에서 지금 나오는 아이가 유아인지 키즈인지)
-  show('cls',k==='mont'); if(k==='mont'){ const y=seg.cls==='유아'; $('cls').textContent=y?'유아 5~8세':'키즈 9~12세'; $('cls').style.background=y?'#FFB3CF':'#D7FF3A'; }
-  // 몽타주 큰 자막: 몽타주 구간을 나눠 차례로
-  const m0=first('mont'), m1=last('mont'); const caps=VER==='30'?['아이돌 안무로 신나게','기본기까지 탄탄하게','평일반 · 토요일반']:['아이돌 안무로 신나게','기본기까지 탄탄하게'];
-  show('cap',k==='mont'); if(k==='mont'){ const i=Math.min(caps.length-1,Math.floor((t-m0.t0)/((m1.t1-m0.t0)/caps.length))); $('cap').firstElementChild.textContent=caps[i]; }
-  // 정보: 줄이 하나씩 (15초는 한 번에)
-  show('info',k==='info'); if(k==='info'){ const i0=first('info').t0, step=(last('info').t1-i0)/ (VER==='30'?5:2);
-    const n=Math.floor((t-i0)/step); [...$('info').children].forEach((e,i)=>{ const on=VER==='30'?i<=n:true; e.style.opacity=on?eo((t-i0-(VER==='30'?i*step:0))/0.25):0; }); }
-  show('cta',k==='cta'); if(k==='cta') $('cta').style.opacity=eo((t-first('cta').t0)/0.3);   // 여러 컷에 걸쳐도 처음 한 번만 나타남
-  show('end',k==='logo'); if(k==='logo'){ $('end').style.opacity=eo(u/0.35); }
+  show('hook',k==='hook'); if(k==='hook'){ const u=t-first('hook').t0;
+    CH.forEach(c=>{ const on=u>=c.on; c.s.style.color=on?'#fff':'transparent'; c.g.textContent=(c.gh&&u>=c.on-1/24&&u<c.on)?c.gc:''; c.g.style.color='rgba(255,255,255,.4)'; });
+    $('hook').querySelector('.k').style.opacity=eo((u-0.05)/0.3); $('hook').querySelector('.n').style.opacity=eo((u-0.45)/0.3); }
+  show('tag',k==='mont'); if(k==='mont'){ const y=seg.cls==='유아'; $('tag').firstElementChild.textContent=y?'유아 · AGE 5–8':'키즈 · AGE 9–12'; $('tag').lastElementChild.style.background=y?'#FFB3CF':'#D7FF3A'; }
+  const m0=first('mont'), m1=last('mont');
+  const caps=VER==='30'?[['DANCE','아이돌 안무로 신나게'],['BASICS','기본기까지 탄탄하게'],['EVERY WEEK','평일반 · 토요일반']]:[['DANCE','아이돌 안무로 신나게'],['BASICS','기본기까지 탄탄하게']];
+  show('cap',k==='mont'); if(k==='mont'){ const n=caps.length, span=(m1.t1-m0.t0)/n, i=Math.min(n-1,Math.floor((t-m0.t0)/span)), u=t-m0.t0-i*span;
+    $('cap').querySelector('.e').textContent=caps[i][0]; $('cap').querySelector('.k').textContent=caps[i][1];
+    const p=eo(u/0.22); $('cap').style.opacity=p; $('cap').style.transform=`translateY(${(1-p)*24}px)`; }
+  show('info',k==='info'); show('free',k==='info');
+  if(k==='info'){ const u=t-first('info').t0; $('info').style.opacity=eo(u/0.35); $('info').style.transform=`translateY(${(1-eo(u/0.35))*30}px)`;
+    const fu=u-(VER==='30'?1.5:0.6); $('free').style.opacity=eo(fu/0.2); $('free').style.transform=`translate(-50%,0) rotate(-4deg) scale(${1.25-0.25*eo(fu/0.2)})`; }
+  show('cta',k==='cta'); if(k==='cta'){ const u=t-first('cta').t0; $('cta').style.opacity=eo(u/0.3); }
+  show('end',k==='logo'); if(k==='logo') $('end').style.opacity=eo((t-first('logo').t0)/0.35);
 };
 </script></body></html>

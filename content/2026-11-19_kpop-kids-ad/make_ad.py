@@ -67,10 +67,11 @@ def clip(f, t, d, out):
 if WHICH == "30":
     song, bpm, first = os.path.join(MUS, "party.wav"), 120.0, 0.029; B = 60 / bpm
     # 원장님 2026-11-19: 무료 체험 빼고, 쌤 이력 강조 → 훅 · 몽타주 · T.YUNI · T.MINKYUNG · 정보 · 로고 (64박 = 32초)
-    plan = [("hook", 4)] + [("mont", 2)] * 12 + [("yuni", 4)] * 2 + [("mink", 4)] * 2 + [("info", 4)] * 3 + [("logo", 8)]
+    # 원장님 2026-11-19 "한글이 너무 빨리 지나가" → 몽타주 줄이고 글자 장면 길게: 훅 2 · 몽타주 8 · YUNI 5 · MINKYUNG 5 · 정보 8(2장×4) · 로고 4초
+    plan = [("hook", 4)] + [("mont", 2)] * 8 + [("yuni", 5)] * 2 + [("mink", 5)] * 2 + [("info", 4)] * 4 + [("logo", 8)]
 else:
     song, bpm, first = os.path.join(MUS, "madness.wav"), 130.0, 0.435; B = 60 / bpm
-    plan = [("hook", 4)] + [("mont", 2)] * 5 + [("yuni", 4)] + [("mink", 4)] + [("info", 6)] + [("logo", 4)]
+    plan = [("hook", 4)] + [("mont", 2)] * 3 + [("yuni", 6)] + [("mink", 6)] + [("info", 6)] + [("logo", 4)]
 nmont = sum(1 for p in plan if p[0] == "mont"); nlong = sum(1 for p in plan if p[0] in ("hook", "info", "cta", "logo"))
 
 # 영상마다 후보 구간

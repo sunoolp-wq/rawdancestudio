@@ -66,10 +66,11 @@ def clip(f, t, d, out):
 # ── 구성 (박자 단위) ──
 if WHICH == "30":
     song, bpm, first = os.path.join(MUS, "party.wav"), 120.0, 0.029; B = 60 / bpm
-    plan = [("hook", 4)] + [("mont", 2)] * 12 + [("info", 4)] * 5 + [("cta", 4)] * 3 + [("logo", 4)]
+    # 원장님 2026-11-19: 무료 체험 빼고, 쌤 이력 강조 → 훅 · 몽타주 · T.YUNI · T.MINKYUNG · 정보 · 로고 (64박 = 32초)
+    plan = [("hook", 4)] + [("mont", 2)] * 12 + [("yuni", 4)] * 2 + [("mink", 4)] * 2 + [("info", 4)] * 3 + [("logo", 8)]
 else:
     song, bpm, first = os.path.join(MUS, "madness.wav"), 130.0, 0.435; B = 60 / bpm
-    plan = [("hook", 4)] + [("mont", 2)] * 8 + [("info", 4)] * 2 + [("logo", 4)]
+    plan = [("hook", 4)] + [("mont", 2)] * 5 + [("yuni", 4)] + [("mink", 4)] + [("info", 6)] + [("logo", 4)]
 nmont = sum(1 for p in plan if p[0] == "mont"); nlong = sum(1 for p in plan if p[0] in ("hook", "info", "cta", "logo"))
 
 # 영상마다 후보 구간
@@ -83,9 +84,15 @@ queue = []
 for r in range(4):
     for f in order:
         if r < len(cand[f]): queue.append((f,) + cand[f][r])
+# 쌤 장면은 그 쌤 반 영상에서 (1021 = YUNI 반, 1119 = MINKYUNG 반 — 영상 앞 자막 기준)
+pool = {"yuni": [("1021_kids.mp4",) + c for c in cand["1021_kids.mp4"]], "mink": [("1119_kids_insta.mp4",) + c for c in cand["1119_kids_insta.mp4"]]}
+used = {"yuni": 0, "mink": 0}
+queue = [q for q in queue if q[0] not in ("1021_kids.mp4", "1119_kids_insta.mp4")] + [q for q in queue if q[0] in ("1021_kids.mp4", "1119_kids_insta.mp4")]
 tmp = tempfile.mkdtemp(prefix="raw-kpopad-"); segs = []; timeline = []; t = 0.0; qi = 0
 for kind, beats in plan:
-    d = beats * B; f, st, cls = queue[qi % len(queue)]; qi += 1
+    d = beats * B
+    if kind in pool: f, st, cls = pool[kind][used[kind] % len(pool[kind])]; used[kind] += 1
+    else: f, st, cls = queue[qi % len(queue)]; qi += 1
     # 몽타주는 그 구간 가운데 1초 근처, 긴 장면은 시작부터
     s0 = st + (0.4 if kind == "mont" else 0)
     out = os.path.join(tmp, f"{len(segs):02d}.mp4"); clip(os.path.join(SRC, f), s0, d, out); segs.append(out)

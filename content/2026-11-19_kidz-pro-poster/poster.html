@@ -17,7 +17,7 @@ body{background:#ddd}
 const c=+(new URLSearchParams(location.search).get('c')||1), story=new URLSearchParams(location.search).has('s');
 const K=n=>`img/k_${n}.png`;
 const FOOT=(col='#141414')=>`<div class="foot" style="color:${col}"><b>상담</b> 인스타 DM @rawdance_suwon · 카카오톡 '로우댄스수원점학원' · 031-225-6600
-<small>일정은 상담 때 안내 · 교습비 월 35만원 · 로우댄스학원 수원점 (수원역·매교역 근처 매산로 136, 4층)</small></div>`;
+<small>일정은 상담 때 안내 · 교습비 월 35만원 · 공연·대회 의상비 별도 · 로우댄스학원 수원점 (수원역·매교역 근처 매산로 136, 4층) · 사진: 수원점 수강생</small></div>`;
 const STEPS=(col,bg)=>`<div style="display:flex;gap:10px;align-items:center;font-size:25px;font-weight:800;color:${col}">
 <span style="background:${bg};padding:10px 18px;border-radius:999px">트레이닝</span>→<span style="background:${bg};padding:10px 18px;border-radius:999px">RAW KIDZ 팀</span>→<span style="background:${bg};padding:10px 18px;border-radius:999px">공연·대회</span></div>`;
 const V={};
@@ -26,7 +26,7 @@ const V={};
 V[1]=`<div class="P" style="background:#F3EEE5">
  <div style="position:absolute;left:64px;top:60px;width:390px;height:1140px;background:#141414;padding:22px 22px 70px;display:grid;grid-template-rows:repeat(4,1fr);gap:16px;transform:rotate(-2.2deg);box-shadow:0 30px 60px rgba(0,0,0,.18)">
   ${[['84.5_2','#FF6B4A'],['83_2','#C9B8FF'],['156_0','#9EE2C6'],['138.5_0','#FFC2A6']].map(([k,bg])=>`<div style="background:${bg};overflow:hidden;position:relative"><img src="${K(k)}" style="position:absolute;left:50%;top:6%;height:160%;transform:translateX(-50%)"></div>`).join('')}
-  <div style="position:absolute;left:0;right:0;bottom:20px;text-align:center;color:#fff;font:600 22px Montserrat;letter-spacing:.3em">RAW KIDZ · 2027</div>
+  <div style="position:absolute;left:0;right:0;bottom:20px;text-align:center;color:#fff;font:600 22px Montserrat;letter-spacing:.3em">NEXT RAW KIDZ</div>
  </div>
  <div style="position:absolute;left:520px;right:60px;top:84px">
   <img class="logo" src="img/raw-logo-tight.png">
@@ -51,7 +51,7 @@ V[2]=`<div class="P" style="background:#FBFAF4;background-image:linear-gradient(
  <div style="position:absolute;left:64px;top:600px;width:280px">
   <div style="font-size:52px;font-weight:800;line-height:1.15;letter-spacing:-.03em">2027<br>키즈 전문반<br>모집</div>
   <div style="margin-top:22px;font-size:25px;line-height:1.6;font-weight:500">체계적인 트레이닝 →<br><b style="font-weight:800">RAW KIDZ 팀</b>으로<br>공연·대회 참여 예정</div>
-  <div class="hand" style="margin-top:26px;font-size:40px;color:#FF3D7F">무대까지 같이 가요 ↗</div>
+  <div class="hand" style="margin-top:26px;font-size:40px;color:#FF3D7F">무대를 목표로<br>같이 연습해요 ↗</div>
  </div>
  ${FOOT()}
 </div>`;
@@ -60,20 +60,19 @@ V[2]=`<div class="P" style="background:#FBFAF4;background-image:linear-gradient(
 V[3]=`<div class="P" style="background:#FFFFFF">
  <img class="logo" src="img/raw-logo-tight.png" style="position:absolute;left:64px;top:60px">
  <div style="position:absolute;right:64px;top:66px;font:800 24px 'Bricolage Grotesque';letter-spacing:.06em">ROSTER 2027</div>
- <div style="position:absolute;left:64px;top:150px;font:800 118px/0.95 'Bricolage Grotesque';letter-spacing:-.04em">RAW KIDZ<br><span style="color:#B9B9B9">1기 멤버 모집</span></div>
+ <div style="position:absolute;left:64px;top:150px;font:800 118px/0.95 'Bricolage Grotesque';letter-spacing:-.04em">RAW KIDZ<br><span style="color:#B9B9B9">키즈 전문반 모집</span></div>
  <div style="position:absolute;left:64px;top:420px;display:grid;grid-template-columns:repeat(4,222px);gap:18px">
   ${[['156_1','#FFD9C7','01'],['138.5_0','#D7E9FF','02'],['83_2','#E4DBFF','03']].map(([k,bg,n])=>`<div style="height:460px;border-radius:26px;background:${bg};position:relative;overflow:hidden">
    <img src="${K(k)}" style="position:absolute;left:50%;bottom:-70px;height:440px;transform:translateX(-50%)">
    <div style="position:absolute;right:16px;top:12px;font:800 40px 'Bricolage Grotesque'">${n}</div>
-   <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px;background:rgba(255,255,255,.88);font:700 16px Montserrat;letter-spacing:.1em;white-space:nowrap">RAW KIDZ MEMBER</div></div>`).join('')}
+   <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px;background:rgba(255,255,255,.88);font:700 16px Montserrat;letter-spacing:.06em;white-space:nowrap">수원점 수강생</div></div>`).join('')}
   <div style="height:460px;border-radius:26px;border:4px dashed #141414;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
    <div style="font:800 40px 'Bricolage Grotesque'">04</div><div style="font-size:84px;line-height:1.1">?</div>
    <div style="font-size:28px;font-weight:800;line-height:1.35">이 자리,<br>우리 아이 자리</div></div>
  </div>
  <div style="position:absolute;left:64px;top:930px;right:64px">
   <div style="font-size:40px;font-weight:800;letter-spacing:-.02em">2027 키즈 전문반 · 모집 대상 <span style="background:#141414;color:#fff;padding:2px 14px;border-radius:10px">10~13세</span></div>
-  <div style="margin-top:30px">${STEPS('#141414','#F1F1F1')}</div>
-  <div style="margin-top:20px;font-size:25px;font-weight:500;color:#555">체계적인 트레이닝 후 RAW KIDZ 팀으로 공연·대회 참여 예정</div>
+  <div style="margin-top:30px;font-size:25px;font-weight:500;color:#555">체계적인 트레이닝 후 RAW KIDZ 팀으로 공연·대회 참여 예정</div>
  </div>
  ${FOOT()}
 </div>`;
@@ -91,10 +90,10 @@ V[4]=`<div class="P" style="background:linear-gradient(180deg,#FFE7D6 0%,#FFF4EA
  </div>
  <div style="position:absolute;right:64px;top:520px;width:270px;text-align:right">
   <div style="font-size:26px;line-height:1.55;font-weight:500">체계적인<br>트레이닝 후</div>
-  <div style="margin-top:18px;font-size:40px;font-weight:800;line-height:1.2">RAW KIDZ<br>팀 결성</div>
+  <div style="margin-top:18px;font-size:40px;font-weight:800;line-height:1.2">RAW KIDZ<br>팀 결성 후</div>
   <div style="margin-top:18px;font-size:26px;line-height:1.55;font-weight:500">공연·대회<br>참여 예정</div>
  </div>
- <div style="position:absolute;right:70px;top:860px;width:190px;height:190px;border-radius:50%;background:#141414;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(-10deg);font-size:34px;font-weight:800;line-height:1.15">RAW KIDZ<br>1기</div>
+ <div style="position:absolute;right:70px;top:860px;width:190px;height:190px;border-radius:50%;background:#141414;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(-10deg);font-size:34px;font-weight:800;line-height:1.15">NEW<br>2027</div>
  <div style="position:absolute;left:0;right:0;bottom:0;height:260px;background:linear-gradient(transparent,#FFF4EA 55%)"></div>
  ${FOOT()}
 </div>`;
@@ -106,7 +105,7 @@ V[5]=`<div class="P" style="background:#F6F0E6">
   <div class="hand" style="font-size:52px;color:#C2562F">트레이닝에서 무대까지</div>
   <div style="margin-top:8px;font-size:96px;font-weight:800;line-height:1.05;letter-spacing:-.04em">2027 키즈 전문반<br>모집 <span style="font-size:52px;vertical-align:middle;background:#141414;color:#F6F0E6;padding:6px 20px;border-radius:999px">10~13세</span></div>
  </div>
- ${[['84.5_2','#E7B98F',90,'STEP 1','체계적인<br>트레이닝',300],['156_1','#D27A4E',400,'STEP 2','RAW KIDZ<br>팀 결성',420],['156_0','#9A4B2C',710,'STEP 3','공연·대회<br>참여 예정',540]].map(([k,bg,x,st,txt,h])=>`
+ ${[['84.5_2','#E7B98F',90,'STEP 1','체계적인<br>트레이닝',300],['156_1','#D27A4E',400,'STEP 2','RAW KIDZ<br>팀 결성 (예정)',420],['156_0','#9A4B2C',710,'STEP 3','공연·대회<br>참여 예정',540]].map(([k,bg,x,st,txt,h])=>`
   <img src="${K(k)}" style="position:absolute;left:${x+150}px;bottom:${190+h-26}px;height:330px;transform:translateX(-50%)">
   <div style="position:absolute;left:${x}px;bottom:190px;width:300px;height:${h}px;background:${bg};border-radius:22px 22px 0 0;padding:26px 24px;color:#fff">
    <div style="font:800 24px Montserrat;letter-spacing:.15em;opacity:.85">${st}</div>

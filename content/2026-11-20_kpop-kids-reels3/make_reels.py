@@ -140,6 +140,7 @@ elif WHICH == "B":
             (8, ("fill", "clip3.mp4", 0), LOGO)]
 else:
     song, bpm, first = "madness.wav", 130.0, 0.435
+    CUT[YT] = 766   # 2분할 위 화면에서 YUNI 티저 글자가 첫 화면 'K-POP KIDZ'·가운데 띠와 겹쳐서 C만 YUNI도 잘라 씀
     ys, ms = yt(3, 3.8, 3), mt(3, 3.8, 3); k1021, k1119 = pk("1021_kids.mp4", 3, 3.8), pk("1119_kids_insta.mp4", 3, 3.8)
     H = hook("K-POP\nKIDZ", "쌤의 춤 · 우리 아이 수업", "TEACHER ↑   CLASS ↓")
     BY = {"kind": "band", "d": "MON · WED", "n": "T. YUNI", "a": "대형 기획사 연습생 출신", "b": ""}

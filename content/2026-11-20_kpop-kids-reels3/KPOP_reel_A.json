@@ -1,0 +1,174 @@
+{
+ "timeline": [
+  {
+   "kind": "hook",
+   "k": "우리 아이 쌤을 소개합니다",
+   "t": "K-POP\nKIDZ",
+   "band": "유아 · 키즈 K-POP반 모집",
+   "t0": 0.0,
+   "t1": 1.0,
+   "src": "n2_talk.mp4",
+   "g0": 0.0
+  },
+  {
+   "kind": "hook",
+   "k": "우리 아이 쌤을 소개합니다",
+   "t": "K-POP\nKIDZ",
+   "band": "유아 · 키즈 K-POP반 모집",
+   "t0": 1.0,
+   "t1": 2.0,
+   "src": "n4_talk.mp4",
+   "g0": 0.0
+  },
+  {
+   "kind": "hook",
+   "k": "우리 아이 쌤을 소개합니다",
+   "t": "K-POP\nKIDZ",
+   "band": "유아 · 키즈 K-POP반 모집",
+   "t0": 2.0,
+   "t1": 3.0,
+   "src": "n2_talk.mp4",
+   "g0": 0.0
+  },
+  {
+   "kind": "hook",
+   "k": "우리 아이 쌤을 소개합니다",
+   "t": "K-POP\nKIDZ",
+   "band": "유아 · 키즈 K-POP반 모집",
+   "t0": 3.0,
+   "t1": 4.0,
+   "src": "n4_talk.mp4",
+   "g0": 0.0
+  },
+  {
+   "kind": "card",
+   "d": "MON · WED",
+   "n": "T. YUNI",
+   "a": "대형 기획사 연습생 출신",
+   "b": "",
+   "s": "월·수 유아 · 키즈 K-POP",
+   "t0": 4.0,
+   "t1": 9.0,
+   "src": "n2_talk.mp4",
+   "g0": 4.0
+  },
+  {
+   "kind": "cap",
+   "tag": "T. YUNI 반",
+   "e": "MON · WED",
+   "ko": "월·수 YUNI 쌤 반",
+   "t0": 9.0,
+   "t1": 11.0,
+   "src": "1021_kids.mp4",
+   "g0": 9.0
+  },
+  {
+   "kind": "cap",
+   "tag": "T. YUNI 반",
+   "e": "MON · WED",
+   "ko": "월·수 YUNI 쌤 반",
+   "t0": 11.0,
+   "t1": 13.0,
+   "src": "1021_kids.mp4",
+   "g0": 9.0
+  },
+  {
+   "kind": "card",
+   "d": "TUE · THU",
+   "n": "T. MINKYUNG",
+   "a": "현장 경험 많은 현역 댄서",
+   "b": "아이돌 백업 등 무대 경력 다수",
+   "s": "화·목 유아 · 키즈 K-POP",
+   "t0": 13.0,
+   "t1": 18.0,
+   "src": "n4_talk.mp4",
+   "g0": 13.0
+  },
+  {
+   "kind": "cap",
+   "tag": "T. MINKYUNG 반",
+   "e": "TUE · THU",
+   "ko": "화·목 MINKYUNG 쌤 반",
+   "t0": 18.0,
+   "t1": 20.0,
+   "src": "1119_kids_insta.mp4",
+   "g0": 18.0
+  },
+  {
+   "kind": "cap",
+   "tag": "T. MINKYUNG 반",
+   "e": "TUE · THU",
+   "ko": "화·목 MINKYUNG 쌤 반",
+   "t0": 20.0,
+   "t1": 22.0,
+   "src": "1119_kids_insta.mp4",
+   "g0": 18.0
+  },
+  {
+   "kind": "cap",
+   "tag": "유아 5–8세",
+   "e": "DANCE",
+   "ko": "아이돌 안무로 신나게",
+   "t0": 22.0,
+   "t1": 23.0,
+   "src": "1118_yua.mp4",
+   "g0": 22.0
+  },
+  {
+   "kind": "cap",
+   "tag": "키즈 9–12세",
+   "e": "DANCE",
+   "ko": "아이돌 안무로 신나게",
+   "t0": 23.0,
+   "t1": 24.0,
+   "src": "clip3.mp4",
+   "g0": 22.0
+  },
+  {
+   "kind": "cap",
+   "tag": "유아 5–8세",
+   "e": "BASICS",
+   "ko": "기본기까지 탄탄하게",
+   "t0": 24.0,
+   "t1": 25.0,
+   "src": "1112_yua_insta.mp4",
+   "g0": 24.0
+  },
+  {
+   "kind": "cap",
+   "tag": "",
+   "e": "BASICS",
+   "ko": "기본기까지 탄탄하게",
+   "t0": 25.0,
+   "t1": 26.0,
+   "src": "n6_img1053.mov",
+   "g0": 24.0
+  },
+  {
+   "kind": "info",
+   "i": 0,
+   "t0": 26.0,
+   "t1": 30.0,
+   "src": "1104_kpop.mp4",
+   "g0": 26.0
+  },
+  {
+   "kind": "info",
+   "i": 1,
+   "t0": 30.0,
+   "t1": 34.0,
+   "src": "1118_yua.mp4",
+   "g0": 30.0
+  },
+  {
+   "kind": "logo",
+   "t0": 34.0,
+   "t1": 38.0,
+   "src": "clip3.mp4",
+   "g0": 34.0
+  }
+ ],
+ "song": "party.wav",
+ "bpm": 120.0,
+ "total": 38.0
+}

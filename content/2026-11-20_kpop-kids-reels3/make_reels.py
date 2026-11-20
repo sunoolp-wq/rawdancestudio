@@ -26,9 +26,15 @@ def motion(f, a, b):
     x = np.frombuffer(r.stdout, np.uint8); n = len(x) // 4096; x = x[:n * 4096].reshape(n, 64, 64).astype(np.float32)
     return np.r_[0, np.abs(np.diff(x, axis=0)).mean((1, 2))]
 
+def luma(f, a, b):
+    r = subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-ss", f"{a:.2f}", "-t", f"{b - a:.2f}", "-i", f, "-vf", "fps=5,scale=32:32,format=gray", "-f", "rawvideo", "-"], capture_output=True)
+    x = np.frombuffer(r.stdout, np.uint8); n = len(x) // 1024; return x[:n * 1024].reshape(n, 1024).mean(1)
+
 def picks(f, a, b, seg, k, gap=2.0):
-    """a~b초 안에서 움직임이 큰 seg초 구간 k개 (서로 gap초 이상 떨어지게), 시간 순"""
+    """a~b초 안에서 움직임이 큰 seg초 구간 k개 (서로 gap초 이상 떨어지게), 시간 순. 어두운 장면(검은 전환·로고)이 낀 구간은 뺌"""
     m = motion(f, a, b); w = max(1, int(seg * 5)); sc = np.convolve(m, np.ones(w) / w, "valid"); out = []
+    L = luma(f, a, b); dark = np.convolve((L < 18).astype(float), np.ones(w), "valid") if len(L) >= w else np.zeros(len(sc))
+    sc = np.where(dark[:len(sc)] > 0, -1, sc) if len(dark) >= len(sc) else sc
     for i in np.argsort(sc)[::-1]:
         t = a + i / 5
         if t + seg > b: continue
@@ -165,8 +171,9 @@ elif WHICH == "B2":
             (4, ("fill", CLS, 5.5, ZN6), T2), (4, ("fill", "m1076.mov", 0.2, (0.42, 0.66, 0.68)), T2),
             (4, ("fill", CLS, 10.0, ZN6), T3), (4, ("fill", "m0415.mov", 8.5, (0.38, 0.66, 0.62)), T3),
             (10, ("split", (YT, ys[0]), (MT, ms[0])), {"kind": "pair"}),
-            (9, ("fill", "1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[1]), {"kind": "info", "i": 4}),   # 통학차량 대기 신청 모집 중
-            (9, ("fill", "1021_kids.mp4", pk("1021_kids.mp4", 2)[1]), {"kind": "info", "i": 3}),              # 유아·키즈반 모집 중
+            # 원장님 2026-11-20 "35초쯤 로고가 갑자기 뜬다" → 배경 영상이 원본 끝(박힌 RAW 로고·검은 화면)까지 넘어가서, 4.5초 통째로 안전한 구간으로 고름
+            (9, ("fill", "1104_kpop.mp4", pk("1104_kpop.mp4", 1, 4.8)[0]), {"kind": "info", "i": 4}),   # 통학차량 대기 신청 모집 중
+            (9, ("fill", "1118_yua.mp4", pk("1118_yua.mp4", 1, 4.8)[0]), {"kind": "info", "i": 3}),      # 유아·키즈반 모집 중
             (6, ("fill", "clip3.mp4", 0), LOGO)]
 else:
     song, bpm, first = "madness.wav", 130.0, 0.435

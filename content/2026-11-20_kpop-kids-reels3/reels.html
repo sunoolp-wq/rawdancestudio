@@ -46,8 +46,9 @@
 #bub .dots{font-size:96px;letter-spacing:.12em;color:#999}
 #bub .lime{margin-top:70px;font-size:58px}
 #line{left:0;right:0;top:1250px;text-align:center}
-#line .e{font-size:112px;font-weight:900;letter-spacing:-.04em;line-height:1.12}
-#line .sub{display:inline-block;margin-top:26px;background:#D7FF3A;color:#111;font-size:50px;font-weight:900;padding:10px 26px;transform:rotate(-3deg);box-shadow:0 12px 28px rgba(0,0,0,.35);text-shadow:none;white-space:nowrap}
+#line .k{font:400 150px/0.9 Anton;letter-spacing:.01em;white-space:nowrap}
+#line .e{margin-top:10px;font-size:118px;font-weight:900;letter-spacing:-.04em;line-height:1.12}
+#line .sub{display:inline-block;margin-top:24px;background:#D7FF3A;color:#111;font-size:64px;font-weight:900;padding:12px 32px;transform:rotate(-3deg);box-shadow:0 12px 28px rgba(0,0,0,.35);text-shadow:none;white-space:nowrap}
 #info{left:0;right:0;top:960px;text-align:center}
 #info .g{display:flex;justify-content:center;gap:70px}
 #info .ko{font-size:58px;font-weight:900}
@@ -82,7 +83,7 @@
 <div id="lab2" class="a lab sh" style="top:1010px"></div>
 <div id="band" class="a"></div>
 <div id="bub" class="a"><div class="b"></div><br><div class="lime"></div></div>
-<div id="line" class="a sh"><div class="e"></div><div class="sub"></div></div>
+<div id="line" class="a sh"><div class="k"></div><div class="e"></div><div class="sub"></div></div>
 <div id="info" class="a sh"></div>
 <div id="end" class="a"><div class="c"><img src="logo.png"><div class="k">KIDS K-POP · SUWON</div>
  <div class="lime">상담은 DM @rawdance_suwon</div><div class="s">카카오톡 '로우댄스수원점학원' · 수원역·매교역 근처</div></div></div>
@@ -139,8 +140,8 @@ window.render=t=>{
     const p=eo(v/0.18); b.style.opacity=p; b.style.transform=`scale(${0.7+0.3*p})`; b.style.transformOrigin='15% 100%';
     if(!typing){ const q=eo((v-0.45)/0.16); b.style.transform=`scale(${1.08-0.08*q})`; }
     pop(B.querySelector('.lime'),v,0.9); }
-  if(k==='line'){ show('line',true); const L=$('line'); if(fresh){ L.style.top=(s.y||1250)+'px'; L.querySelector('.e').innerHTML=s.e; const S=L.querySelector('.sub'); S.textContent=s.sub; S.style.display=s.sub?'':'none'; }
-    fade(L.querySelector('.e'),v,0,0,30); pop(L.querySelector('.sub'),v,0.25); }
+  if(k==='line'){ show('line',true); const L=$('line'); if(fresh){ L.style.top=(s.y||1250)+'px'; L.querySelector('.e').innerHTML=s.e; const K=L.querySelector('.k'); K.textContent=s.k||''; K.style.display=s.k?'':'none'; const S=L.querySelector('.sub'); S.textContent=s.sub; S.style.display=s.sub?'':'none'; }
+    fade(L.querySelector('.k'),v,0,-50,0); fade(L.querySelector('.e'),v,0.08,0,30); pop(L.querySelector('.sub'),v,0.25); }
   if(k==='info'){ show('info',true); const I=$('info'); if(fresh) I.innerHTML=INFO[s.i];
     fade(I,v,0,0,30); pop(I.querySelector('.lime'),v,0.3);
     const D=I.querySelector('.now i'); if(D) D.style.opacity=0.35+0.65*(0.5+0.5*Math.cos(v*Math.PI*2/0.93));

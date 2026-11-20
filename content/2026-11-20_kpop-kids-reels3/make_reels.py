@@ -151,11 +151,12 @@ elif WHICH == "B2":
     # 쌤 수업 컷: YUNI(IMG_1053)·민경쌤(IMG_0620·1076·0415) 번갈아, 쌤 쪽 확대 (전문반 학생 얼굴 크게 안 나오게, 검수 조건)
     song, bpm, first = "party.wav", 120.0, 0.029
     ys, ms = yt(1, 5.2), mt(1, 5.2); ZN6 = (0.45, 0.66, 0.65)
-    K1 = {"kind": "line", "e": "친구들과 다 같이", "sub": ""}
-    K2 = {"kind": "line", "e": "아이돌 안무로 신나게", "sub": ""}
-    T1 = {"kind": "line", "e": "쌤이 먼저 보여주고", "sub": "", "y": 450}
-    T2 = {"kind": "line", "e": "한 동작씩 차근차근", "sub": "", "y": 450}
-    T3 = {"kind": "line", "e": "처음이어도 괜찮아요", "sub": "", "y": 450}
+    # 원장님 2026-11-20 "자막 위·아래가 너무 허전" → 위에 큰 영문, 아래에 연두 띠
+    K1 = {"kind": "line", "k": "TOGETHER", "e": "친구들과 다 같이", "sub": "나이에 맞는 반에서", "y": 1130}
+    K2 = {"kind": "line", "k": "K-POP DANCE", "e": "아이돌 안무로 신나게", "sub": "유아 · 키즈 K-POP반", "y": 1130}
+    T1 = {"kind": "line", "k": "TEACHER", "e": "쌤이 먼저 보여주고", "sub": "T. YUNI · T. MINKYUNG", "y": 330}
+    T2 = {"kind": "line", "k": "STEP BY STEP", "e": "한 동작씩 차근차근", "sub": "기본기까지 탄탄하게", "y": 330}
+    T3 = {"kind": "line", "k": "BEGINNER OK", "e": "처음이어도 괜찮아요", "sub": "첫 춤을 재밌게", "y": 330}
     k = lambda f, i, beats, txt, tag, off=0.3: (beats, ("fill", f, pk(f, 2)[i] + off), dict(txt, tag=tag))
     plan = [(6, ("fill", "clip3.mp4", pk("clip3.mp4", 2)[0]), {"kind": "bubble", "say": "엄마, 나도<br>춤 배우고 싶어!", "band": "유아 5–8세 · 키즈 9–12세"}),
             k("1021_kids.mp4", 0, 3, K1, "키즈 9–12세"), k("1118_yua.mp4", 0, 3, K1, "유아 5–8세"), k("1119_kids_insta.mp4", 0, 3, K1, "키즈 9–12세"), k("1112_yua_insta.mp4", 0, 3, K1, "유아 5–8세"),

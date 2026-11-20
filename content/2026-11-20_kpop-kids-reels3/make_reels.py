@@ -65,19 +65,25 @@ def seg(spec, d, out):
         _, f, t = spec; f = P(f)
         enc(["-ss", f"{t:.3f}", "-t", f"{d:.3f}", "-i", f, "-vf", f"{fit(f, t, d, 1080, 1920)},fps={FPS},setsar=1"], out)
     elif lay == "square":   # 정사각 티저: 뒤는 같은 영상 흐리게, 앞은 정사각 그대로 (티저 속 'K-POP 쌤이름' 글자 살림)
-        _, f, t, Y = spec; f = P(f)
+        _, f, t, Y = spec; c = CUT.get(f); f = P(f)
+        sq = f"crop={c}:{c}:{(1080 - c) // 2}:0,scale=1080:1080" if c else "scale=1080:1080"
         enc(["-ss", f"{t:.3f}", "-t", f"{d:.3f}", "-i", f, "-filter_complex",
-             f"[0:v]fps={FPS},split[a][b];[a]scale=-2:1920,crop=1080:1920,boxblur=40:2,eq=brightness=-0.32[bg];[b]scale=1080:1080[fg];[bg][fg]overlay=0:{Y},setsar=1"], out)
+             f"[0:v]fps={FPS},split[a][b];[a]scale=-2:1920,crop=1080:1920,boxblur=40:2,eq=brightness=-0.32[bg];[b]{sq}[fg];[bg][fg]overlay=0:{Y},setsar=1"], out)
     elif lay == "split":    # 위아래 2분할 (각 1080×960)
-        _, (f1, t1), (f2, t2) = spec; f1, f2 = P(f1), P(f2)
-        top = "crop=1080:960:0:40" if size(f1)[0] == size(f1)[1] else fit(f1, t1, d, 1080, 960)
+        _, (f1, t1), (f2, t2) = spec
+        def half(f, t):
+            c = CUT.get(f); f = P(f)
+            if c: cw = int(c * 1.125) // 2 * 2; return f"crop={cw}:{c}:{(1080 - cw) // 2}:0,scale=1080:960"
+            return "crop=1080:960:0:40" if size(f)[0] == size(f)[1] else fit(f, t, d, 1080, 960)
+        top, bot = half(f1, t1), half(f2, t2); f1, f2 = P(f1), P(f2)
         enc(["-ss", f"{t1:.3f}", "-t", f"{d:.3f}", "-i", f1, "-ss", f"{t2:.3f}", "-t", f"{d:.3f}", "-i", f2, "-filter_complex",
-             f"[0:v]fps={FPS},scale=1080:-2,{top}[a];[1:v]fps={FPS},{fit(f2, t2, d, 1080, 960)}[b];[a][b]vstack,setsar=1"], out)
+             f"[0:v]fps={FPS},{top}[a];[1:v]fps={FPS},{bot}[b];[a][b]vstack,setsar=1"], out)
 
 # ── 쓸 구간 고르기 ──
 YT, MT = "n2_talk.mp4", "n4_talk.mp4"            # 티저: YUNI(0~35초 춤, 뒤 로고) · MINKYUNG(0~37초 춤, 뒤 로고)
+# 원장님 2026-11-20 "민경쌤 위에 있는 글자는 없애야" → MINKYUNG 티저는 박힌 'K-POP MINKYUNG' 글자(세로 775~915) 위쪽 766줄만 잘라 씀 (무릎 위 구도)
+CUT = {MT: 766}
 CLS = "n6_img1053.mov"                            # 쌤이 앞에서 시범, 아이들이 뒤에서 따라 하는 수업 장면 (쌤 이름은 확인 전이라 안 씀)
-TWO = "n5_img0316.mov"                            # 쌤 2명이 먼저 맞춰 보는 장면 (이름 안 씀)
 KIDS = {"1021_kids.mp4": ("키즈", 5.5, 3.5), "1104_kpop.mp4": ("키즈", 5.5, 3.5), "1119_kids_insta.mp4": ("키즈", 5.5, 3.5),
         "clip3.mp4": ("키즈", 5.5, 3.5), "1118_yua.mp4": ("유아", 2.0, 2.0), "1112_yua_insta.mp4": ("유아", 1.0, 1.0)}
 cache = {}
@@ -118,19 +124,19 @@ if WHICH == "A":
             (8, ("fill", "clip3.mp4", 0), LOGO)]
 elif WHICH == "B":
     song, bpm, first = "street.wav", 129.25, 0.453
-    c = pk(CLS, 3, 3.0, gap=3.0); t2 = pk(TWO, 2, 3.0, gap=4.0)
+    c = pk(CLS, 3, 3.0, gap=3.0)   # 쌤 2명 연습 영상(IMG_0316)은 어느 반 쌤인지 확인 전이라 뺌 (검수 권고 2026-11-20)
     H = hook("CLASS\nLOG", "유아 · 키즈 K-POP반 수업 현장", "RAW K-POP · SUWON")
     S1 = {"kind": "step", "no": "STEP 1", "e": "SHOW", "ko": "쌤이 먼저 보여주고"}
     S2 = {"kind": "step", "no": "STEP 2", "e": "FOLLOW", "ko": "하나씩 따라 하고"}
-    S3 = {"kind": "step", "no": "STEP 3", "e": "PERFORM", "ko": "한 곡 완성까지"}
+    S3 = {"kind": "step", "no": "STEP 3", "e": "PERFORM", "ko": "다 같이 맞춰 보기"}   # 검수 2026-11-20: '한 곡 완성'은 취미반 메시지라 바꿈
     ys, ms = yt(1, 4.6), mt(1, 4.6)
     plan = [(8, ("fill", CLS, c[0]), H),
-            (8, ("fill", TWO, t2[0]), S1),
-            (6, ("fill", CLS, c[1]), S2), (6, ("fill", "1104_kpop.mp4", pk("1104_kpop.mp4", 2)[0]), S2),
+            (8, ("fill", CLS, c[1]), S1),
+            (6, ("fill", CLS, c[2]), S2), (6, ("fill", "1104_kpop.mp4", pk("1104_kpop.mp4", 2)[0]), S2),
             (3, ("fill", "clip3.mp4", pk("clip3.mp4", 2)[0] + 0.3), dict(S3, tag="키즈 9–12세")), (3, ("fill", "1118_yua.mp4", pk("1118_yua.mp4", 2)[0] + 0.3), dict(S3, tag="유아 5–8세")),
             (3, ("fill", "1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[0] + 0.3), dict(S3, tag="키즈 9–12세")), (3, ("fill", "1112_yua_insta.mp4", pk("1112_yua_insta.mp4", 2)[0] + 0.3), dict(S3, tag="유아 5–8세")),
             (10, ("split", (YT, ys[0]), (MT, ms[0])), {"kind": "pair"}),
-            (8, ("fill", CLS, c[2]), INFO[0]), (8, ("fill", "1021_kids.mp4", pk("1021_kids.mp4", 2)[1]), INFO[1]),
+            (8, ("fill", "1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[1]), INFO[0]), (8, ("fill", "1021_kids.mp4", pk("1021_kids.mp4", 2)[1]), INFO[1]),
             (8, ("fill", "clip3.mp4", 0), LOGO)]
 else:
     song, bpm, first = "madness.wav", 130.0, 0.435
@@ -174,4 +180,5 @@ subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", base, "-framera
                 "-filter_complex", f"[1:v]format=rgba[o];[0:v][o]overlay=0:0:format=auto,format=yuv420p[v];[2:a]atrim=0:{total:.3f},afade=t=in:st=0:d=0.03,afade=t=out:st={total - 1.5:.3f}:d=1.5[a]",
                 "-map", "[v]", "-map", "[a]", "-t", f"{total:.3f}", "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-c:a", "aac", "-b:a", "256k", "-movflags", "+faststart", out], check=True)
 json.dump({"timeline": tl, "song": song, "bpm": bpm, "total": round(total, 2)}, open(os.path.join(OUT, f"KPOP_reel_{WHICH}.json"), "w"), ensure_ascii=False, indent=1)
+import shutil; shutil.rmtree(tmp, ignore_errors=True)   # 중간 파일(장면 PNG 수백 MB) 지움
 say(out)

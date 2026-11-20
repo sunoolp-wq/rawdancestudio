@@ -56,6 +56,9 @@
 #info .e{font:400 260px/0.85 Anton}
 #info .lime{margin-top:30px;font-size:68px}
 #info .s{margin-top:26px;font-size:46px;font-weight:800;line-height:1.5}
+#info .now{display:inline-flex;align-items:center;gap:18px;font:700 40px Inter;letter-spacing:.3em;text-indent:.3em}
+#info .now i{display:inline-block;width:28px;height:28px;border-radius:50%;background:#ff3b5c;box-shadow:0 0 24px #ff3b5c}
+#info .mz{margin-top:6px;font-size:240px;font-weight:900;letter-spacing:-.06em;line-height:1;color:#D7FF3A}
 #end{inset:0;background:#0b0a0f}
 #end .c{position:absolute;left:0;right:0;top:760px;text-align:center}
 #end img{width:460px}
@@ -95,7 +98,9 @@ const tch=(c,cls)=>`<div class="d">${c.d}</div><div class="n">${c.n}</div><div c
 const TY={d:'MON · WED',n:'T. YUNI',a:'대형 기획사 연습생 출신',b:''}, TM={d:'TUE · THU',n:'T. MINKYUNG',a:'현장 경험 많은 현역 댄서',b:'아이돌 백업 등 무대 경력 다수'};
 // 정보 화면 2장 (11-19 광고 최종 검수 통과 문구 그대로)
 const INFO=[`<div class="g"><div><div class="ko">유아 K-POP</div><div class="num">5–8<small>세</small></div></div><div><div class="ko">키즈 K-POP</div><div class="num">9–12<small>세</small></div></div></div><div class="lime">평일반 · 토요일반 모집</div>`,
-  `<div class="e">DM</div><div class="lime">상담 · 통학차량 대기 신청</div><div class="s">통학차량 운행 계획 중 · 신청 인원이 모이면 운행 시작<br>수원역·매교역 근처 · 건물 내 무료 주차</div>`];
+  `<div class="e">DM</div><div class="lime">상담 · 통학차량 대기 신청</div><div class="s">통학차량 운행 계획 중 · 신청 인원이 모이면 운행 시작<br>수원역·매교역 근처 · 건물 내 무료 주차</div>`,
+  // B2 (원장님 2026-11-20 "DM 상담 통학차량 멘트보다 모집 중인 거 확실히 보이게") — 통학차량은 캡션에만
+  `<div class="now"><i></i>NOW OPEN</div><div class="mz">모집 중</div><div class="lime">유아 · 키즈 K-POP반</div><div class="s">평일반 (월·수 / 화·목) · 토요일반<br>상담 DM @rawdance_suwon</div>`];
 window.setup=o=>{ TL=o.tl; VER=o.ver; };
 let last='';
 window.render=t=>{
@@ -129,7 +134,9 @@ window.render=t=>{
   if(k==='line'){ show('line',true); const L=$('line'); if(fresh){ L.style.top=(s.y||1250)+'px'; L.querySelector('.e').innerHTML=s.e; const S=L.querySelector('.sub'); S.textContent=s.sub; S.style.display=s.sub?'':'none'; }
     fade(L.querySelector('.e'),v,0,0,30); pop(L.querySelector('.sub'),v,0.25); }
   if(k==='info'){ show('info',true); const I=$('info'); if(fresh) I.innerHTML=INFO[s.i];
-    fade(I,v,0,0,30); pop(I.querySelector('.lime'),v,0.3); }
+    fade(I,v,0,0,30); pop(I.querySelector('.lime'),v,0.3);
+    const D=I.querySelector('.now i'); if(D) D.style.opacity=0.35+0.65*(0.5+0.5*Math.cos(v*Math.PI*2/0.93));
+    const M=I.querySelector('.mz'); if(M){ const p=eo((v-0.1)/0.22); M.style.transform=`scale(${1.25-0.25*p})`; M.style.opacity=p; } }
   if(k==='logo'){ show('end',true); $('end').style.opacity=eo(v/0.35); pop($('end').querySelector('.lime'),v,0.4); }
 };
 </script></body></html>

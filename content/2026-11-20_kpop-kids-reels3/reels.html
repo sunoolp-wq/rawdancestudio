@@ -39,6 +39,15 @@
 #band .n{margin-top:6px;font:italic 400 104px/0.95 "GoGo Poster 2020",Anton;white-space:nowrap}
 #band .lime{margin-top:16px;font-size:54px}
 #band .blk{margin-top:12px;font-size:40px;background:#fff;color:#111}
+/* B2: 아이 말풍선 (메시지처럼 ··· 뒤에 톡) + 한글 큰 줄 */
+#bub{left:0;right:0;top:1060px;text-align:center}
+#bub .b{position:relative;display:inline-block;background:#fff;color:#111;border-radius:64px;padding:40px 60px 44px;font-size:96px;font-weight:900;line-height:1.18;letter-spacing:-.03em;box-shadow:0 20px 50px rgba(0,0,0,.4);text-align:left}
+#bub .b:after{content:"";position:absolute;left:70px;bottom:-34px;border:24px solid transparent;border-top:44px solid #fff;border-left:30px solid #fff;transform:skewX(-14deg)}
+#bub .dots{font-size:96px;letter-spacing:.12em;color:#999}
+#bub .lime{margin-top:70px;font-size:58px}
+#line{left:0;right:0;top:1250px;text-align:center}
+#line .e{font-size:112px;font-weight:900;letter-spacing:-.04em;line-height:1.12}
+#line .sub{display:inline-block;margin-top:26px;background:#D7FF3A;color:#111;font-size:50px;font-weight:900;padding:10px 26px;transform:rotate(-3deg);box-shadow:0 12px 28px rgba(0,0,0,.35);text-shadow:none;white-space:nowrap}
 #info{left:0;right:0;top:960px;text-align:center}
 #info .g{display:flex;justify-content:center;gap:70px}
 #info .ko{font-size:58px;font-weight:900}
@@ -64,6 +73,8 @@
 <div id="lab1" class="a lab sh" style="top:250px"></div>
 <div id="lab2" class="a lab sh" style="top:1010px"></div>
 <div id="band" class="a"></div>
+<div id="bub" class="a"><div class="b"></div><br><div class="lime"></div></div>
+<div id="line" class="a sh"><div class="e"></div><div class="sub"></div></div>
 <div id="info" class="a sh"></div>
 <div id="end" class="a"><div class="c"><img src="logo.png"><div class="k">KIDS K-POP · SUWON</div>
  <div class="lime">상담은 DM @rawdance_suwon</div><div class="s">카카오톡 '로우댄스수원점학원' · 수원역·매교역 근처</div></div></div>
@@ -90,9 +101,9 @@ let last='';
 window.render=t=>{
   const s=TL.find(x=>t>=x.t0&&t<x.t1)||TL[TL.length-1], k=s.kind, v=t-s.g0, key=JSON.stringify([s.g0,k]);
   const fresh=key!==last; last=key;
-  const sq=VER==='A'&&(k==='hook'||k==='card'), split=(VER==='C'&&(k==='hook'||k==='band'))||k==='pair';
+  const sq=(VER==='A'&&(k==='hook'||k==='card')), split=(VER==='C'&&(k==='hook'||k==='band'))||k==='pair';
   show('logo',k!=='logo'&&!sq&&!split); show('grad',k!=='logo'&&!split);
-  ['hook','cap','step','card','lab1','lab2','band','info','end','tag'].forEach(id=>show(id,false));
+  ['hook','cap','step','card','lab1','lab2','band','info','end','tag','bub','line'].forEach(id=>show(id,false));
   if(s.tag){ show('tag',true); $('tag').textContent=s.tag; $('tag').style.background=s.tag.startsWith('유아')?'#FFB3CF':'#D7FF3A'; }
   if(k==='hook'){ show('hook',true); const H=$('hook');
     if(fresh){ H.querySelector('.k').textContent=s.k; H.querySelector('.lime').textContent=s.band; if(HT!==s.t) mk(s.t);
@@ -109,6 +120,14 @@ window.render=t=>{
     [['lab1',0],['lab2',0.35]].forEach(([id,dl])=>{ const L=$(id); fade(L.querySelector('.d'),v,dl); fade(L.querySelector('.n'),v,dl,-60,0); pop(L.querySelector('.lime'),v,dl+0.12); pop(L.querySelector('.blk'),v,dl+0.3); }); }
   if(k==='band'){ show('band',true); const B=$('band'); if(fresh) B.innerHTML=`<div class="bar">${tch(s)}</div>`;
     fade(B.querySelector('.bar'),v,0,0,20); fade(B.querySelector('.n'),v,0.05,-60,0); pop(B.querySelector('.lime'),v,0.15); pop(B.querySelector('.blk'),v,0.32); }
+  if(k==='bubble'){ show('bub',true); const B=$('bub'), b=B.querySelector('.b'), typing=v<0.45;
+    if(fresh) B.querySelector('.lime').textContent=s.band;
+    if(B.dataset.t!==String(typing)){ B.dataset.t=String(typing); b.innerHTML=typing?'<span class="dots">•••</span>':s.say; }
+    const p=eo(v/0.18); b.style.opacity=p; b.style.transform=`scale(${0.7+0.3*p})`; b.style.transformOrigin='15% 100%';
+    if(!typing){ const q=eo((v-0.45)/0.16); b.style.transform=`scale(${1.08-0.08*q})`; }
+    pop(B.querySelector('.lime'),v,0.9); }
+  if(k==='line'){ show('line',true); const L=$('line'); if(fresh){ L.style.top=(s.y||1250)+'px'; L.querySelector('.e').innerHTML=s.e; const S=L.querySelector('.sub'); S.textContent=s.sub; S.style.display=s.sub?'':'none'; }
+    fade(L.querySelector('.e'),v,0,0,30); pop(L.querySelector('.sub'),v,0.25); }
   if(k==='info'){ show('info',true); const I=$('info'); if(fresh) I.innerHTML=INFO[s.i];
     fade(I,v,0,0,30); pop(I.querySelector('.lime'),v,0.3); }
   if(k==='logo'){ show('end',true); $('end').style.opacity=eo(v/0.35); pop($('end').querySelector('.lime'),v,0.4); }

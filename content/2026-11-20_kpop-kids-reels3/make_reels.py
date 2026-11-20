@@ -12,7 +12,7 @@ OLD, NEW, MUS, OUT, WHICH = sys.argv[1:6]
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, "../.."))
 FPS = 30
 say = lambda s: print(s, flush=True)
-P = lambda f: os.path.join(NEW if f.startswith("n") else OLD, f)
+P = lambda f: os.path.join(NEW if f[0] in "nm" else OLD, f)   # n·m = 11-20 새 영상
 
 def dur(f): return float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f], capture_output=True, text=True).stdout)
 def size(f):
@@ -59,11 +59,18 @@ def fit(f, t, d, W, H):
 def enc(args, out):
     subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y"] + args + ["-an", "-r", str(FPS), "-c:v", "libx264", "-crf", "12", "-preset", "fast", "-pix_fmt", "yuv420p", out], check=True)
 
+def zoom(z):
+    if not z: return ""
+    cx, cy, k = z; w, h = int(1080 * k) // 2 * 2, int(1920 * k) // 2 * 2
+    x = int(min(max(0, cx * 1080 - w / 2), 1080 - w)); y = int(min(max(0, cy * 1920 - h / 2), 1920 - h))
+    return f",crop={w}:{h}:{x}:{y},scale=1080:1920"
+
 def seg(spec, d, out):
     lay = spec[0]
-    if lay == "fill":       # 세로 꽉 채우기
-        _, f, t = spec; f = P(f)
-        enc(["-ss", f"{t:.3f}", "-t", f"{d:.3f}", "-i", f, "-vf", f"{fit(f, t, d, 1080, 1920)},fps={FPS},setsar=1"], out)
+    if lay == "fill":       # 세로 꽉 채우기 (4번째 값 = 확대: 가운데 x·y 비율, 남길 크기 비율)
+        f, t = spec[1], spec[2]; z = spec[3] if len(spec) > 3 else None; f = P(f)
+        lift = ",eq=brightness=0.05:contrast=1.08:saturation=1.12" if os.path.basename(f).startswith("m") else ""   # 민경쌤 수업 영상은 어두워서 살짝 밝게
+        enc(["-ss", f"{t:.3f}", "-t", f"{d:.3f}", "-i", f, "-vf", f"{fit(f, t, d, 1080, 1920)}{zoom(z)}{lift},fps={FPS},setsar=1"], out)
     elif lay == "square":   # 정사각 티저: 뒤는 같은 영상 흐리게, 앞은 정사각 그대로 (티저 속 'K-POP 쌤이름' 글자 살림)
         _, f, t, Y = spec; c = CUT.get(f); f = P(f)
         sq = f"crop={c}:{c}:{(1080 - c) // 2}:0,scale=1080:1080" if c else "scale=1080:1080"
@@ -136,6 +143,22 @@ elif WHICH == "B":
             (3, ("fill", "clip3.mp4", pk("clip3.mp4", 2)[0] + 0.3), dict(S3, tag="키즈 9–12세")), (3, ("fill", "1118_yua.mp4", pk("1118_yua.mp4", 2)[0] + 0.3), dict(S3, tag="유아 5–8세")),
             (3, ("fill", "1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[0] + 0.3), dict(S3, tag="키즈 9–12세")), (3, ("fill", "1112_yua_insta.mp4", pk("1112_yua_insta.mp4", 2)[0] + 0.3), dict(S3, tag="유아 5–8세")),
             (10, ("split", (YT, ys[0]), (MT, ms[0])), {"kind": "pair"}),
+            (8, ("fill", "1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[1]), INFO[0]), (8, ("fill", "1021_kids.mp4", pk("1021_kids.mp4", 2)[1]), INFO[1]),
+            (8, ("fill", "clip3.mp4", 0), LOGO)]
+elif WHICH == "B2":
+    # 원장님 2026-11-20: B 느낌 좋음 / STEP 1·2·3 빼고 / 시작만 아이 말투 "엄마, 나도 춤 배우고 싶어" / 광고니까 첫 장면 후킹
+    # 쌤 시범 자리는 민경쌤 수업(전문반) 영상이 오면 바꿔 끼움 — 지금은 민경쌤 티저(글자 잘라 냄)로 임시
+    song, bpm, first = "street.wav", 129.25, 0.453
+    c = pk(CLS, 3, 3.0, gap=3.0); ys, ms = yt(1, 4.6), mt(1, 4.6); m1 = mt(2, 6.6, 6)
+    L2 = {"kind": "line", "e": "한 동작씩 차근차근", "sub": ""}
+    L3 = {"kind": "line", "e": "친구들과 다 같이", "sub": ""}
+    plan = [(6, ("fill", "clip3.mp4", pk("clip3.mp4", 2)[0]), {"kind": "bubble", "say": "엄마, 나도<br>춤 배우고 싶어!", "band": "유아 5–8세 · 키즈 9–12세"}),
+            # 원장님 2026-11-20 새로 올린 민경쌤 수업 영상(전문반, IMG_0620·IMG_1076) — 학생들은 키즈반이 아니라 나이 표시 안 붙임
+            (14, ("fill", "m0620.mov", 2.4, (0.45, 0.6, 0.6)), {"kind": "line", "e": "현역 댄서 쌤이<br>먼저 보여주고", "sub": "T. MINKYUNG · 현장 경험 많은 현역 댄서", "y": 360}),
+            (6, ("fill", "m1076.mov", 0.2, (0.42, 0.66, 0.68)), dict(L2, y=360)), (5, ("fill", "1104_kpop.mp4", pk("1104_kpop.mp4", 2)[0]), dict(L2, y=360)),
+            (3, ("fill", "clip3.mp4", pk("clip3.mp4", 2)[1] + 0.3), dict(L3, tag="키즈 9–12세")), (3, ("fill", "1118_yua.mp4", pk("1118_yua.mp4", 2)[0] + 0.3), dict(L3, tag="유아 5–8세")),
+            (3, ("fill", "1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[0] + 0.3), dict(L3, tag="키즈 9–12세")), (3, ("fill", "1112_yua_insta.mp4", pk("1112_yua_insta.mp4", 2)[0] + 0.3), dict(L3, tag="유아 5–8세")),
+            (9, ("split", (YT, ys[0]), (MT, ms[0])), {"kind": "pair"}),
             (8, ("fill", "1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[1]), INFO[0]), (8, ("fill", "1021_kids.mp4", pk("1021_kids.mp4", 2)[1]), INFO[1]),
             (8, ("fill", "clip3.mp4", 0), LOGO)]
 else:

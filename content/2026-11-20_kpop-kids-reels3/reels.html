@@ -1,0 +1,116 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+/* 유아·키즈 K-POP 광고 릴스 재구성 3종 글자 (2026-11-20). 11-19 광고 3차 디자인(연두 띠 + 검은 글씨, 큰 영문) 그대로 이어 씀
+   글자 내용은 make_reels.py 가 장면마다 넘김 (hook · card · cap · step · pair · band · info · logo) */
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:1080px;height:1920px;background:transparent;overflow:hidden;font-family:"Gothic A1","Noto Sans KR",sans-serif;color:#fff}
+.a{position:absolute}
+.sh{text-shadow:0 6px 28px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.5)}
+.lime{display:inline-block;background:#D7FF3A;color:#111;font-weight:900;padding:12px 30px;transform:rotate(-3deg);box-shadow:0 12px 28px rgba(0,0,0,.35);text-shadow:none;white-space:nowrap}
+.blk{display:inline-block;background:#111;color:#fff;font-weight:900;padding:10px 26px;transform:rotate(-3deg);box-shadow:0 12px 28px rgba(0,0,0,.35);text-shadow:none;white-space:nowrap}
+.pill{display:inline-block;padding:12px 26px;font-size:46px;font-weight:900;color:#111;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+#grad{left:0;right:0;bottom:0;height:1100px;background:linear-gradient(transparent,rgba(8,7,12,.78) 55%)}
+#logo{left:60px;top:250px;height:42px}
+#tag{left:60px;top:320px}
+#hook{left:0;right:0;text-align:center}
+#hook .k{font:700 30px Inter;letter-spacing:.3em;text-indent:.3em}
+#hook .t{margin-top:12px;font:italic 400 220px/0.9 "GoGo Poster 2020",Anton}
+#hook .t span{display:inline-block;white-space:pre;position:relative}#hook .t span i{position:absolute;left:0;top:0;font-style:inherit}
+#hook .lime{margin-top:26px;font-size:66px}
+#cap{left:0;right:0;top:1250px;text-align:center}
+#cap .e{font:400 170px/0.88 Anton;letter-spacing:.01em;white-space:nowrap}
+#cap .lime{margin-top:22px;font-size:74px}
+#step{left:0;right:0;top:1170px;text-align:center}
+#step .no{display:inline-block;background:#111;color:#D7FF3A;font:700 40px Inter;letter-spacing:.2em;padding:10px 24px 10px 30px}
+#step .e{margin-top:14px;font:400 190px/0.88 Anton}
+#step .lime{margin-top:22px;font-size:78px}
+#card{left:0;right:0;top:1300px;text-align:center}
+#card .d{font:700 30px Inter;letter-spacing:.42em;text-indent:.42em}
+#card .n{margin-top:6px;font:italic 400 128px/0.95 "GoGo Poster 2020",Anton;white-space:nowrap}
+#card .lime{margin-top:20px;font-size:64px}
+#card .blk{margin-top:16px;font-size:48px}
+#card .s{margin-top:20px;font-size:40px;font-weight:800}
+.lab{left:56px}
+.lab .d{font:700 26px Inter;letter-spacing:.35em}
+.lab .n{margin-top:4px;font:italic 400 96px/0.95 "GoGo Poster 2020",Anton;white-space:nowrap}
+.lab .lime{margin-top:14px;font-size:46px;padding:9px 22px}
+.lab .blk{margin-top:10px;font-size:38px;padding:8px 20px}
+#band{left:0;right:0;top:960px;transform:translateY(-50%);text-align:center}
+#band .bar{display:inline-block;background:rgba(11,10,15,.92);padding:22px 50px 26px;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+#band .d{font:700 26px Inter;letter-spacing:.42em;text-indent:.42em;color:#D7FF3A}
+#band .n{margin-top:6px;font:italic 400 104px/0.95 "GoGo Poster 2020",Anton;white-space:nowrap}
+#band .lime{margin-top:16px;font-size:54px}
+#band .blk{margin-top:12px;font-size:40px;background:#fff;color:#111}
+#info{left:0;right:0;top:960px;text-align:center}
+#info .g{display:flex;justify-content:center;gap:70px}
+#info .ko{font-size:58px;font-weight:900}
+#info .num{margin-top:4px;font:400 250px/0.85 Anton;color:#D7FF3A}
+#info .num small{font-family:"Gothic A1";font-size:64px;font-weight:900;color:#fff;margin-left:6px}
+#info .e{font:400 260px/0.85 Anton}
+#info .lime{margin-top:30px;font-size:68px}
+#info .s{margin-top:26px;font-size:46px;font-weight:800;line-height:1.5}
+#end{inset:0;background:#0b0a0f}
+#end .c{position:absolute;left:0;right:0;top:760px;text-align:center}
+#end img{width:460px}
+#end .k{margin-top:30px;font:700 26px Inter;letter-spacing:.32em;text-indent:.32em;opacity:.85}
+#end .lime{margin-top:50px;font-size:60px}
+#end .s{margin-top:34px;font-size:38px;font-weight:700;opacity:.8}
+</style></head><body>
+<div id="grad" class="a"></div>
+<img id="logo" class="a" src="logo.png">
+<div id="tag" class="a pill"></div>
+<div id="hook" class="a sh"><div class="k"></div><div class="t" id="ht"></div><div class="lime"></div></div>
+<div id="cap" class="a sh"><div class="e"></div><div class="lime"></div></div>
+<div id="step" class="a sh"><div class="no"></div><div class="e"></div><div class="lime"></div></div>
+<div id="card" class="a sh"></div>
+<div id="lab1" class="a lab sh" style="top:250px"></div>
+<div id="lab2" class="a lab sh" style="top:1010px"></div>
+<div id="band" class="a"></div>
+<div id="info" class="a sh"></div>
+<div id="end" class="a"><div class="c"><img src="logo.png"><div class="k">KIDS K-POP · SUWON</div>
+ <div class="lime">상담은 DM @rawdance_suwon</div><div class="s">카카오톡 '로우댄스수원점학원' · 수원역·매교역 근처</div></div></div>
+<script>
+const $=id=>document.getElementById(id), cl=x=>Math.min(1,Math.max(0,x)), eo=x=>1-Math.pow(1-cl(x),3);
+let TL=[], VER='A';
+let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+const AZ="ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let CH=[], HT='';
+function mk(txt){ const el=$('ht'); el.innerHTML=''; HT=txt;
+  CH=[...txt].map(c=>{ if(c==='\n'){ el.appendChild(document.createElement('br')); return null; }
+    const s=document.createElement('span'); s.textContent=c; const g=document.createElement('i'); s.appendChild(g); el.appendChild(s);
+    return {s,g,c,on:0.05+rnd()*0.45,gh:rnd()<0.45,gc:AZ[Math.floor(rnd()*26)]}; }).filter(Boolean); }
+const show=(id,on)=>{ $(id).style.display=on?'':'none'; };
+const pop=(el,u,dl=0)=>{ if(!el) return; const p=eo((u-dl)/0.22); el.style.opacity=p; el.style.transform='rotate(-3deg)'+` scale(${1.18-0.18*p})`; };
+const fade=(el,u,dl=0,dx=0,dy=0)=>{ if(!el) return; const p=eo((u-dl)/0.25); el.style.opacity=p; el.style.transform=`translate(${(1-p)*dx}px,${(1-p)*dy}px)`; };
+const tch=(c,cls)=>`<div class="d">${c.d}</div><div class="n">${c.n}</div><div class="lime">${c.a}</div>${c.b?`<br><div class="blk">${c.b}</div>`:''}${c.s?`<div class="s">${c.s}</div>`:''}`;
+// 쌤 이력 (브랜드 가이드 강사 표, 원장님 확인 2026-11-13 · 11-19)
+const TY={d:'MON · WED',n:'T. YUNI',a:'대형 기획사 연습생 출신',b:''}, TM={d:'TUE · THU',n:'T. MINKYUNG',a:'현장 경험 많은 현역 댄서',b:'아이돌 백업 등 무대 경력 다수'};
+// 정보 화면 2장 (11-19 광고 최종 검수 통과 문구 그대로)
+const INFO=[`<div class="g"><div><div class="ko">유아 K-POP</div><div class="num">5–8<small>세</small></div></div><div><div class="ko">키즈 K-POP</div><div class="num">9–12<small>세</small></div></div></div><div class="lime">평일반 · 토요일반 모집</div>`,
+  `<div class="e">DM</div><div class="lime">상담 · 통학차량 대기 신청</div><div class="s">통학차량 운행 계획 중 · 신청 인원이 모이면 운행 시작<br>수원역·매교역 근처 · 건물 내 무료 주차</div>`];
+window.setup=o=>{ TL=o.tl; VER=o.ver; };
+let last='';
+window.render=t=>{
+  const s=TL.find(x=>t>=x.t0&&t<x.t1)||TL[TL.length-1], k=s.kind, v=t-s.g0, key=JSON.stringify([s.g0,k]);
+  const fresh=key!==last; last=key;
+  const sq=VER==='A'&&(k==='hook'||k==='card'), split=(VER==='C'&&(k==='hook'||k==='band'))||k==='pair';
+  show('logo',k!=='logo'&&!sq&&!split); show('grad',k!=='logo'&&!split);
+  ['hook','cap','step','card','lab1','lab2','band','info','end','tag'].forEach(id=>show(id,false));
+  if(s.tag){ show('tag',true); $('tag').textContent=s.tag; $('tag').style.background=s.tag.startsWith('유아')?'#FFB3CF':'#D7FF3A'; }
+  if(k==='hook'){ show('hook',true); const H=$('hook');
+    if(fresh){ H.querySelector('.k').textContent=s.k; H.querySelector('.lime').textContent=s.band; if(HT!==s.t) mk(s.t);
+      H.style.top=(VER==='A'?1300:VER==='C'?560:1060)+'px'; }
+    CH.forEach(c=>{ c.s.style.color=v>=c.on?'#fff':'transparent'; c.g.textContent=(c.gh&&v>=c.on-1/24&&v<c.on)?c.gc:''; c.g.style.color='rgba(255,255,255,.4)'; });
+    H.querySelector('.k').style.opacity=eo((v-0.05)/0.3); pop(H.querySelector('.lime'),v,0.5); }
+  if(k==='cap'){ show('cap',true); const C=$('cap'); if(fresh){ C.querySelector('.e').textContent=s.e; C.querySelector('.lime').textContent=s.ko; }
+    fade(C.querySelector('.e'),v,0,0,30); pop(C.querySelector('.lime'),v,0.08); }
+  if(k==='step'){ show('step',true); const S=$('step'); if(fresh){ S.querySelector('.no').textContent=s.no; S.querySelector('.e').textContent=s.e; S.querySelector('.lime').textContent=s.ko; }
+    fade(S.querySelector('.no'),v,0,-40,0); fade(S.querySelector('.e'),v,0.06,0,30); pop(S.querySelector('.lime'),v,0.15); }
+  if(k==='card'){ show('card',true); const C=$('card'); if(fresh) C.innerHTML=tch(s);
+    fade(C.querySelector('.d'),v); fade(C.querySelector('.n'),v,0,-60,0); pop(C.querySelector('.lime'),v,0.12); pop(C.querySelector('.blk'),v,0.3); fade(C.querySelector('.s'),v,0.4); }
+  if(k==='pair'){ show('lab1',true); show('lab2',true); if(fresh){ $('lab1').innerHTML=tch(TY); $('lab2').innerHTML=tch(TM); }
+    [['lab1',0],['lab2',0.35]].forEach(([id,dl])=>{ const L=$(id); fade(L.querySelector('.d'),v,dl); fade(L.querySelector('.n'),v,dl,-60,0); pop(L.querySelector('.lime'),v,dl+0.12); pop(L.querySelector('.blk'),v,dl+0.3); }); }
+  if(k==='band'){ show('band',true); const B=$('band'); if(fresh) B.innerHTML=`<div class="bar">${tch(s)}</div>`;
+    fade(B.querySelector('.bar'),v,0,0,20); fade(B.querySelector('.n'),v,0.05,-60,0); pop(B.querySelector('.lime'),v,0.15); pop(B.querySelector('.blk'),v,0.32); }
+  if(k==='info'){ show('info',true); const I=$('info'); if(fresh) I.innerHTML=INFO[s.i];
+    fade(I,v,0,0,30); pop(I.querySelector('.lime'),v,0.3); }
+  if(k==='logo'){ show('end',true); $('end').style.opacity=eo(v/0.35); pop($('end').querySelector('.lime'),v,0.4); }
+};
+</script></body></html>

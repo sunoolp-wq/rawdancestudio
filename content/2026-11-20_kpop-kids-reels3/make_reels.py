@@ -92,7 +92,9 @@ def seg(spec, d, out):
     elif lay == "split":    # 위아래 2분할 (각 1080×960)
         _, (f1, t1), (f2, t2) = spec
         def half(f, t):
-            c = CUT.get(f); f = P(f)
+            c = CUT.get(f); gx = GX.get(f); f = P(f)
+            if gx is not None:
+                w0, h0 = size(f); cw = int(h0 * 1.125) // 2 * 2; return f"crop={cw}:{h0}:{int(min(max(0, gx * w0 - cw / 2), w0 - cw))}:0,scale=1080:960"
             if c: cw = int(c * 1.125) // 2 * 2; return f"crop={cw}:{c}:{(1080 - cw) // 2}:0,scale=1080:960"
             return "crop=1080:960:0:40" if size(f)[0] == size(f)[1] else fit(f, t, d, 1080, 960)
         top, bot = half(f1, t1), half(f2, t2); f1, f2 = P(f1), P(f2)
@@ -103,6 +105,7 @@ def seg(spec, d, out):
 YT, MT = "n2_talk.mp4", "n4_talk.mp4"            # 티저: YUNI(0~35초 춤, 뒤 로고) · MINKYUNG(0~37초 춤, 뒤 로고)
 # 원장님 2026-11-20 "민경쌤 위에 있는 글자는 없애야" → MINKYUNG 티저는 박힌 'K-POP MINKYUNG' 글자(세로 775~915) 위쪽 766줄만 잘라 씀 (무릎 위 구도)
 CUT = {MT: 766}
+GX = {"nk1.mp4": 0.5, "nk2.mp4": 0.52, "nk3.mp4": 0.47}   # 하트 단체샷 2분할용 가운데 x
 CLS = "n6_img1053.mov"                            # 쌤이 앞에서 시범, 아이들이 뒤에서 따라 하는 수업 장면 (쌤 이름은 확인 전이라 안 씀)
 KIDS = {"1021_kids.mp4": ("키즈", 5.5, 3.5), "1104_kpop.mp4": ("키즈", 5.5, 3.5), "1119_kids_insta.mp4": ("키즈", 5.5, 3.5),
         "clip3.mp4": ("키즈", 5.5, 3.5), "1118_yua.mp4": ("유아", 2.0, 2.0), "1112_yua_insta.mp4": ("유아", 1.0, 1.0)}
@@ -163,7 +166,7 @@ elif WHICH == "B2":
     #   → 통학차량 대기 신청 모집 중 → 유아·키즈반 모집 중(체포하겠어 영상, 48초가 마지막) → 엔딩
     # 11-21 "중복 영상이 너무 많아, 다양하게" → 영상마다 딱 한 번만 나오게:
     #   아이들 = clip3 · 하트 단체샷 3개(nk1~3) · 1119 · 1021 · 1118 · 1104 · 1112 (9개 각 1번)
-    #   쌤 = 유니쌤 IMG_0316 · C1912 · IMG_1053 / 민경쌤 시퀀스26 · IMG_1076 · IMG_0620 (6개 각 1번)
+    #   쌤 = 유니쌤 IMG_0316 · C1912 · IMG_1053 / 민경쌤 IMG_0415 · IMG_1076 · IMG_0620 (6개 각 1번)
     #   엔딩 = 옥상 영상(nk4_roof, 인사하는 장면) 위에 로고 — 원장님 "인사하는 장면, 엔딩으로"
     song, bpm, first = "party.wav", 120.0, 0.029
     ys, ms = yt(1, 5.2), mt(1, 5.2); ZN6 = (0.45, 0.66, 0.65); ZN5 = (0.48, 0.74, 0.72); Y5 = pk("n5_img0316.mov", 1, 2.2)
@@ -176,15 +179,19 @@ elif WHICH == "B2":
     k = lambda f, i, beats, txt, tag, off=0.3: (beats, ("fill", f, pk(f, 2)[i] + off), dict(txt, tag=tag))
     G = lambda f, cx, tag="": (3, ("square", f, 0.2, 200, cx), dict(K1, tag=tag) if tag else K1)   # 하트 단체샷 (2초 남짓)
     plan = [(6, ("fill", "clip3.mp4", pk("clip3.mp4", 2)[0]), {"kind": "bubble", "say": "엄마, 나도<br>춤 배우고 싶어!", "band": "유아 5–8세 · 키즈 9–12세"}),
-            G("nk3.mp4", 0.47, "유아 5–8세"), G("nk1.mp4", 0.5), G("nk2.mp4", 0.52, "유아 5–8세"), k("1119_kids_insta.mp4", 0, 3, K1, "키즈 9–12세"),
+            # 원장님 11-21 "친구들과 다 같이는 2분할로" → 위아래 2분할 2장 (하트 단체샷 3개 + 키즈 1컷)
+            (4, ("split", ("nk3.mp4", 0.1), ("nk2.mp4", 0.0)), dict(K1, y=880, nogr=1, tag="유아 5–8세")),
+            (4, ("split", ("nk1.mp4", 0.1), ("1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[0] + 0.3)), dict(K1, y=880, nogr=1)),
             k("1021_kids.mp4", 0, 3, K2, "키즈 9–12세"), k("1118_yua.mp4", 0, 3, K2, "유아 5–8세"), k("1104_kpop.mp4", 0, 3, K2, "키즈 9–12세"),
-            (4, ("fill", "n5_img0316.mov", Y5[0], ZN5), T1), (4, ("fill", "n9_seq26.mp4", 4.0), T1),
+            (4, ("fill", "n5_img0316.mov", Y5[0], ZN5), T1), (4, ("fill", "m0415.mov", 8.5, (0.38, 0.66, 0.62)), T1),   # 11-21 "17초 상관없는 쌤" → 시퀀스26 빼고 민경쌤 IMG_0415
             (4, ("fill", "n10_c1912.mp4", 15.0), T2), (4, ("fill", "m1076.mov", 0.2, (0.42, 0.66, 0.68)), T2),
             (4, ("fill", CLS, 5.5, ZN6), T3), (4, ("fill", "m0620.mov", 2.4, (0.45, 0.6, 0.6)), T3),
             (10, ("split", (YT, ys[0]), (MT, ms[0])), {"kind": "pair"}),
-            (9, ("fill", "1112_yua_insta.mp4", VAN), {"kind": "info", "i": 4}),                       # 통학차량 대기 신청 모집 중
+            # 11-21 "32초 영상 하나가 너무 길게" → 통학차량 화면을 3컷으로
+            (3, ("fill", "1112_yua_insta.mp4", VAN), {"kind": "info", "i": 4}), (3, ("fill", "clip3.mp4", pk("clip3.mp4", 2)[1] + 0.3), {"kind": "info", "i": 4}),
+            (3, ("fill", "1118_yua.mp4", pk("1118_yua.mp4", 2)[1] + 0.3), {"kind": "info", "i": 4}),
             (9, ("fill", "n8_hobby.mp4", 48.0 - 9 * 60 / bpm), {"kind": "info", "i": 3}),             # 유아·키즈반 모집 중 (체포하겠어 영상, 48초가 마지막)
-            (7, ("fill", "nk4_roof.mp4", 37.2 - 7 * 60 / bpm, ("src", 0.475, 0.5, 1.0)), {"kind": "logo", "bg": 1})]   # 엔딩: 옥상에서 인사 + 로고
+            (7, ("fill", "nk4_roof.mp4", 5.0, ("src", 0.475, 0.5, 1.0)), {"kind": "logo", "bg": 1})]   # 엔딩: 옥상 영상 5~8초 인사(치마 잡고 꾸벅) + 로고 — 원장님 11-21
 else:
     song, bpm, first = "madness.wav", 130.0, 0.435
     CUT[YT] = 766   # 2분할 위 화면에서 YUNI 티저 글자가 첫 화면 'K-POP KIDZ'·가운데 띠와 겹쳐서 C만 YUNI도 잘라 씀

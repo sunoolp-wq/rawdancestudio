@@ -116,7 +116,7 @@ window.render=t=>{
   const s=TL.find(x=>t>=x.t0&&t<x.t1)||TL[TL.length-1], k=s.kind, v=t-s.g0, key=JSON.stringify([s.g0,k]);
   const fresh=key!==last; last=key;
   const sq=(VER==='A'&&(k==='hook'||k==='card')), split=(VER==='C'&&(k==='hook'||k==='band'))||k==='pair';
-  show('logo',k!=='logo'&&!sq&&!split); show('grad',k!=='logo'&&!split);
+  show('logo',k!=='logo'&&!sq&&!split); show('grad',k!=='logo'&&!split&&!s.nogr);
   ['hook','cap','step','card','lab1','lab2','band','info','end','tag','bub','line'].forEach(id=>show(id,false));
   if(s.tag){ show('tag',true); $('tag').textContent=s.tag; $('tag').style.background=s.tag.startsWith('유아')?'#FFB3CF':'#D7FF3A'; }
   if(k==='hook'){ show('hook',true); const H=$('hook');

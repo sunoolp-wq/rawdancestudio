@@ -172,9 +172,10 @@ elif WHICH == "B2":
     ys, ms = yt(1, 5.2), mt(1, 5.2); ZN6 = (0.45, 0.66, 0.65); ZN5 = (0.48, 0.74, 0.72); Y5 = pk("n5_img0316.mov", 1, 2.2)
     K1 = {"kind": "line", "k": "TOGETHER", "e": "친구들과 다 같이", "sub": "나이에 맞는 반에서", "y": 1130}
     K2 = {"kind": "line", "k": "K-POP DANCE", "e": "아이돌 안무로 신나게", "sub": "유아 · 키즈 K-POP반", "y": 1130}
-    T1 = {"kind": "line", "k": "TEACHER", "e": "쌤이 먼저 보여주고", "sub": "T. YUNI · T. MINKYUNG", "y": 330}
-    T2 = {"kind": "line", "k": "STEP BY STEP", "e": "한 동작씩 차근차근", "sub": "기본기까지 탄탄하게", "y": 330}
-    T3 = {"kind": "line", "k": "BEGINNER OK", "e": "처음이어도 괜찮아요", "sub": "첫 춤을 재밌게", "y": 330}
+    # 원장님 11-21 "쌤 장면 자막 조금 아래로" → 위(330) → 아이들 장면과 같은 높이(1130), 얼굴 대신 다리 쪽에
+    T1 = {"kind": "line", "k": "TEACHER", "e": "쌤이 먼저 보여주고", "sub": "T. YUNI · T. MINKYUNG", "y": 1130}
+    T2 = {"kind": "line", "k": "STEP BY STEP", "e": "한 동작씩 차근차근", "sub": "기본기까지 탄탄하게", "y": 1130}
+    T3 = {"kind": "line", "k": "BEGINNER OK", "e": "처음이어도 괜찮아요", "sub": "첫 춤을 재밌게", "y": 1130}
     used = pk("1112_yua_insta.mp4", 2)[0]; VAN = next(t for t in pk("1112_yua_insta.mp4", 4, 4.8, gap=3.0) if abs(t - used) >= 8)
     k = lambda f, i, beats, txt, tag, off=0.3: (beats, ("fill", f, pk(f, 2)[i] + off), dict(txt, tag=tag))
     G = lambda f, cx, tag="": (3, ("square", f, 0.2, 200, cx), dict(K1, tag=tag) if tag else K1)   # 하트 단체샷 (2초 남짓)

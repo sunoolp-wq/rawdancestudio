@@ -75,11 +75,18 @@ def seg(spec, d, out):
     lay = spec[0]
     if lay == "fill":       # 세로 꽉 채우기 (4번째 값 = 확대: 가운데 x·y 비율, 남길 크기 비율)
         f, t = spec[1], spec[2]; z = spec[3] if len(spec) > 3 else None; f = P(f)
+        if z and z[0] == "src":   # 원본에서 직접 9:16 (가운데 cx·cy, 높이 비율 hf)
+            _, cx, cy, hf = z; w0, h0 = size(f); ch = h0 * hf; cw = ch * 9 / 16
+            x = min(max(0, cx * w0 - cw / 2), w0 - cw); y = min(max(0, cy * h0 - ch / 2), h0 - ch)
+            enc(["-ss", f"{t:.3f}", "-t", f"{d:.3f}", "-i", f, "-vf", f"crop={int(cw)//2*2}:{int(ch)//2*2}:{int(x)}:{int(y)},scale=1080:1920,fps={FPS},setsar=1"], out); return
         lift = ",eq=brightness=0.05:contrast=1.08:saturation=1.12" if os.path.basename(f).startswith("m") else ""   # 민경쌤 수업 영상은 어두워서 살짝 밝게
         enc(["-ss", f"{t:.3f}", "-t", f"{d:.3f}", "-i", f, "-vf", f"{fit(f, t, d, 1080, 1920)}{zoom(z)}{lift},fps={FPS},setsar=1"], out)
     elif lay == "square":   # 정사각 티저: 뒤는 같은 영상 흐리게, 앞은 정사각 그대로 (티저 속 'K-POP 쌤이름' 글자 살림)
-        _, f, t, Y = spec; c = CUT.get(f); f = P(f)
-        sq = f"crop={c}:{c}:{(1080 - c) // 2}:0,scale=1080:1080" if c else "scale=1080:1080"
+        f, t, Y = spec[1], spec[2], spec[3]; cx = spec[4] if len(spec) > 4 else 0.5; c = CUT.get(f); f = P(f)
+        w0, h0 = size(f)
+        if c: sq = f"crop={c}:{c}:{(1080 - c) // 2}:0,scale=1080:1080"
+        elif w0 > h0: sq = f"crop=ih:ih:{int(min(max(0, cx * w0 - h0 / 2), w0 - h0))}:0,scale=1080:1080"   # 가로 단체샷: 정사각으로 (아이들 다 보이게)
+        else: sq = "scale=1080:1080"
         enc(["-ss", f"{t:.3f}", "-t", f"{d:.3f}", "-i", f, "-filter_complex",
              f"[0:v]fps={FPS},split[a][b];[a]scale=-2:1920,crop=1080:1920,boxblur=40:2,eq=brightness=-0.32[bg];[b]{sq}[fg];[bg][fg]overlay=0:{Y},setsar=1"], out)
     elif lay == "split":    # 위아래 2분할 (각 1080×960)
@@ -152,34 +159,32 @@ elif WHICH == "B":
             (8, ("fill", "1119_kids_insta.mp4", pk("1119_kids_insta.mp4", 2)[1]), INFO[0]), (8, ("fill", "1021_kids.mp4", pk("1021_kids.mp4", 2)[1]), INFO[1]),
             (8, ("fill", "clip3.mp4", 0), LOGO)]
 elif WHICH == "B2":
-    # 원장님 2026-11-20 (3차): 순서 = 엄마 나 춤 배우고 싶어 → 아이들(친구들과 다 같이 + 한 줄 더) → 쌤 수업(먼저 보여주고 · 한 동작씩 차근차근 · 처음이어도 괜찮아요)
-    #   → 쌤 2분할 → 통학차량 대기 신청 모집 중 + 유아·키즈반 모집 중 (모집 문구 눈에 띄게). 살짝 길어져도 됨. 음원은 Street Fighters 말고 다른 곡
-    # 쌤 수업 컷: YUNI(IMG_1053)·민경쌤(IMG_0620·1076·0415) 번갈아, 쌤 쪽 확대 (전문반 학생 얼굴 크게 안 나오게, 검수 조건)
+    # 원장님 2026-11-20~21 누적: 엄마 말풍선 → 아이들(TOGETHER · K-POP DANCE) → 쌤 수업(먼저 보여주고 · 차근차근 · 처음이어도) → 쌤 2분할
+    #   → 통학차량 대기 신청 모집 중 → 유아·키즈반 모집 중(체포하겠어 영상, 48초가 마지막) → 엔딩
+    # 11-21 "중복 영상이 너무 많아, 다양하게" → 영상마다 딱 한 번만 나오게:
+    #   아이들 = clip3 · 하트 단체샷 3개(nk1~3) · 1119 · 1021 · 1118 · 1104 · 1112 (9개 각 1번)
+    #   쌤 = 유니쌤 IMG_0316 · C1912 · IMG_1053 / 민경쌤 시퀀스26 · IMG_1076 · IMG_0620 (6개 각 1번)
+    #   엔딩 = 옥상 영상(nk4_roof, 인사하는 장면) 위에 로고 — 원장님 "인사하는 장면, 엔딩으로"
     song, bpm, first = "party.wav", 120.0, 0.029
-    ys, ms = yt(1, 5.2), mt(1, 5.2); ZN6 = (0.45, 0.66, 0.65)
-    # 원장님 2026-11-20 "자막 위·아래가 너무 허전" → 위에 큰 영문, 아래에 연두 띠
+    ys, ms = yt(1, 5.2), mt(1, 5.2); ZN6 = (0.45, 0.66, 0.65); ZN5 = (0.48, 0.74, 0.72); Y5 = pk("n5_img0316.mov", 1, 2.2)
     K1 = {"kind": "line", "k": "TOGETHER", "e": "친구들과 다 같이", "sub": "나이에 맞는 반에서", "y": 1130}
     K2 = {"kind": "line", "k": "K-POP DANCE", "e": "아이돌 안무로 신나게", "sub": "유아 · 키즈 K-POP반", "y": 1130}
     T1 = {"kind": "line", "k": "TEACHER", "e": "쌤이 먼저 보여주고", "sub": "T. YUNI · T. MINKYUNG", "y": 330}
     T2 = {"kind": "line", "k": "STEP BY STEP", "e": "한 동작씩 차근차근", "sub": "기본기까지 탄탄하게", "y": 330}
     T3 = {"kind": "line", "k": "BEGINNER OK", "e": "처음이어도 괜찮아요", "sub": "첫 춤을 재밌게", "y": 330}
-    ZN5 = (0.48, 0.74, 0.72); Y5 = pk("n5_img0316.mov", 2, 2.2, gap=6.0)
     used = pk("1112_yua_insta.mp4", 2)[0]; VAN = next(t for t in pk("1112_yua_insta.mp4", 4, 4.8, gap=3.0) if abs(t - used) >= 8)
     k = lambda f, i, beats, txt, tag, off=0.3: (beats, ("fill", f, pk(f, 2)[i] + off), dict(txt, tag=tag))
+    G = lambda f, cx, tag="": (3, ("square", f, 0.2, 200, cx), dict(K1, tag=tag) if tag else K1)   # 하트 단체샷 (2초 남짓)
     plan = [(6, ("fill", "clip3.mp4", pk("clip3.mp4", 2)[0]), {"kind": "bubble", "say": "엄마, 나도<br>춤 배우고 싶어!", "band": "유아 5–8세 · 키즈 9–12세"}),
-            k("1021_kids.mp4", 0, 3, K1, "키즈 9–12세"), k("1118_yua.mp4", 0, 3, K1, "유아 5–8세"), k("1119_kids_insta.mp4", 0, 3, K1, "키즈 9–12세"), k("1112_yua_insta.mp4", 0, 3, K1, "유아 5–8세"),
-            k("clip3.mp4", 1, 3, K2, "키즈 9–12세"), k("1118_yua.mp4", 1, 3, K2, "유아 5–8세"), k("1104_kpop.mp4", 0, 3, K2, "키즈 9–12세"),
-            # 원장님 2026-11-20: IMG_0316 = 유니쌤 설명 영상 → 유니쌤 컷도 영상 두 개로 (IMG_0316 · IMG_1053 · IMG_0316)
-            (4, ("fill", "n5_img0316.mov", Y5[0], ZN5), T1), (4, ("fill", "m0620.mov", 2.4, (0.45, 0.6, 0.6)), T1),
-            (4, ("fill", CLS, 5.5, ZN6), T2), (4, ("fill", "m1076.mov", 0.2, (0.42, 0.66, 0.68)), T2),
-            (4, ("fill", "n5_img0316.mov", Y5[1], ZN5), T3), (4, ("fill", "m0415.mov", 8.5, (0.38, 0.66, 0.62)), T3),
+            G("nk3.mp4", 0.47, "유아 5–8세"), G("nk1.mp4", 0.5), G("nk2.mp4", 0.52, "유아 5–8세"), k("1119_kids_insta.mp4", 0, 3, K1, "키즈 9–12세"),
+            k("1021_kids.mp4", 0, 3, K2, "키즈 9–12세"), k("1118_yua.mp4", 0, 3, K2, "유아 5–8세"), k("1104_kpop.mp4", 0, 3, K2, "키즈 9–12세"),
+            (4, ("fill", "n5_img0316.mov", Y5[0], ZN5), T1), (4, ("fill", "n9_seq26.mp4", 4.0), T1),
+            (4, ("fill", "n10_c1912.mp4", 15.0), T2), (4, ("fill", "m1076.mov", 0.2, (0.42, 0.66, 0.68)), T2),
+            (4, ("fill", CLS, 5.5, ZN6), T3), (4, ("fill", "m0620.mov", 2.4, (0.45, 0.6, 0.6)), T3),
             (10, ("split", (YT, ys[0]), (MT, ms[0])), {"kind": "pair"}),
-            # 원장님 2026-11-20 "35초쯤 로고가 갑자기 뜬다" → 배경 영상이 원본 끝(박힌 RAW 로고·검은 화면)까지 넘어가서, 4.5초 통째로 안전한 구간으로 고름
-            # 원장님 2026-11-20 "엔딩샷에 중복 영상이네 → 이 영상(YUNI 반 3명, n8_hobby.mp4)에서 적절한 걸로" — 앞 3초 제목·끝 로고 빼고 4~48초에서 고름
-            # 원장님 2026-11-20 "통학차량이랑 모집 중이 왜 같은 영상이냐 / 엔딩만 이 영상, 통학차량은 다른 영상" → 통학차량 = 유아반 영상(앞 몽타주와 8초 이상 떨어진 구간)
-            (9, ("fill", "1112_yua_insta.mp4", VAN), {"kind": "info", "i": 4}),   # 통학차량 대기 신청 모집 중
-            (9, ("fill", "n8_hobby.mp4", 48.0 - 9 * 60 / bpm), {"kind": "info", "i": 3}),   # 유아·키즈반 모집 중 (엔딩) — 원장님 "48초가 마지막 장면, 엔딩 로고 전에"
-            (6, ("fill", "clip3.mp4", 0), LOGO)]
+            (9, ("fill", "1112_yua_insta.mp4", VAN), {"kind": "info", "i": 4}),                       # 통학차량 대기 신청 모집 중
+            (9, ("fill", "n8_hobby.mp4", 48.0 - 9 * 60 / bpm), {"kind": "info", "i": 3}),             # 유아·키즈반 모집 중 (체포하겠어 영상, 48초가 마지막)
+            (7, ("fill", "nk4_roof.mp4", 37.2 - 7 * 60 / bpm, ("src", 0.475, 0.5, 1.0)), {"kind": "logo", "bg": 1})]   # 엔딩: 옥상에서 인사 + 로고
 else:
     song, bpm, first = "madness.wav", 130.0, 0.435
     CUT[YT] = 766   # 2분할 위 화면에서 YUNI 티저 글자가 첫 화면 'K-POP KIDZ'·가운데 띠와 겹쳐서 C만 YUNI도 잘라 씀
@@ -199,7 +204,7 @@ else:
 B = 60 / bpm; tmp = tempfile.mkdtemp(prefix="raw-reels3-"); segs = []; tl = []; t = 0.0
 for i, (beats, spec, txt) in enumerate(plan):
     d = beats * B; out = os.path.join(tmp, f"{i:02d}.mp4")
-    if txt.get("kind") != "logo": seg(spec, d, out)
+    if txt.get("kind") != "logo" or txt.get("bg"): seg(spec, d, out)
     else: enc(["-f", "lavfi", "-i", f"color=c=0x0b0a0f:s=1080x1920:r={FPS}", "-t", f"{d:.3f}"], out)
     segs.append(out); tl.append(dict(txt, t0=round(t, 3), t1=round(t + d, 3), src=spec[1] if spec[0] != "split" else f"{spec[1][0]} / {spec[2][0]}")); t += d
 # 같은 글자가 이어지는 장면은 한 묶음 (글자 애니메이션이 컷마다 다시 시작하지 않게)

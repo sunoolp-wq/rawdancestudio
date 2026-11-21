@@ -148,6 +148,8 @@ window.render=t=>{
     I.querySelectorAll('.cls div').forEach((c,j)=>{ const p=eo((v-0.3-0.12*j)/0.2); c.style.opacity=p; c.style.transform=`translateY(${(1-p)*30}px)`; });
     const Vn=I.querySelector('.van'); if(Vn){ const p=eo((v-0.05)/0.22); Vn.style.transform=`scale(${1.2-0.2*p})`; Vn.style.opacity=p; }
     const M=I.querySelector('.mz'); if(M){ const p=eo((v-0.1)/0.22); M.style.transform=`scale(${1.25-0.25*p})`; M.style.opacity=p; } }
-  if(k==='logo'){ show('end',true); $('end').style.opacity=eo(v/0.35); pop($('end').querySelector('.lime'),v,0.4); }
+  if(k==='logo'){ show('end',true); const En=$('end'); En.style.background=s.bg?'linear-gradient(rgba(11,10,15,.15),rgba(11,10,15,.25) 30%,rgba(11,10,15,.82) 62%,rgba(11,10,15,.9))':'#0b0a0f';
+    En.querySelector('.c').style.top=s.bg?'1180px':'760px'; En.querySelector('img').style.width=s.bg?'380px':'460px';
+    En.style.opacity=s.bg?1:eo(v/0.35); const C=En.querySelector('.c'); C.style.opacity=eo((v-(s.bg?0.6:0))/0.4); pop(En.querySelector('.lime'),v,s.bg?0.9:0.4); }
 };
 </script></body></html>

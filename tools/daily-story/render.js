@@ -32,6 +32,8 @@ const out = path.join(outDir, 'story.mp4');
   // 음악: music.json {"file": "music/xxx.mp3", "start": 초} 또는 날짜별 {"2026-11-05": {...}} / 없으면 무음
   let mus = null; const mp = path.join(__dirname, 'music.json');
   if (fs.existsSync(mp)) { const mj = JSON.parse(fs.readFileSync(mp)); mus = mj[dateStr] || mj.default || null; }
+  // 음원 파일이 맥에 없으면(저장소에 안 올림) 멈추지 않고 무음으로 (2026-11-23 자동 예약)
+  if (mus && !fs.existsSync(path.join(__dirname, mus.file))) { console.warn(`음원 없음: ${mus.file} → 무음으로 만듦`); mus = null; }
   const audioIn = mus ? ['-ss', String(mus.start || 0), '-i', path.join(__dirname, mus.file)] : ['-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo'];
   const af = mus ? ['-af', `afade=t=in:st=0:d=0.4,afade=t=out:st=${SEC - 1.2}:d=1.2,volume=${mus.volume || 1}`] : [];
   // 장면을 여러 탭에서 동시에 그려 임시 폴더에 저장 → ffmpeg로 합침 (원장님 2026-11-17 속도·맥 멈춤)

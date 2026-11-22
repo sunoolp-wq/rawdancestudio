@@ -1,0 +1,50 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+/* B2 광고 릴스 커버(썸네일) 3안 — 2026-11-22. 영상과 같은 디자인(연두 띠·말풍선·굵은 한글).
+   인스타 프로필 격자는 가운데 4:5(세로 285~1635px)만 보여서 중요한 글자는 그 안에 */
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:1080px;height:1920px;overflow:hidden;background:#0b0a0f;font-family:"Gothic A1",sans-serif;color:#fff}
+.a{position:absolute}.bg{inset:0;width:1080px;height:1920px;object-fit:cover}
+.sh{text-shadow:0 8px 30px rgba(0,0,0,.65),0 2px 8px rgba(0,0,0,.5)}
+.lime{display:inline-block;background:#D7FF3A;color:#111;font-weight:900;padding:14px 34px;transform:rotate(-3deg);box-shadow:0 12px 28px rgba(0,0,0,.35);white-space:nowrap}
+.grad{left:0;right:0;bottom:0;height:1100px;background:linear-gradient(transparent,rgba(8,7,12,.85) 55%)}
+.logo{left:60px;top:300px;height:46px}
+.bub{display:inline-block;position:relative;background:#fff;color:#111;border-radius:60px;padding:36px 54px 40px;font-size:84px;font-weight:900;line-height:1.16;letter-spacing:-.03em;box-shadow:0 20px 50px rgba(0,0,0,.45);text-align:left}
+.bub:after{content:"";position:absolute;bottom:-34px;border:24px solid transparent;border-top:44px solid #fff}
+.bub.l:after{left:70px;border-left:30px solid #fff;transform:skewX(-14deg)}
+.bub.r:after{right:70px;border-right:30px solid #fff;transform:skewX(14deg)}
+.big{font:italic 400 210px/0.9 "GoGo Poster 2020",Anton}
+.ko{font-size:118px;font-weight:900;letter-spacing:-.05em;line-height:1.05}
+.cards{display:flex;justify-content:center;gap:24px}
+.cards div{background:#fff;color:#111;border-radius:18px;padding:14px 28px 16px;box-shadow:0 12px 28px rgba(0,0,0,.35);text-align:center}
+.cards b{display:block;font-size:40px;font-weight:900}.cards span{display:block;font:400 96px/1 Anton}
+.mz{font:400 250px/1 "Black Han Sans","Gothic A1";letter-spacing:-.02em;color:#D7FF3A}
+.now{display:inline-flex;align-items:center;gap:18px;font:700 40px Inter;letter-spacing:.3em}
+.now i{display:inline-block;width:28px;height:28px;border-radius:50%;background:#ff3b5c;box-shadow:0 0 24px #ff3b5c}
+.sq{left:0;top:300px;width:1080px;height:1080px;object-fit:cover}
+</style></head><body>
+<div id="A" style="display:none">
+  <img class="a bg" src="bg_A.jpg"><div class="a grad"></div><img class="a logo" src="logo.png">
+  <div class="a" style="left:30px;top:640px"><div class="bub r" style="font-size:66px;padding:28px 40px 32px">엄마, 나도<br>춤 배우고 싶어!</div></div>
+  <div class="a sh" style="left:0;right:0;top:960px;text-align:center">
+    <div class="big">K-POP KIDZ</div>
+    <div class="lime" style="margin-top:26px;font-size:72px">유아 · 키즈 K-POP반 모집</div>
+    <div style="margin-top:28px;font-size:48px;font-weight:800">유아 5–8세 · 키즈 9–12세 · 평일반 · 토요일반</div>
+  </div>
+</div>
+<div id="B" style="display:none">
+  <img class="a bg" src="bg_B.jpg"><div class="a grad"></div><img class="a logo" src="logo.png">
+  <div class="a sh" style="left:0;right:0;top:1000px;text-align:center">
+    <div class="now"><i></i>NOW OPEN</div>
+    <div class="mz">모집 중</div>
+    <div class="cards" style="margin-top:20px"><div><b>유아 K-POP</b><span>5–8세</span></div><div><b>키즈 K-POP</b><span>9–12세</span></div></div>
+  </div>
+</div>
+<div id="C" style="display:none">
+  <img class="a bg" src="bg_Cblur.jpg"><img class="a sq" src="bg_C.jpg" style="top:240px"><div class="a grad" style="height:800px"></div><img class="a logo" src="logo.png" style="top:330px">
+  <div class="a sh" style="left:0;right:0;top:1100px;text-align:center">
+    <div class="big" style="font-size:170px">TOGETHER</div>
+    <div class="ko" style="margin-top:6px;font-size:92px;white-space:nowrap">친구들과 다 같이 K-POP</div>
+    <div class="lime" style="margin-top:26px;font-size:68px">유아 5–8세 · 키즈 9–12세 모집</div>
+  </div>
+</div>
+<script>window.show=v=>{document.getElementById(v).style.display='';};</script>
+</body></html>

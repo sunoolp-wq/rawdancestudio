@@ -16,6 +16,7 @@ try {
   $bk = [IO.Path]::GetTempFileName()
   if (Test-Path tools\daily-story\extra.json) { Copy-Item tools\daily-story\extra.json $bk -Force } else { Set-Content $bk "{}" -Encoding UTF8 }
   Say "▶ 최신 버전 받는 중 (처음엔 몇 분 걸려요)"
+  git sparse-checkout set --no-cone '/*' '!/content/' 2>$null   # content(마케팅 기록, 약 600MB)는 받지 않음 (2026-11-23)
   git -c core.autocrlf=false fetch -q --depth 1 origin $BR; if ($LASTEXITCODE) { throw "받기 실패 (인터넷·로그인 확인)" }
   git -c core.autocrlf=false reset -q --hard FETCH_HEAD
   # 대강·팝업 합치기: 같은 날짜는 원장님 컴퓨터에서 바꾼 것이 우선

@@ -15,6 +15,8 @@ main() {
   gh auth setup-git >/dev/null
   [ -d .git ] || { git init -q; git remote add origin "https://github.com/$REPO.git"; }
   BK=$(mktemp); cp tools/daily-story/extra.json "$BK" 2>/dev/null || echo '{}' > "$BK"
+  # 원장님 2026-11-23 "맥 용량" → content(마케팅 기록·사진, 약 600MB)는 맥에 안 받음. 스토리 영상은 만들 때 content 안에 새로 생김
+  git sparse-checkout set --no-cone '/*' '!/content/' >/dev/null 2>&1 || true
   echo "▶ 최신 버전 받는 중 (처음엔 몇 분 걸려요)"
   git fetch -q --depth 1 origin "$BR"
   git reset -q --hard FETCH_HEAD

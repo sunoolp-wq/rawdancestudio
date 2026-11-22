@@ -4,7 +4,8 @@
 > 이 문서는 **원장님 맥의 Claude Code**가 따라 한다 (클라우드 세션은 맥 브라우저를 못 씀). 원장님은 RAW 영상공장 폴더에서 `claude`를 열고 "docs/story-schedule.md 대로 다음 주 스토리 예약해줘"라고만 하면 된다.
 
 ## 0. 준비 (매번)
-1. `git pull` (시간표·대강·팝업·음원 설정이 따라옴)
+1. 최신으로 받기: 원장님 맥은 `3_업데이트.command`와 같은 방식(얕게 받기 + content 제외)이라 `git pull` 대신 `git fetch --depth 1 origin claude/low-dance-marketing-agents-lisndi && git reset --hard FETCH_HEAD` (단, `tools/daily-story/extra.json`은 받기 전에 복사해 두고 받은 뒤 합친다 — 3_업데이트와 같음). 가장 쉬운 방법: 원장님께 `3_업데이트.command`를 먼저 더블클릭해 달라고 한다
+   - content 폴더는 맥에 받지 않는다(용량, 2026-11-23). 스토리 영상은 render.js가 content 안에 새로 만든다
 2. 예약할 날짜 = 다음 주 월~금 (원장님이 날짜를 말하면 그 날짜). 토요일은 하지 않는다.
 3. 음원: `tools/daily-story/music.json`에 그 날짜가 있으면 `tools/daily-story/music/` 안에 그 mp3가 있어야 한다. 없으면 멈추고 원장님께 파일을 달라고 한다 (음원은 저장소에 없음).
 

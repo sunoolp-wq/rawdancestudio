@@ -83,5 +83,18 @@
     }
    }
   ]
+ },
+ "2026-11-23": {
+  "replace": [
+   {
+    "start": "19:40",
+    "name": "HEELSCHOREO",
+    "set": {
+     "name": "POPPING",
+     "teacher": "SUNGMI",
+     "mark": "popup"
+    }
+   }
+  ]
  }
 }

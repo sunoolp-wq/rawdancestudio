@@ -1,6 +1,6 @@
 #!/bin/bash
 # RAW 영상공장 업데이트: 더블클릭 → Claude가 고친 최신 버전 받기 (처음 한 번은 GitHub 로그인)
-# 원장님이 화면에서 바꾼 대강·팝업(tools/daily-story/extra.json)은 합쳐서 보존. 설치물(.venv, node_modules)·결과 영상은 그대로
+# 대강·팝업(tools/daily-story/extra.json)은 클라우드(GitHub) 것을 그대로 씀 (원장님 2026-11-23 "대강은 클라우드에서만 고칠게"). 설치물(.venv, node_modules)·결과 영상은 그대로
 main() {
   cd "$(dirname "$0")" || exit 1
   set -e
@@ -14,21 +14,12 @@ main() {
   fi
   gh auth setup-git >/dev/null
   [ -d .git ] || { git init -q; git remote add origin "https://github.com/$REPO.git"; }
-  BK=$(mktemp); cp tools/daily-story/extra.json "$BK" 2>/dev/null || echo '{}' > "$BK"
-  # 원장님 2026-11-23 "맥 용량" → content(마케팅 기록·사진, 약 600MB)는 맥에 안 받음. 스토리 영상은 만들 때 content 안에 새로 생김
   echo "▶ 최신 버전 받는 중 (처음엔 몇 분 걸려요)"
   git fetch -q --depth 1 origin "$BR"
   git reset -q --hard FETCH_HEAD
   # content(마케팅 기록·사진, 약 600MB)는 맥에 안 받음 (원장님 2026-11-23 "맥 용량"). tools/raw-studio/keep-content.txt 에 적은 폴더만 남김
   KEEP=(); while IFS= read -r l; do l="${l%%#*}"; l="$(printf '%s' "$l" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"; if [ -n "$l" ]; then KEEP+=("/content/$l/"); fi; done < <(cat tools/raw-studio/keep-content.txt 2>/dev/null)
   git sparse-checkout set --no-cone '/*' '!/content/' ${KEEP[@]+"${KEEP[@]}"} >/dev/null 2>&1 || true
-  # 대강·팝업 합치기: 같은 날짜는 원장님 맥에서 바꾼 것이 우선
-  python3 - "$BK" tools/daily-story/extra.json <<'PY'
-import json, sys
-mine = json.load(open(sys.argv[1], encoding="utf-8")); new = json.load(open(sys.argv[2], encoding="utf-8"))
-new.update(mine); json.dump(dict(sorted(new.items())), open(sys.argv[2], "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-PY
-  rm -f "$BK"
   echo "▶ 필요한 프로그램 확인"
   command -v uv >/dev/null 2>&1 || brew install uv
   uv pip install -q --python .venv/bin/python ultralytics lap flask numpy

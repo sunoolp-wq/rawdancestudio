@@ -13,7 +13,7 @@
 - 조건: 21:00에 맥이 켜져 있고(잠자기면 깨어날 때 실행, 자정 넘으면 건너뛰고 알림) Ego Lite가 Meta 비즈니스 스위트에 로그인돼 있어야 함
 
 ## 0. 준비 (매번 · 손으로 할 때)
-1. 최신으로 받기: 원장님 맥은 `3_업데이트.command`와 같은 방식(얕게 받기 + content 제외)이라 `git pull` 대신 `git fetch --depth 1 origin claude/low-dance-marketing-agents-lisndi && git reset --hard FETCH_HEAD` (단, `tools/daily-story/extra.json`은 받기 전에 복사해 두고 받은 뒤 합친다 — 3_업데이트와 같음). 가장 쉬운 방법: 원장님께 `3_업데이트.command`를 먼저 더블클릭해 달라고 한다
+1. 최신으로 받기: 원장님 맥은 `3_업데이트.command`와 같은 방식(얕게 받기 + content 제외)이라 `git pull` 대신 `git fetch --depth 1 origin claude/low-dance-marketing-agents-lisndi && git reset --hard FETCH_HEAD` (대강·팝업 `tools/daily-story/extra.json`은 클라우드(GitHub) 것을 그대로 쓴다. 원장님 2026-11-23 "대강은 클라우드에서만 고칠게" → 맥에서 고치지 않는다). 가장 쉬운 방법: 원장님께 `3_업데이트.command`를 먼저 더블클릭해 달라고 한다
    - content 폴더는 맥에 받지 않는다(용량, 2026-11-23). 스토리 영상은 render.js가 content 안에 새로 만든다
 2. 예약할 날짜 = 다음 주 월~금 (원장님이 날짜를 말하면 그 날짜). 토요일은 하지 않는다.
 3. 음원: `tools/daily-story/music.json`에 그 날짜가 있으면 `tools/daily-story/music/` 안에 그 mp3가 있어야 한다. 없으면 멈추고 원장님께 파일을 달라고 한다 (음원은 저장소에 없음).

@@ -8,7 +8,7 @@
 //   node tools/daily-story/schedule_stories.js --tomorrow [--yes]  내일 날짜
 //   --no-update  최신 받기 건너뜀 / --check  예약 안 하고 점검만 (브라우저 로그인 확인까지) / --force  이미 예약한 날도 다시
 //
-// 순서: 최신 받기(3_업데이트와 같은 방식, extra.json 합침) → render.js → plan.js → 영상 찾기 → Ego Lite로 00:00부터 예약
+// 순서: 최신 받기(3_업데이트와 같은 방식, 대강·팝업은 클라우드 것 그대로) → render.js → plan.js → 영상 찾기 → Ego Lite로 00:00부터 예약
 // 같은 날 두 번 예약 방지: ~/Library/Application Support/raw-story/<날짜>.json 에 예약한 칸을 적어 둔다
 // 로그: ~/Library/Logs/raw-story.log / 끝나면 macOS 알림
 const fs = require('fs'), path = require('path'), os = require('os');
@@ -64,22 +64,17 @@ function update() {
   const g = (...a) => run('git', a);
   const head = g('rev-parse', 'HEAD').stdout.trim();
   const known = g('rev-parse', '--verify', '-q', `refs/remotes/origin/${BR}`).stdout.trim();
-  // 이 맥에서 만든 커밋이나 고친 파일이 있으면 reset --hard로 지워지므로 받지 않는다 (extra.json·content는 괜찮음)
+  // 이 맥에서 만든 커밋이나 고친 파일이 있으면 reset --hard로 지워지므로 받지 않는다 (content는 괜찮음. extra.json은 클라우드 것을 그대로 씀)
   if (known && head !== known) { log('⚠ 최신 받기 건너뜀: 이 맥에 올리지 않은 커밋이 있음'); return false; }
   const dirty = g('status', '--porcelain', '-z', '--untracked-files=no').stdout.split('\0').filter(Boolean)
     .map(l => l.slice(3)).filter(p => p && p !== 'tools/daily-story/extra.json' && !p.startsWith('content/'));
   if (dirty.length) { log('⚠ 최신 받기 건너뜀: 고친 파일 있음 →', dirty.slice(0, 5).join(', ')); return false; }
-  const ep = path.join(ROOT, 'tools/daily-story/extra.json');
-  let mine = {}; try { mine = JSON.parse(fs.readFileSync(ep, 'utf8')); } catch (e) { /* 없으면 빈 값 */ }
   const pkg = () => { try { return fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'); } catch (e) { return ''; } };
   const pkgBefore = pkg();
   if (!g('fetch', '-q', '--depth', '1', 'origin', BR).ok) { log('⚠ 최신 받기 실패 (인터넷·GitHub 로그인 확인) → 지금 버전으로 계속'); return false; }
   g('reset', '-q', '--hard', 'FETCH_HEAD');
   g('sparse-checkout', 'set', '--no-cone', '/*', '!/content/', ...keepContent());   // 원장님 2026-11-23 "맥 용량": content는 안 받고 keep-content.txt 폴더만 남김
-  // 대강·팝업 합치기: 같은 날짜는 이 맥에서 바꾼 것이 우선 (3_업데이트와 같음)
-  let neu = {}; try { neu = JSON.parse(fs.readFileSync(ep, 'utf8')); } catch (e) { /* */ }
-  const merged = { ...neu, ...mine };
-  fs.writeFileSync(ep, JSON.stringify(Object.fromEntries(Object.keys(merged).sort().map(k => [k, merged[k]])), null, 1));
+  // 대강·팝업(extra.json)은 클라우드(GitHub) 것을 그대로 씀 — 맥에서 고친 건 덮어씀 (원장님 2026-11-23 "대강은 클라우드에서만 고칠게")
   if (pkg() !== pkgBefore) run('npm', ['install', '--no-audit', '--no-fund', '--silent']);
   log('최신 받기 완료:', g('log', '-1', '--format=%h %s').stdout.trim());
   return true;

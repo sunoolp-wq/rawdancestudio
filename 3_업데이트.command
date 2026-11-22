@@ -16,10 +16,12 @@ main() {
   [ -d .git ] || { git init -q; git remote add origin "https://github.com/$REPO.git"; }
   BK=$(mktemp); cp tools/daily-story/extra.json "$BK" 2>/dev/null || echo '{}' > "$BK"
   # 원장님 2026-11-23 "맥 용량" → content(마케팅 기록·사진, 약 600MB)는 맥에 안 받음. 스토리 영상은 만들 때 content 안에 새로 생김
-  git sparse-checkout set --no-cone '/*' '!/content/' >/dev/null 2>&1 || true
   echo "▶ 최신 버전 받는 중 (처음엔 몇 분 걸려요)"
   git fetch -q --depth 1 origin "$BR"
   git reset -q --hard FETCH_HEAD
+  # content(마케팅 기록·사진, 약 600MB)는 맥에 안 받음 (원장님 2026-11-23 "맥 용량"). tools/raw-studio/keep-content.txt 에 적은 폴더만 남김
+  KEEP=(); while IFS= read -r l; do l="${l%%#*}"; l="$(printf '%s' "$l" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"; if [ -n "$l" ]; then KEEP+=("/content/$l/"); fi; done < <(cat tools/raw-studio/keep-content.txt 2>/dev/null)
+  git sparse-checkout set --no-cone '/*' '!/content/' ${KEEP[@]+"${KEEP[@]}"} >/dev/null 2>&1 || true
   # 대강·팝업 합치기: 같은 날짜는 원장님 맥에서 바꾼 것이 우선
   python3 - "$BK" tools/daily-story/extra.json <<'PY'
 import json, sys

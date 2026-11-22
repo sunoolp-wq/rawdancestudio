@@ -54,6 +54,11 @@ const [Y, M, D] = date.split('-').map(Number);
 const MMDD = pad(M) + pad(D), MD = `${M}/${D}`;
 const DOW = new Date(Y, M - 1, D).getDay();
 
+function keepContent() {
+  try { return fs.readFileSync(path.join(ROOT, 'tools/raw-studio/keep-content.txt'), 'utf8').split('\n').map(l => l.replace(/#.*/, '').trim()).filter(Boolean).map(l => `/content/${l}/`); }
+  catch (e) { return []; }
+}
+
 // ---------- 1. 최신 받기 (3_업데이트.command와 같은 방식) ----------
 function update() {
   const g = (...a) => run('git', a);
@@ -68,9 +73,9 @@ function update() {
   let mine = {}; try { mine = JSON.parse(fs.readFileSync(ep, 'utf8')); } catch (e) { /* 없으면 빈 값 */ }
   const pkg = () => { try { return fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'); } catch (e) { return ''; } };
   const pkgBefore = pkg();
-  g('sparse-checkout', 'set', '--no-cone', '/*', '!/content/');   // 원장님 2026-11-23 "맥 용량": content는 맥에 안 받음
   if (!g('fetch', '-q', '--depth', '1', 'origin', BR).ok) { log('⚠ 최신 받기 실패 (인터넷·GitHub 로그인 확인) → 지금 버전으로 계속'); return false; }
   g('reset', '-q', '--hard', 'FETCH_HEAD');
+  g('sparse-checkout', 'set', '--no-cone', '/*', '!/content/', ...keepContent());   // 원장님 2026-11-23 "맥 용량": content는 안 받고 keep-content.txt 폴더만 남김
   // 대강·팝업 합치기: 같은 날짜는 이 맥에서 바꾼 것이 우선 (3_업데이트와 같음)
   let neu = {}; try { neu = JSON.parse(fs.readFileSync(ep, 'utf8')); } catch (e) { /* */ }
   const merged = { ...neu, ...mine };

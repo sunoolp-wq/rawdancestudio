@@ -115,4 +115,4 @@
 - 춤 시작 `tools/class-reel/find_start.py`, 음원 맞추기 공통 `audiomatch.py`(music_sync.py·find_start.py가 같이 씀). 음원 폴더는 환경 변수 `RAW_MUSIC`로 바꿀 수 있음
 - 서버 `server.py`(Flask, 127.0.0.1:5577) + 화면 `index.html`. 작업은 한 줄 큐로 순서대로. 결과 폴더는 환경 변수 `RAW_OUT`로 바꿀 수 있음
 - 맥 설치: Homebrew → node·ffmpeg·uv → `.venv` = uv가 받은 파이썬 3.12(`uv venv --managed-python`, Homebrew 파이썬은 macOS 26.2에서 맥 버전을 못 읽어 pip이 멈춤) + ultralytics, lap, flask, numpy → `npm install`(playwright) + `npx playwright install chromium` → `tools/fonts/install.sh`(맥은 ~/Library/Fonts)
-- 스토리는 기존대로 `content/날짜_daily-story/story.mp4`를 만들고 결과 폴더로 복사. 대강·팝업은 `tools/daily-story/extra.json`에 저장 → 원장님 맥의 extra.json은 저장소와 따로 놀 수 있음 (Claude에게 부탁할 땐 바뀐 내용 알려 주기)
+- 스토리는 기존대로 `content/날짜_daily-story/story.mp4`를 만들고 결과 폴더로 복사. 대강·팝업은 `tools/daily-story/extra.json`에 저장 → **단, 업데이트·스토리 자동 예약 때 클라우드(GitHub) 것으로 덮어씀** (원장님 2026-11-23 "대강은 클라우드에서만 고칠게"). 대강·팝업은 클라우드 Claude에게 부탁한다

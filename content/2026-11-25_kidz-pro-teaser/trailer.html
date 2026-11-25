@@ -23,7 +23,7 @@
 #info div{opacity:0}
 #info .i1{font:400 68px "Black Han Sans";letter-spacing:.02em}
 #info .i2{margin-top:26px;display:inline-block;border:3px solid #fff;padding:4px 28px;font:400 50px "Black Han Sans"}
-#info .i3{margin-top:26px;font-size:32px;font-weight:700;line-height:1.55;color:#ddd}
+#info .i3{margin-top:26px;font-size:36px;font-weight:700;line-height:1.55;color:#ddd}
 #tag{left:0;right:0;top:1415px;text-align:center;z-index:6;font:italic 400 50px "GoGo Poster 2020";letter-spacing:.35em;text-indent:.35em;opacity:0}
 #foot{left:90px;right:90px;top:1495px;text-align:center;z-index:6;font-size:26px;line-height:1.55;color:#cfcfcf;opacity:0}
 #foot small{display:block;font-size:20px;opacity:.7;margin-top:4px}
@@ -66,10 +66,16 @@ const D=[]; window.setup=(arg)=>{ const v=(arg&&arg.v)||'A';
   if(arg&&arg.ad){ const st=document.createElement('style'); st.textContent=`
     #orig{top:285px} #title{top:350px} #title .rk{font-size:262px}
     #band{top:592px;width:470px;font-size:46px;padding:13px 0} #flare{top:592px}
-    #info{top:865px} #info .i1{font-size:60px} #info .i2{margin-top:18px;font-size:44px} #info .i3{margin-top:18px;font-size:30px}
+    #info{top:865px} #info .i1{font-size:68px} #info .i2{margin-top:18px;font-size:44px} #info .i3{margin-top:18px;font-size:34px}
     #tag{top:1168px;font-size:46px} #foot{display:none}`; document.head.appendChild(st); }
   if(arg&&arg.overlay){ document.documentElement.style.background=document.body.style.background='transparent'; $('bg').style.display='none'; $('fog1').style.opacity=.22; $('fog2').style.opacity=.35; } COPY[v].forEach((h,i)=>$('c'+(i+1)).innerHTML=h); const el=$('dust'); for(let i=0;i<90;i++){ const s=1+rnd()*3.5; const d=document.createElement('i'); d.style.width=d.style.height=s+'px'; el.appendChild(d); D.push({d,x:rnd()*1080,y:rnd()*1920,vx:(rnd()-.5)*18,vy:-6-rnd()*22,o:.15+rnd()*.5,s}); } };
-window.render=t=>{
+// 한글 카드 글자 크기 자동 맞춤 (원장님 2026-11-25 "한글이 빈 공간이 많게 작은 것 같아, 눈에 퐉 띄게")
+// 가장 긴 줄이 화면 폭 약 76%(820px)를 채우게, 최대 210px (쾅 할 때 1.25배로 튀어도 안 잘리고, 오른쪽 버튼 줄 피함)
+let fitted=false; const fitCards=()=>{ const cx=document.createElement('canvas').getContext('2d');
+  document.querySelectorAll('.card .k').forEach(k=>{ cx.font='400 100px "Black Han Sans"'; const ls=k.innerHTML.split(/<br\s*\/?>/); const w=Math.max(...ls.map(l=>cx.measureText(l.replace(/<[^>]+>/g,'')).width));
+    // 세 줄 카드는 높이도 제한(전체 520px): 광고 아래 가림 영역·오른쪽 버튼 줄 피함
+    k.style.fontSize=Math.min(210,Math.floor(100*820/w),Math.floor(520/(ls.length*1.12)))+'px'; k.style.lineHeight='1.12'; }); fitted=true; };
+window.render=t=>{ if(!fitted) fitCards();
   D.forEach(p=>{ p.d.style.transform=`translate(${p.x+p.vx*t}px,${((p.y+p.vy*t)%1920+1920)%1920}px)`; p.d.style.opacity=p.o*(.6+.4*Math.sin(t*2+p.x)); p.d.style.filter=p.s>3?'blur(1.5px)':'none'; });
   $('fog1').style.transform=`translate(${Math.sin(t*.3)*40}px,${Math.cos(t*.25)*30}px) scale(${1+t*.01})`;
   $('fog2').style.transform=`translate(${Math.cos(t*.2)*-50}px,${Math.sin(t*.3)*20}px)`;
@@ -78,7 +84,7 @@ window.render=t=>{
   $('flash').style.opacity=fl;
   const shake=sh?`translate(${Math.sin(t*120)*14*sh}px,${Math.cos(t*95)*10*sh}px)`:'';
   CARDS.forEach(([id,a,b,hit])=>{ const e=$(id); const inn=hit? (t>=a?1:0) : eo((t-a)/0.6); const out=1-eo((t-b+0.25)/0.25); const o=t<a?0:Math.min(inn,out);
-    e.style.opacity=o; const zoom=1+(t-a)*0.035; e.style.transform=`translateY(-50%) ${t>=a&&t<a+0.3?shake:''} scale(${hit? (t<a+0.12? 1.25-((t-a)/0.12)*0.25 : zoom) : zoom})`; e.style.filter= hit&&t>=a&&t<a+0.15? 'blur(2px)':'none'; });
+    e.style.opacity=o; const zoom=1+(t-a)*0.022; e.style.transform=`translateY(-50%) ${t>=a&&t<a+0.3?shake:''} scale(${hit? (t<a+0.12? 1.25-((t-a)/0.12)*0.25 : zoom) : zoom})`; e.style.filter= hit&&t>=a&&t<a+0.15? 'blur(2px)':'none'; });
   // 타이틀: 쾅 + 서서히 다가옴 + 빛 지나감
   const ti=$('title'); ti.style.opacity=t>=T_TITLE?1:0;
   const tz=t<T_TITLE+0.15? 1.35-((t-T_TITLE)/0.15)*0.35 : 1+(t-T_TITLE)*0.005;

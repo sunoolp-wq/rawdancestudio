@@ -1,0 +1,30 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:1080px;height:1920px;overflow:hidden;background:#000;color:#fff}
+.bg{position:absolute;inset:0;background:radial-gradient(70% 45% at 50% 50%,#2a0508 0%,#0b0102 55%,#000 100%)}
+.bar{position:absolute;left:0;right:0;height:250px;background:#000}
+.c{position:absolute;left:0;right:0;text-align:center}
+.met{background:linear-gradient(180deg,#fff 0%,#eee 40%,#a9a9a9 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 26px rgba(255,40,60,.4))}
+.band{display:inline-block;background:#E8202E;color:#fff;padding:14px 40px;transform:rotate(-4deg);box-shadow:0 0 50px rgba(232,32,46,.7)}
+.lab{position:absolute;left:0;right:0;bottom:270px;text-align:center;font:700 34px "Gothic A1";color:#ffd27a}
+</style></head><body><div class="bg"></div><div id="r"></div><div class="bar" style="top:0"></div><div class="bar" style="bottom:0"></div>
+<script>
+const q=new URLSearchParams(location.search), v=q.get('v'), scene=q.get('s');
+const F={
+ N:{n:"N 키즈 발랄 (Bungee + 주아)",en:"400 {s}px/0.95 'Bungee'",ko:"400 {s}px/1.25 'Jua'",ens:220,num:250,kos:118},
+ O:{n:"O 네온 사인 (Monoton + 구기)",en:"400 {s}px/1 'Monoton'",ko:"400 {s}px/1.25 'Gugi'",ens:210,num:230,kos:112},
+ P:{n:"P 붓 터치 (Staatliches + 동해독도)",en:"400 {s}px/0.9 'Staatliches'",ko:"400 {s}px/1.15 'East Sea Dokdo'",ens:330,num:380,kos:170},
+ Q:{n:"Q 슬랩 히어로 (Alfa Slab + 연성)",en:"400 {s}px/0.95 'Alfa Slab One'",ko:"400 {s}px/1.25 'Yeon Sung'",ens:250,num:280,kos:128},
+ R:{n:"R 스트리트 (Rubik Mono + 기랑해랑)",en:"400 {s}px/1 'Rubik Mono One'",ko:"400 {s}px/1.25 'Kirang Haerang'",ens:190,num:220,kos:130},
+ S:{n:"S 엘레강트 (Cormorant + 고운바탕)",en:"700 {s}px/0.95 'Cormorant Garamond'",ko:"700 {s}px/1.3 'Gowun Batang'",ens:300,num:330,kos:104},
+ T:{n:"T 테크 와이드 (Michroma + IBM Plex)",en:"400 {s}px/1.05 'Michroma'",ko:"700 {s}px/1.25 'IBM Plex Sans KR'",ens:150,num:190,kos:96},
+ U:{n:"U 굵은 헤드라인 (Archivo Black + 노토산스 900)",en:"400 {s}px/0.95 'Archivo Black'",ko:"900 {s}px/1.25 'Noto Sans KR'",ens:250,num:280,kos:100},
+};
+const f=F[v], en=f.en.replace('{s}',f.ens), num=f.en.replace('{s}',f.num), ko=f.ko.replace('{s}',f.kos), sm=s=>f.en.replace(/\{s\}px\/[\d.]+/,s+'px/1');
+document.getElementById('r').innerHTML = scene==='k'
+ ? `<div class="c" style="top:560px;font:${sm(34)};letter-spacing:.5em;color:#ccc">AGES</div>
+    <div class="c met" style="top:620px;font:${num}">10–13</div>
+    <div class="c met" style="top:1120px;font:${ko};letter-spacing:${f.ls||'.02em'}">12월,<br>키즈 전문반 개강</div><div class="lab">${f.n}</div>`
+ : `<div class="c met" style="top:520px;font:${en};letter-spacing:.03em">RAW<br>KIDZ</div>
+    <div class="c" style="top:1150px"><span class="band" style="font:${sm(40)};letter-spacing:.3em">SEASON 1</span></div>
+    <div class="c met" style="top:1300px;font:${ko.replace(/\d+px\/[\d.]+/,'72px/1.3')}">작은 댄서들의 첫 시즌</div><div class="lab">${f.n}</div>`;
+</script></body></html>

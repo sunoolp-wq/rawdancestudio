@@ -11,6 +11,7 @@ for w in 300 400 500 700 900; do get "Noto+Sans+KR" $w "NotoSansKR-$w.ttf"; done
 for w in 500 600 700 800; do get "Montserrat" $w "Montserrat-$w.ttf"; done
 get "Montserrat" "700" "Montserrat-700.ttf"
 get "Anton" 400 "Anton.ttf"; get "Bebas+Neue" 400 "BebasNeue.ttf"; get "Black+Han+Sans" 400 "BlackHanSans.ttf"
+get "Cinzel" 900 "Cinzel-900.ttf"; get "Cinzel" 700 "Cinzel-700.ttf"; get "Noto+Serif+KR" 900 "NotoSerifKR-900.ttf"   # 키즈 전문반 예고편 (2026-11-25)
 # 원장님 글꼴 (GoGo Poster 2020: TRACKPAD 자막용, 원장님 제공 파일, 2026-11-13 저장소에 보관)
 for f in "$(dirname "$0")"/private/*.otf; do [ -e "$f" ] && { [ -s "$DIR/$(basename "$f")" ] || { cp "$f" "$DIR/" && echo "설치: $(basename "$f")"; }; }; done
 fc-cache -f >/dev/null 2>&1 || true

@@ -16,7 +16,8 @@ module.exports.renderFrames = async ({ file, setupArg, n, fps, dir, type = 'png'
   workers = +process.env.RAW_WORKERS || workers || Math.max(2, Math.min(8, os.cpus().length - 2));
   const b = await module.exports.launch(); let next = 0, done = 0;
   await Promise.all(Array.from({ length: workers }, async () => {
-    const p = await b.newPage({ viewport: { width: w, height: h } });
+    // RAW_PREVIEW=1 → 절반 크기로 빨리 그림 (미리보기용, 2026-11-25 "수정 한 번에 10분")
+    const p = await b.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: process.env.RAW_PREVIEW ? 0.5 : 1 });
     // 윈도우(C:\...)도 되게 파일 주소를 pathToFileURL로 (2026-11-18)
     await p.goto(require('url').pathToFileURL(file).href); await p.evaluate(o => window.setup(o), setupArg); await p.evaluate(() => document.fonts.ready);
     if (check) await check(p);

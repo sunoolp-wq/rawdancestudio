@@ -6,6 +6,7 @@ description: 홍보 영상(학원 소개, 반별 모집, 강사 소개, 오시�
 # 홍보영상 워크플로
 
 메인 세션이 총괄 PD로서 진행한다.
+직접 렌더링하는 영상(예고편·광고 릴스·티저)은 영상편집팀을 쓴다: 음악 → `beat-sync`, 원본 → `footage-scout`, 렌더 전·후 → `render-qa` (순서는 `tools/video-kit/README.md`).
 
 ## 1. 브리프
 - 어떤 영상인지: `docs/promo-video-catalog.md` 번호 또는 설명

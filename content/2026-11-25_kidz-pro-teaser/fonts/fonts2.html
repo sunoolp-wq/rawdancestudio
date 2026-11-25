@@ -1,0 +1,30 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:1080px;height:1920px;overflow:hidden;background:#000;color:#fff}
+.bg{position:absolute;inset:0;background:radial-gradient(70% 45% at 50% 50%,#2a0508 0%,#0b0102 55%,#000 100%)}
+.bar{position:absolute;left:0;right:0;height:250px;background:#000}
+.c{position:absolute;left:0;right:0;text-align:center}
+.met{background:linear-gradient(180deg,#fff 0%,#eee 40%,#a9a9a9 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 26px rgba(255,40,60,.4))}
+.band{display:inline-block;background:#E8202E;color:#fff;padding:14px 40px;transform:rotate(-4deg);box-shadow:0 0 50px rgba(232,32,46,.7)}
+.lab{position:absolute;left:0;right:0;bottom:270px;text-align:center;font:700 34px "Gothic A1";color:#ffd27a}
+</style></head><body><div class="bg"></div><div id="r"></div><div class="bar" style="top:0"></div><div class="bar" style="bottom:0"></div>
+<script>
+const q=new URLSearchParams(location.search), v=q.get('v'), scene=q.get('s');
+const F={
+ F:{n:"F 학원 TRACKPAD 글꼴 (GoGo Poster + 블랙한산스)",en:"italic 400 {s}px/0.9 'GoGo Poster 2020'",ko:"400 {s}px/1.2 'Black Han Sans'",ens:300,num:330,kos:110},
+ G:{n:"G 세로로 긴 예고편 (League Gothic + 고딕 900)",en:"400 {s}px/0.88 'League Gothic'",ko:"900 {s}px/1.2 'Gothic A1'",ens:440,num:480,kos:100},
+ H:{n:"H 고급 매거진 (Bodoni + 함렛)",en:"900 {s}px/0.95 'Bodoni Moda'",ko:"900 {s}px/1.25 'Hahmlet'",ens:270,num:300,kos:100},
+ I:{n:"I 미래·게임 (Orbitron + 오르빗)",en:"900 {s}px/1 'Orbitron'",ko:"400 {s}px/1.25 'Orbit'",ens:190,num:240,kos:100},
+ J:{n:"J 인더스트리얼 (Big Shoulders + 고딕 넓게)",en:"900 {s}px/0.9 'Big Shoulders Display'",ko:"900 {s}px/1.25 'Gothic A1'",ens:380,num:400,kos:92,ls:".12em"},
+ K:{n:"K 미니멀 와이드 (Syncopate + 노토산스)",en:"700 {s}px/1.05 'Syncopate'",ko:"900 {s}px/1.25 'Noto Sans KR'",ens:150,num:180,kos:96},
+ L:{n:"L 옛 한국 영화 포스터 (Six Caps + 흑백사진)",en:"400 {s}px/0.9 'Six Caps'",ko:"400 {s}px/1.15 'Black And White Picture'",ens:520,num:560,kos:140},
+ M:{n:"M 붓 명조 (Teko + 송명)",en:"700 {s}px/0.85 'Teko'",ko:"400 {s}px/1.25 'Song Myung'",ens:360,num:400,kos:118},
+};
+const f=F[v], en=f.en.replace('{s}',f.ens), num=f.en.replace('{s}',f.num), ko=f.ko.replace('{s}',f.kos), sm=s=>f.en.replace(/\{s\}px\/[\d.]+/,s+'px/1');
+document.getElementById('r').innerHTML = scene==='k'
+ ? `<div class="c" style="top:560px;font:${sm(34)};letter-spacing:.5em;color:#ccc">AGES</div>
+    <div class="c met" style="top:620px;font:${num}">10–13</div>
+    <div class="c met" style="top:1120px;font:${ko};letter-spacing:${f.ls||'.02em'}">12월,<br>키즈 전문반 개강</div><div class="lab">${f.n}</div>`
+ : `<div class="c met" style="top:520px;font:${en};letter-spacing:.03em">RAW<br>KIDZ</div>
+    <div class="c" style="top:1150px"><span class="band" style="font:${sm(40)};letter-spacing:.3em">SEASON 1</span></div>
+    <div class="c met" style="top:1300px;font:${ko.replace(/\d+px\/[\d.]+/,'72px/1.3')}">작은 댄서들의 첫 시즌</div><div class="lab">${f.n}</div>`;
+</script></body></html>

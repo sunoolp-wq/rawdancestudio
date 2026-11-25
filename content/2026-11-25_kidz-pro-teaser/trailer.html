@@ -15,8 +15,7 @@
 .card .k{font-size:150px;font-weight:900;letter-spacing:-.03em;line-height:1.15;background:linear-gradient(180deg,#fff 0%,#d8d8d8 45%,#8f8f8f 100%);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 30px rgba(255,40,60,.35))}
 .card .y{font:400 420px/1 Anton;letter-spacing:.04em;background:linear-gradient(180deg,#fff,#bdbdbd 55%,#6d6d6d);-webkit-background-clip:text;color:transparent}
 #title{z-index:3;left:0;right:0;top:560px;text-align:center;opacity:0}
-#title .rk{position:relative;font:400 380px/0.84 Anton;background:linear-gradient(180deg,#ffffff 0%,#e9e9e9 30%,#9a9a9a 52%,#f2f2f2 60%,#7a7a7a 100%);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 6px 0 rgba(0,0,0,.6)) drop-shadow(0 0 40px rgba(232,32,46,.45))}
-#sweep{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.85) 50%,transparent 60%);mix-blend-mode:overlay;background-size:300% 100%}
+#title .rk{position:relative;font:400 380px/0.84 Anton;background:linear-gradient(105deg,rgba(255,255,255,0) 42%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 58%),linear-gradient(180deg,#ffffff 0%,#e9e9e9 30%,#9a9a9a 52%,#f2f2f2 60%,#7a7a7a 100%);background-size:300% 100%,100% 100%;background-repeat:no-repeat;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 6px 0 rgba(0,0,0,.6)) drop-shadow(0 0 40px rgba(232,32,46,.45))}
 #band{left:50%;top:880px;width:540px;padding:20px 0;background:#E8202E;text-align:center;font:700 36px Inter;letter-spacing:.45em;text-indent:.45em;box-shadow:0 0 50px rgba(232,32,46,.7);z-index:4;opacity:0}
 #flare{left:-10%;right:-10%;top:880px;height:6px;background:linear-gradient(90deg,transparent,rgba(255,120,130,.0) 10%,rgba(255,200,205,.95) 50%,rgba(255,120,130,0) 90%,transparent);filter:blur(2px);opacity:0;z-index:4}
 #info{left:0;right:0;top:1280px;text-align:center;z-index:4}
@@ -38,7 +37,7 @@
 <div id="c3" class="a card"><div class="k">기본기부터</div></div>
 <div id="c4" class="a card"><div class="k">하나의 팀으로</div></div>
 <div id="c5" class="a card"><div class="k">무대를 향해</div></div>
-<div id="title" class="a"><div class="rk">RAW<br>KIDZ<div id="sweep"></div></div></div>
+<div id="title" class="a"><div class="rk" id="rk">RAW<br>KIDZ</div></div>
 <div id="flare" class="a"></div>
 <div id="band" class="a">SEASON 1</div>
 <div id="info" class="a"><div class="i1">2027 키즈 전문반 모집</div><div class="i2">10~13세</div><div class="i3">체계적인 트레이닝 후 RAW KIDZ 팀으로<br>공연·대회 참여 예정</div></div>
@@ -71,7 +70,7 @@ window.render=t=>{
   const ti=$('title'); ti.style.opacity=t>=T_TITLE?1:0;
   const tz=t<T_TITLE+0.15? 1.35-((t-T_TITLE)/0.15)*0.35 : 1+(t-T_TITLE)*0.012;
   ti.style.transform=`${t>=T_TITLE&&t<T_TITLE+0.3?shake:''} scale(${Math.max(1,tz)})`;
-  $('sweep').style.backgroundPosition=`${150-cl((t-T_TITLE-0.4)/1.2)*200}% 0`;
+  $('rk').style.backgroundPosition=`${100-cl((t-T_TITLE-0.4)/1.2)*100}% 0, 0 0`;   // 빛이 글자 안에서만 왼→오
   // SEASON 1 띠 + 가로 빛줄기
   const bp=t>=T_BAND? Math.min(1,(t-T_BAND)/0.12):0;
   $('band').style.opacity=bp; $('band').style.transform=`translate(-50%,-50%) rotate(-4deg) scale(${t<T_BAND+0.12?1.8-0.8*bp:1}) ${t>=T_BAND&&t<T_BAND+0.3?shake:''}`;

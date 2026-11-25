@@ -1,0 +1,25 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:1080px;height:1920px;overflow:hidden;background:#000;color:#fff}
+.bg{position:absolute;inset:0;background:radial-gradient(70% 45% at 50% 50%,#2a0508 0%,#0b0102 55%,#000 100%)}
+.bar{position:absolute;left:0;right:0;height:250px;background:#000}
+.c{position:absolute;left:0;right:0;text-align:center}
+.met{background:linear-gradient(180deg,#fff 0%,#eee 40%,#a9a9a9 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 26px rgba(255,40,60,.4))}
+.band{display:inline-block;background:#E8202E;color:#fff;padding:14px 40px;transform:rotate(-4deg);box-shadow:0 0 50px rgba(232,32,46,.7)}
+.lab{position:absolute;left:0;right:0;bottom:270px;text-align:center;font:700 34px "Gothic A1";color:#ffd27a}
+</style></head><body><div class="bg"></div><div id="r"></div><div class="bar" style="top:0"></div><div class="bar" style="bottom:0"></div>
+<script>
+const q=new URLSearchParams(location.search), v=q.get('v'), scene=q.get('s');
+const F={
+ A:{n:"A 클래식 영화 (Cinzel + 명조)",en:"900 {s}px/1.02 Cinzel",ko:"900 {s}px/1.3 'Noto Serif KR'",ens:250,kos:112,ls:".05em"},
+ B:{n:"B 액션 블록버스터 (Anton + 블랙한산스)",en:"400 {s}px/0.86 Anton",ko:"400 {s}px/1.15 'Black Han Sans'",ens:360,kos:130,ls:".01em"},
+ C:{n:"C 스포츠 광고 (Bebas + 고딕 넓게)",en:"400 {s}px/0.88 'Bebas Neue'",ko:"800 {s}px/1.25 'Gothic A1'",ens:400,kos:104,ls:".14em"},
+ D:{n:"D 드라마 시즌 (Playfair + 나눔명조)",en:"900 {s}px/0.95 'Playfair Display'",ko:"400 {s}px/1.3 NanumMyeongjoExtraBold",ens:280,kos:112,ls:".02em"},
+ E:{n:"E 게임·SF (Unbounded + 도현)",en:"900 {s}px/0.95 Unbounded",ko:"400 {s}px/1.2 'Do Hyeon'",ens:200,kos:130,ls:".02em"},
+};
+const f=F[v], en=f.en.replace('{s}',f.ens), ko=f.ko.replace('{s}',f.kos);
+document.getElementById('r').innerHTML = scene==='k'
+ ? `<div class="c met" style="top:770px;font:${ko};letter-spacing:${f.ls}">우리 아이의<br>첫 번째 시즌</div><div class="lab">${f.n}</div>`
+ : `<div class="c met" style="top:560px;font:${en};letter-spacing:.03em">RAW<br>KIDZ</div>
+    <div class="c" style="top:1130px"><span class="band" style="font:${en.replace(/\d+px\/[\d.]+/, '40px/1')};letter-spacing:.35em">SEASON 1</span></div>
+    <div class="c" style="top:1290px;font:${ko.replace(/\d+px\/[\d.]+/, '58px/1.3')};">2027 키즈 전문반 모집</div><div class="lab">${f.n}</div>`;
+</script></body></html>

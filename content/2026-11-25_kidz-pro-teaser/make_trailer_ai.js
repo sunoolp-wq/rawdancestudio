@@ -5,7 +5,8 @@
 const { renderFrames } = require('../../tools/pw.js');
 const { execFileSync } = require('child_process'); const path = require('path'), fs = require('fs'), os = require('os');
 const V = process.argv[2] || 'A', MUS = process.argv[3], AI = process.argv[4];
-const PV = !!process.env.RAW_PREVIEW, W = PV ? 540 : 1080, H = PV ? 960 : 1920, FPS = 30, SEC = 22.5;
+// RAW_FEED=1 → 피드용 4:5 (1080×1350, 끝 _4x5)
+const FEED = !!process.env.RAW_FEED, PV = !!process.env.RAW_PREVIEW, W = PV ? 540 : 1080, H = (FEED ? 1350 : 1920) / (PV ? 2 : 1), FPS = 30, SEC = 22.5;
 // [파일, 원본 시작초, 길이(초), 밝기(낮을수록 어두움), 속도(1=그대로, 0.7=느리게)] — 시각은 trailer.html CARDS·T_TITLE과 같음
 // [파일, 원본 시작초, 길이(초), 밝기, 속도(0.7=느리게), 확대, 가로 기준(0왼~1오), 세로 기준]
 // 구간은 원장님 11-25 "이상한 부분도 꽤 있거덩" → 0.5초씩 보고 이상한 곳 뺌 (아래 메모)
@@ -44,8 +45,8 @@ const SEG = process.argv[5] === 'bg' ? SEG_BG : SEG_PEOPLE;
   fl.push(SEG.map((_, i) => `[s${i}]`).join('') + `concat=n=${SEG.length}:v=1:a=0,format=yuv420p[v]`);
   execFileSync('ffmpeg', ['-nostdin', '-v', 'error', '-y', ...inputs, '-filter_complex', fl.join(';'), '-map', '[v]', '-t', String(SEC), '-c:v', 'libx264', '-crf', '14', bg]);
   const dir = path.join(tmp, 'f');
-  await renderFrames({ file: path.join(__dirname, 'trailer.html'), setupArg: { v: V, overlay: true, ad: !!process.env.RAW_AD }, n: SEC * FPS, fps: FPS, dir });
-  const out = path.join(__dirname, `KIDZ_SEASON1_trailer_${V}_ai${process.env.RAW_AD ? '_ad' : ''}${PV ? '_preview' : ''}.mp4`);
+  await renderFrames({ file: path.join(__dirname, 'trailer.html'), setupArg: { v: V, overlay: true, ad: !!process.env.RAW_AD, feed: FEED }, n: SEC * FPS, fps: FPS, dir, h: FEED ? 1350 : 1920 });
+  const out = path.join(__dirname, `KIDZ_SEASON1_trailer_${V}_ai${process.env.RAW_AD ? '_ad' : ''}${FEED ? '_4x5' : ''}${PV ? '_preview' : ''}.mp4`);
   execFileSync('ffmpeg', ['-nostdin', '-v', 'error', '-y', '-i', bg, '-framerate', String(FPS), '-i', path.join(dir, '%05d.png'), '-i', MUS,
     '-filter_complex', `[1:v]scale=${W}:${H}[o];[0:v][o]overlay=0:0:format=auto[v]`, '-map', '[v]', '-map', '2:a', '-t', String(SEC),
     '-af', `afade=t=out:st=${SEC - 1.5}:d=1.5`, '-c:v', 'libx264', '-crf', PV ? '20' : '17', '-maxrate', '14M', '-bufsize', '28M', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', out]);

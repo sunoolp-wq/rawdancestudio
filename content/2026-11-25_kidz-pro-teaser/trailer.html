@@ -68,6 +68,12 @@ const D=[]; window.setup=(arg)=>{ const v=(arg&&arg.v)||'A';
     #band{top:592px;width:470px;font-size:46px;padding:13px 0} #flare{top:592px}
     #info{top:865px} #info .i1{font-size:68px} #info .i2{margin-top:18px;font-size:44px} #info .i3{margin-top:18px;font-size:34px}
     #tag{top:1168px;font-size:46px} #foot{display:none}`; document.head.appendChild(st); }
+  // feed: 피드 게시물·피드 광고용 4:5 (1080×1350, 원장님 2026-11-25 "게시물 사이즈로") — 피드는 글자가 영상 위를 가리지 않아 화면 전체 사용
+  if(arg&&arg.feed){ const st=document.createElement('style'); st.textContent=`
+    html,body{height:1350px} .bar{height:150px}
+    #orig{top:70px} #title{top:140px} #title .rk{font-size:270px}
+    #band{top:392px;width:470px;font-size:46px;padding:13px 0} #flare{top:392px}
+    #info{top:650px} #tag{top:1012px;font-size:46px} #foot{top:1100px}`; document.head.appendChild(st); }
   if(arg&&arg.overlay){ document.documentElement.style.background=document.body.style.background='transparent'; $('bg').style.display='none'; $('fog1').style.opacity=.22; $('fog2').style.opacity=.35; } COPY[v].forEach((h,i)=>$('c'+(i+1)).innerHTML=h); const el=$('dust'); for(let i=0;i<90;i++){ const s=1+rnd()*3.5; const d=document.createElement('i'); d.style.width=d.style.height=s+'px'; el.appendChild(d); D.push({d,x:rnd()*1080,y:rnd()*1920,vx:(rnd()-.5)*18,vy:-6-rnd()*22,o:.15+rnd()*.5,s}); } };
 // 한글 카드 글자 크기 자동 맞춤 (원장님 2026-11-25 "한글이 빈 공간이 많게 작은 것 같아, 눈에 퐉 띄게")
 // 가장 긴 줄이 화면 폭 약 76%(820px)를 채우게, 최대 210px (쾅 할 때 1.25배로 튀어도 안 잘리고, 오른쪽 버튼 줄 피함)
@@ -100,7 +106,7 @@ window.render=t=>{ if(!fitted) fitCards();
   $('tag').style.opacity=eo((t-19.5)/0.3)*(.8+.2*Math.sin(t*4));
   $('foot').style.opacity=eo((t-19.9)/0.6);
   // 시네마 바: 타이틀 뒤로 열림 (세로 화면 꽉 채움)
-  const open=eo((t-T_INFO+0.2)/0.8); $('bt').style.transform=`translateY(${-open*250}px)`; $('bb').style.transform=`translateY(${open*250}px)`;
+  const open=eo((t-T_INFO+0.2)/0.8), BH=$('bt').offsetHeight; $('bt').style.transform=`translateY(${-open*BH}px)`; $('bb').style.transform=`translateY(${open*BH}px)`;
   // 끝은 어둡게 하지 않음 (마지막 모집 화면 그대로 유지, 밝기 0 변화)
   document.body.style.filter=`brightness(${1-eo((t-(END-0.6))/0.6)*0.0})`;
 };

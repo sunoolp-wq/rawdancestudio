@@ -1,0 +1,39 @@
+// node make_trailer_ai.js <A|C> <음원.wav> <AI영상폴더> → KIDZ_SEASON1_trailer_<V>_ai.mp4
+// 원장님 2026-11-25: Gemini(Veo)로 만든 AI 영상을 "AI 티 안 나게 뒷배경으로 어둡게" → 어둡게·붉은 톤·살짝 흐림·필름 입자·비네팅 후 글자 카드 뒤에 깔기
+// 컷은 쾅(번쩍) 시각에 바꿔서 번쩍 효과가 이음새를 가림. RAW_PREVIEW=1 이면 540×960 미리보기
+const { renderFrames } = require('../../tools/pw.js');
+const { execFileSync } = require('child_process'); const path = require('path'), fs = require('fs'), os = require('os');
+const V = process.argv[2] || 'A', MUS = process.argv[3], AI = process.argv[4];
+const PV = !!process.env.RAW_PREVIEW, W = PV ? 540 : 1080, H = PV ? 960 : 1920, FPS = 30, SEC = 22.5;
+// [파일, 원본 시작초, 길이(초), 밝기(낮을수록 어두움), 속도(1=그대로, 0.7=느리게)] — 시각은 trailer.html CARDS·T_TITLE과 같음
+// [파일, 원본 시작초, 길이(초), 밝기, 속도(0.7=느리게), 확대, 가로 기준(0왼~1오), 세로 기준]
+// 구간은 원장님 11-25 "이상한 부분도 꽤 있거덩" → 0.5초씩 보고 이상한 곳 뺌 (아래 메모)
+const SEG = [
+  ['gemini_c866cea3.mp4', 2.0, 4.16, 0.50, 1, 1.08, 0.5, 0.5],          // 0~4.66 첫 화면: 커튼 스포트라이트 (0~1.5초 테두리 이상, 6.5초~ 흰 점 → 2.0~6.2만)
+  ['gemini_13420bdf.mp4', 7.0, 2.09, 0.45, 1, 1.32, 0.72, 0.62],        // 4.66~6.75 흰 운동화 (뒤쪽 떠 있는 다리 가리게 오른쪽 확대, 5초쯤 발 꺾임 피함)
+  ['Child_dancer_standing_in_room.mp4', 0.3, 3.14, 0.42, 0.8, 1.05, 0.5, 0.5], // 6.75~9.89 아이 실루엣 (5초~ 팔이 녹아내림 → 앞 2.5초만 느리게)
+  ['Children_dancing_in_practice_room.mp4', 3.0, 1.82, 0.40, 1, 1.1, 0.5, 0.5], // 9.89~11.71 연습실 발 (1초 공중 발·5초~ 발 뭉개짐 피함)
+  ['Children_dancers_standing_on_stage.mp4', 1.5, 0.79, 0.42, 1, 1.08, 0.5, 0.5], // 11.71~12.50 팀 대형 (6.5초~ 몸 모양 이상)
+  ['Stage_lights.mp4', 4.4, 0.91, 0.42, 1, 1.1, 0.5, 0.4],             // 12.50~13.41 큰 무대 (1~2.5초 조명 V자 이상, 아래 스피커 녹음은 시네마 바에 가림)
+  ['Red_smoke.mp4', 0.6, 9.09, 0.38, 0.7, 1.12, 0.5, 0.5],             // 13.41~ RAW KIDZ 뒤 불꽃→붉은 연기 (왼쪽 검은 홈 가리게 확대)
+];
+(async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kidz-ai-')); const bg = path.join(tmp, 'bg.mp4');
+  const inputs = [], fl = [];
+  SEG.forEach(([f, ss, d, br, sp, k, cx, cy], i) => {
+    inputs.push('-ss', String(ss), '-t', String(d * sp + 0.2), '-i', path.join(AI, f));
+    // 어둡게 + 채도 낮추고 붉은 톤 + 살짝 흐림(AI 디테일 숨김) + 비네팅 + 필름 입자
+    fl.push(`[${i}:v]setpts=PTS/${sp},fps=${FPS},scale=${Math.round(W * k / 2) * 2}:${Math.round(H * k / 2) * 2}:force_original_aspect_ratio=increase,crop=${W}:${H}:(iw-${W})*${cx}:(ih-${H})*${cy},` +
+      `eq=saturation=0.55:contrast=1.12,colorchannelmixer=rr=1.0:gg=0.72:bb=0.72,colorchannelmixer=rr=${br}:gg=${br}:bb=${br},` +
+      `gblur=sigma=${PV ? 1.2 : 2.4},vignette=angle=PI/3.2,noise=alls=${PV ? 6 : 10}:allf=t,trim=duration=${d},setpts=PTS-STARTPTS[s${i}]`);
+  });
+  fl.push(SEG.map((_, i) => `[s${i}]`).join('') + `concat=n=${SEG.length}:v=1:a=0,format=yuv420p[v]`);
+  execFileSync('ffmpeg', ['-nostdin', '-v', 'error', '-y', ...inputs, '-filter_complex', fl.join(';'), '-map', '[v]', '-t', String(SEC), '-c:v', 'libx264', '-crf', '14', bg]);
+  const dir = path.join(tmp, 'f');
+  await renderFrames({ file: path.join(__dirname, 'trailer.html'), setupArg: { v: V, overlay: true }, n: SEC * FPS, fps: FPS, dir });
+  const out = path.join(__dirname, `KIDZ_SEASON1_trailer_${V}_ai${PV ? '_preview' : ''}.mp4`);
+  execFileSync('ffmpeg', ['-nostdin', '-v', 'error', '-y', '-i', bg, '-framerate', String(FPS), '-i', path.join(dir, '%05d.png'), '-i', MUS,
+    '-filter_complex', `[1:v]scale=${W}:${H}[o];[0:v][o]overlay=0:0:format=auto[v]`, '-map', '[v]', '-map', '2:a', '-t', String(SEC),
+    '-af', `afade=t=out:st=${SEC - 1.5}:d=1.5`, '-c:v', 'libx264', '-crf', PV ? '20' : '15', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', out]);
+  fs.rmSync(tmp, { recursive: true, force: true }); console.log(out);
+})();

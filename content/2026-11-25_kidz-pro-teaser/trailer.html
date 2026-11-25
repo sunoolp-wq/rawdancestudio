@@ -60,7 +60,9 @@ const HITS=[4.66,6.75,9.89,11.71,12.50,T_TITLE,T_BAND,19.5];
 const COPY={
   A:['<div class="ag">AGES</div><div class="y">10–13</div>','<div class="k">12월<br>키즈 전문반<br>개강 예정</div>','<div class="k">어린 나이부터<br>체계적으로</div>','<div class="k">한 팀이 되어</div>','<div class="k">무대와<br>대회를 향해</div>'],
   C:['<div class="k">12월<br>키즈 전문반<br>개강 예정</div>','<div class="k">작은 댄서들의<br>첫 시즌</div>','<div class="k">어린 나이부터,<br>제대로</div>','<div class="k">한 팀으로</div>','<div class="k">무대와<br>대회를 향해</div>']};
-const D=[]; window.setup=(arg)=>{ const v=(arg&&arg.v)||'A'; COPY[v].forEach((h,i)=>$('c'+(i+1)).innerHTML=h); const el=$('dust'); for(let i=0;i<90;i++){ const s=1+rnd()*3.5; const d=document.createElement('i'); d.style.width=d.style.height=s+'px'; el.appendChild(d); D.push({d,x:rnd()*1080,y:rnd()*1920,vx:(rnd()-.5)*18,vy:-6-rnd()*22,o:.15+rnd()*.5,s}); } };
+const D=[]; window.setup=(arg)=>{ const v=(arg&&arg.v)||'A';
+  // overlay: AI 배경 영상 위에 얹을 글자만 (배경 투명) — 원장님 2026-11-25 "AI 영상 티 안 나게 뒷배경으로 어둡게"
+  if(arg&&arg.overlay){ document.documentElement.style.background=document.body.style.background='transparent'; $('bg').style.display='none'; $('fog1').style.opacity=.22; $('fog2').style.opacity=.35; } COPY[v].forEach((h,i)=>$('c'+(i+1)).innerHTML=h); const el=$('dust'); for(let i=0;i<90;i++){ const s=1+rnd()*3.5; const d=document.createElement('i'); d.style.width=d.style.height=s+'px'; el.appendChild(d); D.push({d,x:rnd()*1080,y:rnd()*1920,vx:(rnd()-.5)*18,vy:-6-rnd()*22,o:.15+rnd()*.5,s}); } };
 window.render=t=>{
   D.forEach(p=>{ p.d.style.transform=`translate(${p.x+p.vx*t}px,${((p.y+p.vy*t)%1920+1920)%1920}px)`; p.d.style.opacity=p.o*(.6+.4*Math.sin(t*2+p.x)); p.d.style.filter=p.s>3?'blur(1.5px)':'none'; });
   $('fog1').style.transform=`translate(${Math.sin(t*.3)*40}px,${Math.cos(t*.25)*30}px) scale(${1+t*.01})`;

@@ -1,0 +1,58 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
+/* 키즈 전문반 캐러셀 2~5장 (1장 = 확정 포스터 feed_B1_red.jpg). 같은 빨강 시즌 포스터 톤, 시즌 드라마의 '에피소드' 느낌
+   문구는 포스터·캡션 검수 통과 내용만 (10~13세, 트레이닝 후 RAW KIDZ 팀 공연·대회 참여 '예정', 일정은 상담 때 안내) */
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:1080px;height:1350px;overflow:hidden}
+.P{width:1080px;height:1350px;position:relative;overflow:hidden;color:#fff;font-family:"Gothic A1","Noto Sans KR",sans-serif;background:radial-gradient(120% 90% at 50% 30%,#E8202E 0%,#B00F1C 70%,#7E0A14 100%)}
+.dot{position:absolute;inset:0;opacity:.16;background-image:radial-gradient(#000 1px,transparent 1px);background-size:4px 4px}
+.top{position:absolute;left:72px;right:72px;top:64px;display:flex;justify-content:space-between;font:700 20px Inter;letter-spacing:.32em}
+.ttl{position:absolute;left:72px;right:72px;top:150px}
+.ttl .k{font:600 24px Inter;letter-spacing:.4em}
+.ttl h1{margin-top:18px;font-size:84px;font-weight:800;letter-spacing:-.04em;line-height:1.12}
+.band{display:inline-block;background:#111;color:#fff;font:700 26px Inter;letter-spacing:.42em;padding:12px 26px 12px 34px;transform:rotate(-3deg);box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.foot{position:absolute;left:72px;right:72px;bottom:56px;display:flex;justify-content:space-between;align-items:flex-end;font:600 20px Inter;letter-spacing:.2em;opacity:.85}
+.big{font:400 300px/0.84 Anton}
+.ep{display:flex;gap:28px;align-items:flex-start;padding:34px 0;border-top:3px solid rgba(255,255,255,.35)}
+.ep:last-child{border-bottom:3px solid rgba(255,255,255,.35)}
+.ep .n{flex:none;width:200px;font:400 64px/1 Anton;letter-spacing:.02em}
+.ep .n small{display:block;font:700 18px Inter;letter-spacing:.3em;opacity:.8;margin-bottom:8px}
+.ep b{display:block;font-size:50px;font-weight:800;letter-spacing:-.03em}
+.ep span{display:block;margin-top:10px;font-size:28px;font-weight:500;opacity:.9}
+.tag{display:inline-block;margin-left:10px;font-size:24px;font-weight:800;background:#111;padding:4px 12px;vertical-align:middle}
+.chk{display:flex;gap:26px;align-items:center;padding:30px 0;font-size:46px;font-weight:800;letter-spacing:-.03em;border-top:3px solid rgba(255,255,255,.35)}
+.chk:last-child{border-bottom:3px solid rgba(255,255,255,.35)}
+.chk i{flex:none;width:64px;height:64px;border:5px solid #fff;display:flex;align-items:center;justify-content:center;font-style:normal;font:400 46px Anton}
+.row{display:flex;justify-content:space-between;align-items:baseline;padding:26px 0;border-top:3px solid rgba(255,255,255,.35);font-size:40px;font-weight:800}
+.row:last-child{border-bottom:3px solid rgba(255,255,255,.35)}
+.row span{font-size:36px;font-weight:700;opacity:.92}
+</style></head><body><div id="r"></div>
+<script>
+const s=+new URLSearchParams(location.search).get('s')||2;
+const TOP=`<div class="top"><span>RAW KIDZ</span><span>SEASON 1 · ${s}/5</span></div>`;
+const FOOT=`<div class="foot"><span>A RAW DANCE STUDIO ORIGINAL</span><span>@RAWDANCE_SUWON</span></div>`;
+const S={};
+S[2]=`<div class="ttl"><div class="k">WHAT IS</div><h1>RAW KIDZ가<br>뭐예요?</h1></div>
+ <div style="position:absolute;left:72px;right:72px;top:520px">
+  <div class="big">KIDZ</div>
+  <div style="margin-top:-30px"><span class="band">2027 SEASON 1</span></div>
+  <div style="margin-top:56px;font-size:46px;font-weight:800;line-height:1.45;letter-spacing:-.03em">RAW의 2027 키즈 전문반<br>10~13세 친구들이 모여<br>체계적인 트레이닝 후<br>RAW KIDZ 팀으로 공연·대회 참여 예정</div></div>`;
+S[3]=`<div class="ttl"><div class="k">EPISODES</div><h1>이렇게<br>진행돼요</h1></div>
+ <div style="position:absolute;left:72px;right:72px;top:520px">
+  <div class="ep"><div class="n"><small>EPISODE</small>01</div><div><b>기본기 트레이닝</b><span>체계적인 트레이닝으로 기본기부터</span></div></div>
+  <div class="ep"><div class="n"><small>EPISODE</small>02</div><div><b>RAW KIDZ 팀 구성<span class="tag" style="display:inline-block;margin-top:0">예정</span></b><span>함께 연습하는 우리 팀</span></div></div>
+  <div class="ep"><div class="n"><small>EPISODE</small>03</div><div><b>공연·대회 무대<span class="tag" style="display:inline-block;margin-top:0">예정</span></b><span>팀으로 무대에 서는 게 목표</span></div></div></div>`;
+S[4]=`<div class="ttl"><div class="k">FOR</div><h1>이런 친구라면<br>딱이에요</h1></div>
+ <div style="position:absolute;left:72px;right:72px;top:540px">
+  <div class="chk"><i>✓</i>춤을 제대로 배워 보고 싶은 아이</div>
+  <div class="chk"><i>✓</i>무대에 서 보고 싶은 아이</div>
+  <div class="chk"><i>✓</i>친구들과 한 팀으로<br>도전해 보고 싶은 아이</div>
+  <div style="margin-top:70px;text-align:center"><span class="band">RAW KIDZ · SEASON 1</span></div></div>`;
+S[5]=`<div class="ttl"><div class="k">CONTACT</div><h1>상담<br>안내</h1></div>
+ <div style="position:absolute;left:72px;right:72px;top:520px">
+  <div class="row">대상<span>10~13세</span></div>
+  <div class="row">수업 요일·시간<span>상담 때 안내</span></div>
+  <div class="row">상담<span>DM '키즈 전문반'</span></div>
+  <div class="row">카카오톡<span>로우댄스수원점학원</span></div>
+  <div class="row">전화<span>031-225-6600</span></div>
+  <div style="margin-top:40px;font-size:30px;font-weight:600;line-height:1.5;opacity:.9">수원역·매교역 근처 매산로 136, 4층 · 건물 내 무료 주차</div></div>`;
+document.getElementById('r').innerHTML=`<div class="P"><div class="dot"></div>${TOP}${S[s]}${FOOT}</div>`;
+</script></body></html>

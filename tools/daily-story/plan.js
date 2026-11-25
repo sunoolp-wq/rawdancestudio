@@ -18,4 +18,5 @@ const story = path.join(__dirname, '../../content', `${dateStr}_daily-story`, 's
 console.log(`${dateStr} (${DOW}) 예약 순서`);
 console.log(`00:00  시간표 스토리  ${story}`);
 // 원장님 2026-11-22: 스토리 예약은 장르 수업만 (K-POP 수업은 빼고), 시각은 빈칸 없이 00:01부터 차례로
-classes.filter(c => !/K-POP/i.test(c.name)).forEach((c, i) => console.log(`00:${String(i + 1).padStart(2, '0')}  ${c.start} ${c.name}  T. ${c.teacher || '?'}${c.mark ? '  (' + c.mark + ')' : ''}`));
+// 쌤 없는 칸(휴강 대체 등)은 쌤 영상이 없으니 예약하지 않음 (2026-11-25)
+classes.filter(c => !/K-POP/i.test(c.name) && c.teacher).forEach((c, i) => console.log(`00:${String(i + 1).padStart(2, '0')}  ${c.start} ${c.name}  T. ${c.teacher || '?'}${c.mark ? '  (' + c.mark + ')' : ''}`));

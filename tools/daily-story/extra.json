@@ -96,5 +96,20 @@
     }
    }
   ]
+ },
+ "2026-11-26": {
+  "replace": [
+   {
+    "start": "18:30",
+    "name": "BASIC",
+    "set": {
+     "name": "월말평가 준비",
+     "teacher": "",
+     "sub": "BASIC(GAON) 휴강",
+     "mark": "change",
+     "key": "pro"
+    }
+   }
+  ]
  }
 }

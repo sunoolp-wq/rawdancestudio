@@ -1,0 +1,48 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
+/* 키즈 전문반 캐러셀 2~5장 2차 (원장님 2026-11-25 "캐러셀 5장 클로드 티 안 나게 다시")
+   1차에서 AI 티 난 것: 넓게 벌린 작은 영어 라벨(WHAT IS·EPISODES·SEASON 1·2/5·A RAW DANCE STUDIO ORIGINAL), 가는 선 표, 체크박스, EPISODE 01 같은 장치
+   → 1장 포스터(L3 미니멀)와 같은 빨강 바탕·큰 글씨. 장마다 한 문장만 크게, 작은 영어 라벨 없음, 오른쪽 아래 RAW 로고만
+   문구는 검수 통과 내용 + 12월 개강 예정(브랜드 가이드 11-25) */
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:1080px;height:1350px;overflow:hidden}
+.P{width:1080px;height:1350px;position:relative;overflow:hidden;color:#fff;font-family:"Gothic A1","Noto Sans KR",sans-serif;background:radial-gradient(120% 90% at 50% 30%,#E8202E 0%,#B00F1C 70%,#7E0A14 100%)}
+.dot{position:absolute;inset:0;opacity:.16;background-image:radial-gradient(#000 1px,transparent 1px);background-size:4px 4px}
+.logo{position:absolute;right:64px;bottom:56px;height:40px;filter:brightness(0) invert(1)}
+.a{position:absolute}
+.h{font-weight:900;letter-spacing:-.05em;line-height:1.08}
+.s{font-weight:500;letter-spacing:-.02em;line-height:1.5}
+.bub{display:inline-block;position:relative;background:#fff;color:#111;border-radius:56px;padding:34px 54px 38px;font-size:70px;font-weight:900;letter-spacing:-.04em;line-height:1.15;box-shadow:0 18px 40px rgba(0,0,0,.28)}
+.bub:after{content:"";position:absolute;bottom:-30px;border:20px solid transparent;border-top:38px solid #fff}
+.bub.l:after{left:64px;border-left:26px solid #fff;transform:skewX(-14deg)}
+.bub.r:after{right:64px;border-right:26px solid #fff;transform:skewX(14deg)}
+.step{display:flex;align-items:baseline;gap:34px}
+.step b{font-size:200px;font-weight:900;line-height:1;letter-spacing:-.06em}
+.step span{font-size:40px;font-weight:700;letter-spacing:-.02em;opacity:.95}
+.step em{font-style:normal;display:inline-block;background:#111;color:#fff;font-size:26px;font-weight:800;padding:4px 14px;margin-left:10px;vertical-align:middle}
+</style></head><body><div id="r"></div>
+<script>
+const s=+new URLSearchParams(location.search).get('s')||2;
+const S={};
+// 2장: 누구·언제 — 나이 숫자를 가장 크게
+S[2]=`<div class="a" style="left:60px;top:130px;display:flex;align-items:flex-end;gap:14px"><span style="font:400 400px/0.86 Anton;letter-spacing:-.01em">10–13</span><span class="h" style="font-size:120px;margin-bottom:14px">세</span></div>
+ <div class="a h" style="left:64px;top:620px;font-size:140px">키즈 전문반<br>12월 개강 예정</div>
+ <div class="a s" style="left:72px;top:1000px;font-size:40px;font-weight:700">체계적인 트레이닝 후<br>RAW KIDZ 팀으로 공연·대회 참여 예정</div>`;
+// 3장: 과정 — 단어 세 개를 크게 쌓기
+S[3]=`<div class="a h" style="left:72px;top:110px;font-size:64px;font-weight:800">이렇게 가요</div>
+ <div class="a" style="left:64px;top:270px;display:flex;flex-direction:column;gap:70px">
+  <div class="step"><b>기본기</b><span>체계적인 트레이닝</span></div>
+  <div class="step"><b>한 팀</b><span>RAW KIDZ 팀 구성<em>예정</em></span></div>
+  <div class="step"><b>무대</b><span>공연·대회 참여<em>예정</em></span></div></div>
+ <div class="a s" style="left:72px;top:1130px;font-size:36px;font-weight:700;opacity:.92">팀으로 무대에 서는 게 목표예요</div>`;
+// 4장: 이런 친구 — 아이가 하는 말(말풍선, B2 광고에서 원장님이 고른 방식)
+S[4]=`<div class="a h" style="left:72px;top:110px;font-size:64px;font-weight:800">우리 아이가<br>이런 말 했다면</div>
+ <div class="a" style="left:64px;top:430px"><div class="bub l">춤 제대로<br>배우고 싶어!</div></div>
+ <div class="a" style="right:64px;top:700px"><div class="bub r">나도 무대에<br>서 보고 싶어</div></div>
+ <div class="a" style="left:100px;top:990px"><div class="bub l">친구들이랑<br>한 팀 하고 싶어</div></div>`;
+// 5장: 상담 — DM 한 단어를 가장 크게
+S[5]=`<div class="a h" style="left:72px;top:110px;font-size:64px;font-weight:800">상담은</div>
+ <div class="a" style="left:58px;top:200px;font:400 420px/0.9 Anton">DM</div>
+ <div class="a h" style="left:72px;top:600px;font-size:80px">'키즈 전문반'이라고<br>보내 주세요</div>
+ <div class="a s" style="left:72px;top:860px;font-size:36px">카톡 '로우댄스수원점학원' · 031-225-6600<br>수업 요일·시간은 상담 때 안내</div>
+ <div class="a s" style="left:72px;top:1020px;font-size:30px;opacity:.85">수원역·매교역 근처 매산로 136, 4층<br>건물 내 무료 주차</div>`;
+document.getElementById('r').innerHTML=`<div class="P"><div class="dot"></div>${S[s]}<img class="logo" src="raw-logo-tight.png"></div>`;
+</script></body></html>

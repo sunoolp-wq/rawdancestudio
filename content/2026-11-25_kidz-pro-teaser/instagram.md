@@ -12,8 +12,8 @@
 - 음악: 원장님 모션어레이 **MA_VasilYatsevich_NoiseTherapy** (24초, 115 BPM, 구독 라이선스 — 다운로드 기록 보관). 2차(원장님 "노래랑 텍스트가 너무 안 맞아", "글꼴 별로"): 박자 계산 말고 곡에서 잰 큰 소리에 맞춤 — 4.66 "2027" / 6.75 첫 번째 시즌 / 9.89 기본기부터 / 11.71 하나의 팀으로 / 12.50 무대를 향해 / 13.41 RAW KIDZ / 16.15 SEASON 1 / 19.5 NOW RECRUITING. 글꼴: 영문 Cinzel(영화 포스터 로마자 세리프), 한글 Noto Serif KR Black(명조). 22.5초(끝 1.5초 페이드). `node make_trailer.js 음원.wav` (음원 파일은 저장소에 안 올림). 캡션은 아래 릴스 캡션 그대로
 
 ### A안·C안 (2026-11-25 3차, 원장님 "A,C 안으로 두개" + 글꼴 "F GoGo Poster + 블랙한산스로 가자")
-- `KIDZ_SEASON1_trailer_A.mp4` (나이로 꽂기): AGES 10–13 → 12월 키즈 전문반 개강 예정 → 어린 나이부터 체계적으로 → 한 팀이 되어 → 무대와 대회를 향해 → RAW KIDZ / SEASON 1
-- `KIDZ_SEASON1_trailer_C.mp4` (작은 댄서들): 12월 키즈 전문반 개강 예정 → 작은 댄서들의 첫 시즌 → 어린 나이부터, 제대로 → 한 팀으로 → 무대와 대회를 향해 → RAW KIDZ / SEASON 1
+- `KIDZ_SEASON1_trailer_A.mp4` (나이로 꽂기): AGES 10–13 → 12월 키즈 전문반 개강 예정 → 어린 나이부터 체계적으로 → 한 팀이 되어 → 무대와 / 대회를 향해 → RAW KIDZ / SEASON 1
+- `KIDZ_SEASON1_trailer_C.mp4` (작은 댄서들): 12월 키즈 전문반 개강 예정 → 작은 댄서들의 첫 시즌 → 어린 나이부터, 제대로 → 한 팀으로 → 무대와 / 대회를 향해 → RAW KIDZ / SEASON 1
 - 첫 화면·끝 화면 맨 위 "A RAW DANCE STUDIO ORIGINAL" → "RAW DANCE STUDIO SUWON" (원장님 2026-11-25 "SUWON으로")
 - 끝 화면: 키즈 전문반 · 12월 개강 예정 / 10~13세 / 트레이닝 후 RAW KIDZ 팀으로 공연·대회 참여 예정 / NOW RECRUITING / 상담 줄(요일·시간은 상담 때 안내)
 - 만드는 법 `node make_trailer.js A|C 음원.wav` (박자 시각은 2차와 같음). 음원이 영상에 들어 있으니 **인스타 앱에서 음악 또 넣지 않기**

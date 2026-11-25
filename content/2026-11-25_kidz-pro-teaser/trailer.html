@@ -11,23 +11,23 @@
 #dust{inset:0}#dust i{position:absolute;border-radius:50%;background:#fff}
 .bar{left:0;right:0;height:250px;background:#000;z-index:5}#bt{top:0}#bb{bottom:0}
 .card{left:0;right:0;top:50%;text-align:center;transform:translateY(-50%);opacity:0;z-index:3}
-.card .s{font:italic 400 44px "GoGo Poster 2020";letter-spacing:.45em;text-indent:.45em;color:#d9d9d9}
+.card .s{font:italic 400 42px "GoGo Poster 2020";letter-spacing:.22em;text-indent:.22em;color:#d9d9d9}
 .card .k{font:400 128px/1.22 "Black Han Sans";letter-spacing:.02em;text-indent:.02em;background:linear-gradient(180deg,#ffffff 0%,#f1f1f1 40%,#b5b5b5 100%);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 26px rgba(255,40,60,.4))}
 .card .ag{font:italic 400 60px "GoGo Poster 2020";letter-spacing:.5em;text-indent:.5em;color:#ccc;margin-bottom:10px}
 .card .y{font:italic 400 290px/0.9 "GoGo Poster 2020";letter-spacing:.02em;background:linear-gradient(180deg,#fff,#d6d6d6 50%,#7a7a7a);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 40px rgba(232,32,46,.45))}
-#title{z-index:3;left:0;right:0;top:620px;text-align:center;opacity:0}
+#title{z-index:3;left:0;right:0;top:430px;text-align:center;opacity:0}
 #title .rk{position:relative;font:italic 400 330px/0.88 "GoGo Poster 2020";letter-spacing:.04em;text-indent:.04em;background:linear-gradient(105deg,rgba(255,255,255,0) 42%,rgba(255,255,255,1) 50%,rgba(255,255,255,0) 58%),linear-gradient(180deg,#ffffff 0%,#e9e9e9 30%,#9a9a9a 52%,#f2f2f2 60%,#7a7a7a 100%);background-size:300% 100%,100% 100%;background-repeat:no-repeat;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 6px 0 rgba(0,0,0,.6)) drop-shadow(0 0 40px rgba(232,32,46,.45))}
-#band{left:50%;top:930px;width:520px;padding:16px 0;background:#E8202E;text-align:center;font:italic 400 52px "GoGo Poster 2020";letter-spacing:.3em;text-indent:.4em;box-shadow:0 0 50px rgba(232,32,46,.7);z-index:4;opacity:0}
-#flare{left:-10%;right:-10%;top:930px;height:6px;background:linear-gradient(90deg,transparent,rgba(255,120,130,.0) 10%,rgba(255,200,205,.95) 50%,rgba(255,120,130,0) 90%,transparent);filter:blur(2px);opacity:0;z-index:4}
-#info{left:0;right:0;top:1280px;text-align:center;z-index:4}
+#band{left:50%;top:712px;width:520px;padding:16px 0;background:#E8202E;text-align:center;font:italic 400 52px "GoGo Poster 2020";letter-spacing:.3em;text-indent:.4em;box-shadow:0 0 50px rgba(232,32,46,.7);z-index:4;opacity:0}
+#flare{left:-10%;right:-10%;top:712px;height:6px;background:linear-gradient(90deg,transparent,rgba(255,120,130,.0) 10%,rgba(255,200,205,.95) 50%,rgba(255,120,130,0) 90%,transparent);filter:blur(2px);opacity:0;z-index:4}
+#info{left:0;right:0;top:1100px;text-align:center;z-index:4}
 #info div{opacity:0}
 #info .i1{font:400 68px "Black Han Sans";letter-spacing:.02em}
-#info .i2{margin-top:18px;display:inline-block;border:3px solid #fff;padding:4px 28px;font:400 50px "Black Han Sans"}
-#info .i3{margin-top:20px;font-size:32px;font-weight:700;line-height:1.5;color:#ddd}
-#tag{left:0;right:0;top:1560px;text-align:center;z-index:6;font:italic 400 50px "GoGo Poster 2020";letter-spacing:.35em;text-indent:.35em;opacity:0}
-#foot{left:60px;right:60px;top:1712px;text-align:center;z-index:6;font-size:24px;line-height:1.55;color:#cfcfcf;opacity:0}
-#foot small{display:block;font-size:18px;opacity:.75}
-#orig{left:0;right:0;top:300px;text-align:center;z-index:6;font:italic 400 34px "GoGo Poster 2020";letter-spacing:.35em;text-indent:.35em;color:#bbb;opacity:0}
+#info .i2{margin-top:26px;display:inline-block;border:3px solid #fff;padding:4px 28px;font:400 50px "Black Han Sans"}
+#info .i3{margin-top:26px;font-size:32px;font-weight:700;line-height:1.55;color:#ddd}
+#tag{left:0;right:0;top:1470px;text-align:center;z-index:6;font:italic 400 50px "GoGo Poster 2020";letter-spacing:.35em;text-indent:.35em;opacity:0}
+#foot{left:60px;right:60px;top:1560px;text-align:center;z-index:6;font-size:26px;line-height:1.55;color:#cfcfcf;opacity:0}
+#foot small{display:block;font-size:20px;opacity:.7;margin-top:4px}
+#orig{left:0;right:0;top:310px;text-align:center;z-index:6;font:italic 400 34px "GoGo Poster 2020";letter-spacing:.35em;text-indent:.35em;color:#bbb;opacity:0}
 #flash{inset:0;background:#fff;opacity:0;z-index:9}
 #rgb{inset:0;z-index:8;pointer-events:none}
 </style></head><body>
@@ -58,8 +58,8 @@ const T_TITLE=13.41, T_BAND=16.15, T_INFO=16.9, END=22.5;
 const HITS=[4.66,6.75,9.89,11.71,12.50,T_TITLE,T_BAND,19.5];
 // 원장님 2026-11-25: A안(나이로 꽂기)·C안(작은 댄서들) 두 개, 글꼴 F(GoGo Poster + 블랙한산스)
 const COPY={
-  A:['<div class="ag">AGES</div><div class="y">10–13</div>','<div class="k">12월<br>키즈 전문반<br>개강 예정</div>','<div class="k">어린 나이부터<br>체계적으로</div>','<div class="k">한 팀이 되어</div>','<div class="k">무대와 대회를<br>향해</div>'],
-  C:['<div class="k">12월<br>키즈 전문반<br>개강 예정</div>','<div class="k">작은 댄서들의<br>첫 시즌</div>','<div class="k">어린 나이부터,<br>제대로</div>','<div class="k">한 팀으로</div>','<div class="k">무대와 대회를<br>향해</div>']};
+  A:['<div class="ag">AGES</div><div class="y">10–13</div>','<div class="k">12월<br>키즈 전문반<br>개강 예정</div>','<div class="k">어린 나이부터<br>체계적으로</div>','<div class="k">한 팀이 되어</div>','<div class="k">무대와<br>대회를 향해</div>'],
+  C:['<div class="k">12월<br>키즈 전문반<br>개강 예정</div>','<div class="k">작은 댄서들의<br>첫 시즌</div>','<div class="k">어린 나이부터,<br>제대로</div>','<div class="k">한 팀으로</div>','<div class="k">무대와<br>대회를 향해</div>']};
 const D=[]; window.setup=(arg)=>{ const v=(arg&&arg.v)||'A'; COPY[v].forEach((h,i)=>$('c'+(i+1)).innerHTML=h); const el=$('dust'); for(let i=0;i<90;i++){ const s=1+rnd()*3.5; const d=document.createElement('i'); d.style.width=d.style.height=s+'px'; el.appendChild(d); D.push({d,x:rnd()*1080,y:rnd()*1920,vx:(rnd()-.5)*18,vy:-6-rnd()*22,o:.15+rnd()*.5,s}); } };
 window.render=t=>{
   D.forEach(p=>{ p.d.style.transform=`translate(${p.x+p.vx*t}px,${((p.y+p.vy*t)%1920+1920)%1920}px)`; p.d.style.opacity=p.o*(.6+.4*Math.sin(t*2+p.x)); p.d.style.filter=p.s>3?'blur(1.5px)':'none'; });
@@ -73,7 +73,7 @@ window.render=t=>{
     e.style.opacity=o; const zoom=1+(t-a)*0.035; e.style.transform=`translateY(-50%) ${t>=a&&t<a+0.3?shake:''} scale(${hit? (t<a+0.12? 1.25-((t-a)/0.12)*0.25 : zoom) : zoom})`; e.style.filter= hit&&t>=a&&t<a+0.15? 'blur(2px)':'none'; });
   // 타이틀: 쾅 + 서서히 다가옴 + 빛 지나감
   const ti=$('title'); ti.style.opacity=t>=T_TITLE?1:0;
-  const tz=t<T_TITLE+0.15? 1.35-((t-T_TITLE)/0.15)*0.35 : 1+(t-T_TITLE)*0.012;
+  const tz=t<T_TITLE+0.15? 1.35-((t-T_TITLE)/0.15)*0.35 : 1+(t-T_TITLE)*0.005;
   ti.style.transform=`${t>=T_TITLE&&t<T_TITLE+0.3?shake:''} scale(${Math.max(1,tz)})`;
   $('rk').style.backgroundPosition=`${100-cl((t-T_TITLE-0.4)/1.2)*100}% 0, 0 0`;   // 빛이 글자 안에서만 왼→오
   // SEASON 1 띠 + 가로 빛줄기

@@ -48,6 +48,6 @@ const SEG = process.argv[5] === 'bg' ? SEG_BG : SEG_PEOPLE;
   const out = path.join(__dirname, `KIDZ_SEASON1_trailer_${V}_ai${process.env.RAW_AD ? '_ad' : ''}${PV ? '_preview' : ''}.mp4`);
   execFileSync('ffmpeg', ['-nostdin', '-v', 'error', '-y', '-i', bg, '-framerate', String(FPS), '-i', path.join(dir, '%05d.png'), '-i', MUS,
     '-filter_complex', `[1:v]scale=${W}:${H}[o];[0:v][o]overlay=0:0:format=auto[v]`, '-map', '[v]', '-map', '2:a', '-t', String(SEC),
-    '-af', `afade=t=out:st=${SEC - 1.5}:d=1.5`, '-c:v', 'libx264', '-crf', PV ? '20' : '15', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', out]);
+    '-af', `afade=t=out:st=${SEC - 1.5}:d=1.5`, '-c:v', 'libx264', '-crf', PV ? '20' : '17', '-maxrate', '14M', '-bufsize', '28M', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', out]);
   fs.rmSync(tmp, { recursive: true, force: true }); console.log(out);
 })();

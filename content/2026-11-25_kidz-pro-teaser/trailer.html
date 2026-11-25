@@ -62,6 +62,12 @@ const COPY={
   C:['<div class="k">12월<br>키즈 전문반<br>개강 예정</div>','<div class="k">작은 댄서들의<br>첫 시즌</div>','<div class="k">어린 나이부터,<br>제대로</div>','<div class="k">한 팀으로</div>','<div class="k">무대와<br>대회를 향해</div>']};
 const D=[]; window.setup=(arg)=>{ const v=(arg&&arg.v)||'A';
   // overlay: AI 배경 영상 위에 얹을 글자만 (배경 투명) — 원장님 2026-11-25 "AI 영상 티 안 나게 뒷배경으로 어둡게"
+  // ad: 광고 릴스용 (원장님 2026-11-25 "광고용 C안") — 광고는 아래 35%를 버튼·문구가, 위 14%를 계정 줄이 덮음 → 끝 화면을 270~1250px 안에, 상담 줄은 빼고(광고 버튼이 대신)
+  if(arg&&arg.ad){ const st=document.createElement('style'); st.textContent=`
+    #orig{top:285px} #title{top:350px} #title .rk{font-size:262px}
+    #band{top:592px;width:470px;font-size:46px;padding:13px 0} #flare{top:592px}
+    #info{top:865px} #info .i1{font-size:60px} #info .i2{margin-top:18px;font-size:44px} #info .i3{margin-top:18px;font-size:30px}
+    #tag{top:1168px;font-size:46px} #foot{display:none}`; document.head.appendChild(st); }
   if(arg&&arg.overlay){ document.documentElement.style.background=document.body.style.background='transparent'; $('bg').style.display='none'; $('fog1').style.opacity=.22; $('fog2').style.opacity=.35; } COPY[v].forEach((h,i)=>$('c'+(i+1)).innerHTML=h); const el=$('dust'); for(let i=0;i<90;i++){ const s=1+rnd()*3.5; const d=document.createElement('i'); d.style.width=d.style.height=s+'px'; el.appendChild(d); D.push({d,x:rnd()*1080,y:rnd()*1920,vx:(rnd()-.5)*18,vy:-6-rnd()*22,o:.15+rnd()*.5,s}); } };
 window.render=t=>{
   D.forEach(p=>{ p.d.style.transform=`translate(${p.x+p.vx*t}px,${((p.y+p.vy*t)%1920+1920)%1920}px)`; p.d.style.opacity=p.o*(.6+.4*Math.sin(t*2+p.x)); p.d.style.filter=p.s>3?'blur(1.5px)':'none'; });

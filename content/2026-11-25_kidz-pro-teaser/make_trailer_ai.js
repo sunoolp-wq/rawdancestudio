@@ -1,3 +1,4 @@
+// RAW_AD=1 node make_trailer_ai.js … → 광고용(_ad: 끝 화면을 광고 가림 영역 밖으로, 상담 줄 뺌)
 // node make_trailer_ai.js <A|C> <음원.wav> <AI영상폴더> [bg] → KIDZ_SEASON1_trailer_<V>_ai.mp4
 // 원장님 2026-11-25: Gemini(Veo)로 만든 AI 영상을 "AI 티 안 나게 뒷배경으로 어둡게" → 어둡게·붉은 톤·살짝 흐림·필름 입자·비네팅 후 글자 카드 뒤에 깔기
 // 컷은 쾅(번쩍) 시각에 바꿔서 번쩍 효과가 이음새를 가림. RAW_PREVIEW=1 이면 540×960 미리보기
@@ -43,8 +44,8 @@ const SEG = process.argv[5] === 'bg' ? SEG_BG : SEG_PEOPLE;
   fl.push(SEG.map((_, i) => `[s${i}]`).join('') + `concat=n=${SEG.length}:v=1:a=0,format=yuv420p[v]`);
   execFileSync('ffmpeg', ['-nostdin', '-v', 'error', '-y', ...inputs, '-filter_complex', fl.join(';'), '-map', '[v]', '-t', String(SEC), '-c:v', 'libx264', '-crf', '14', bg]);
   const dir = path.join(tmp, 'f');
-  await renderFrames({ file: path.join(__dirname, 'trailer.html'), setupArg: { v: V, overlay: true }, n: SEC * FPS, fps: FPS, dir });
-  const out = path.join(__dirname, `KIDZ_SEASON1_trailer_${V}_ai${PV ? '_preview' : ''}.mp4`);
+  await renderFrames({ file: path.join(__dirname, 'trailer.html'), setupArg: { v: V, overlay: true, ad: !!process.env.RAW_AD }, n: SEC * FPS, fps: FPS, dir });
+  const out = path.join(__dirname, `KIDZ_SEASON1_trailer_${V}_ai${process.env.RAW_AD ? '_ad' : ''}${PV ? '_preview' : ''}.mp4`);
   execFileSync('ffmpeg', ['-nostdin', '-v', 'error', '-y', '-i', bg, '-framerate', String(FPS), '-i', path.join(dir, '%05d.png'), '-i', MUS,
     '-filter_complex', `[1:v]scale=${W}:${H}[o];[0:v][o]overlay=0:0:format=auto[v]`, '-map', '[v]', '-map', '2:a', '-t', String(SEC),
     '-af', `afade=t=out:st=${SEC - 1.5}:d=1.5`, '-c:v', 'libx264', '-crf', PV ? '20' : '15', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', out]);

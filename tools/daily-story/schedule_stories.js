@@ -7,6 +7,7 @@
 //   node tools/daily-story/schedule_stories.js 2026-11-24 --yes    확인 없이 예약 (launchd 자동 실행용)
 //   node tools/daily-story/schedule_stories.js --tomorrow [--yes]  내일 날짜
 //   --no-update  최신 받기 건너뜀 / --check  예약 안 하고 점검만 (브라우저 로그인 확인까지) / --force  이미 예약한 날도 다시
+//   --at HH:MM  시작 시각 바꾸기 (기본 00:00). 원장님 2026-11-27 "지금 예약으로 올릴 순 없나": 이미 지난 날 다시 올릴 때 예) --at 01:20 → 01:20 시간표, 01:21·01:22 수업
 //
 // 순서: 최신 받기(3_업데이트와 같은 방식, 대강·팝업은 클라우드 것 그대로) → render.js → plan.js → 영상 찾기 → Ego Lite로 00:00부터 예약
 // 같은 날 두 번 예약 방지: ~/Library/Application Support/raw-story/<날짜>.json 에 예약한 칸을 적어 둔다
@@ -42,6 +43,9 @@ const pad = n => String(n).padStart(2, '0');
 const argv = process.argv.slice(2);
 const flag = f => argv.includes(f);
 const YES = flag('--yes'), CHECK = flag('--check'), FORCE = flag('--force'), NO_UPDATE = flag('--no-update');
+const AT = (argv[argv.indexOf('--at') + 1] || '').match(/^(\d{1,2}):(\d{2})$/) && argv.includes('--at') ? argv[argv.indexOf('--at') + 1] : '00:00';
+const AT_MIN = +AT.split(':')[0] * 60 + +AT.split(':')[1];
+const hhmm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 let date = argv.find(a => /^\d{4}-\d{2}-\d{2}$/.test(a));
 if (!date && (flag('--tomorrow') || argv.includes('tomorrow'))) {
   const now = new Date();
@@ -156,7 +160,8 @@ async function loggedIn() {
   const line = ((await page.snapshot()).split("\\n").find(l => l.includes("공유 대상 ")) || "").trim();
   if (!/공유 대상 rawdance_suwon"/.test(line)) throw new Error("공유 대상이 rawdance_suwon이 아님: " + line);
 }
-async function one({ file, min }) {
+async function one({ file, t }) {
+  const H = +t.slice(0, 2), MM = t.slice(3), AP = H < 12 ? "오전" : "오후", H12 = H % 12 || 12;
   await loggedIn();
   const cp = page.waitForFileChooser({ timeout: 15000 });
   await page.click("text=사진/동영상 추가", { label: "add video" });
@@ -169,11 +174,11 @@ async function one({ file, min }) {
   await page.keyboard.press("Enter");
   await page.waitForTimeout(800);
   await page.click('input[aria-label="오전/오후"]', { label: "AM/PM field" });
-  await page.keyboard.type("A");
+  await page.keyboard.type(H < 12 ? "A" : "P");
   await page.click('input[aria-label="시간"]', { label: "hour field" });
-  await page.keyboard.type("12");
+  await page.keyboard.type(String(H12).padStart(2, "0"));
   await page.click('input[aria-label="분"]', { label: "minute field" });
-  await page.keyboard.type(String(min).padStart(2, "0"));
+  await page.keyboard.type(MM);
   await page.waitForTimeout(1000);
   for (let i = 0; i < 60; i++) { if (await page.evaluate(() => { const t = document.body.innerText; return !/미디어 (처리|업로드) 중/.test(t) && /0:\\d+\\s*초/.test(t); })) break; await page.waitForTimeout(5000); }
   const st = await page.evaluate(() => ({
@@ -183,14 +188,14 @@ async function one({ file, min }) {
     media: (document.body.innerText.match(/0:\\d+\\s*초/g) || []).length,
   }));
   const [y, m, d] = DATE.split("-").map(Number);
-  const ok = st.date && st.date.includes(y + "년 " + m + "월 " + d + "일") && st.time === "오전12:" + String(min).padStart(2, "0") && !st.busy && st.media === 1;
+  const ok = st.date && st.date.includes(y + "년 " + m + "월 " + d + "일") && new RegExp("^" + AP + "0?" + H12 + ":" + MM + "$").test(st.time || "") && !st.busy && st.media === 1;
   if (!ok) throw new Error("예약 전 확인 실패 (예약 안 누름): " + JSON.stringify(st));
   await page.click("xpath=(//*[@role='button' or self::button][normalize-space(.)='예약'])[last()]", { label: "confirm schedule" });
   await page.waitForFunction(() => document.body.innerText.includes("예약되었습니다"), undefined, { timeout: 30000 });
 }
 try {
   if (${check ? 'true' : 'false'}) { await loggedIn(); console.log("CHECK_OK"); }
-  else for (const it of ITEMS) { await one(it); console.log("SLOT_OK " + it.min); }
+  else for (const it of ITEMS) { await one(it); console.log("SLOT_OK " + it.t); }
 } catch (e) {
   const shot = await page.screenshot({ path: ${JSON.stringify(path.join(STATE_DIR, `fail-${date}.png`))} }).catch(() => "");
   console.log("FAIL " + e.message + (shot ? " | 화면: " + shot : ""));
@@ -219,12 +224,12 @@ console.log("DONE");
   const done = s => !FORCE && state.slots[s];
   const rows = [];
   // 이미 다 예약한 날이면 시간표 영상은 다시 만들지 않는다
-  const allDone = done('00:00') && classes.every(c => done(`00:${pad(c.min)}`));
-  const tt = allDone ? { file: state.slots['00:00'], how: '' } : timetable(videos);
+  const allDone = done(hhmm(AT_MIN)) && classes.every(c => done(hhmm(AT_MIN + c.min)));
+  const tt = allDone ? { file: state.slots[hhmm(AT_MIN)], how: '' } : timetable(videos);
   rows.push({ min: 0, label: '시간표 스토리', teacher: '', ...tt });
   for (const c of classes) rows.push({ min: c.min, label: `${c.start} ${c.name}`, teacher: c.teacher, ...(findClip(videos, c) || { file: null, how: '영상 없음' }) });
   for (const r of rows) {
-    r.slot = `00:${pad(r.min)}`;
+    r.slot = hhmm(AT_MIN + r.min);
     if (r.file && !done(r.slot)) { const s = duration(r.file); if (!s || s > 60) { r.how = `영상 길이 이상(${s.toFixed(1)}초) → 건너뜀`; r.file = null; } }
   }
 
@@ -248,8 +253,8 @@ console.log("DONE");
   }
 
   log(`Ego Lite로 ${todo.length}개 예약 중…`);
-  const r = run('ego-browser', ['nodejs'], { input: egoScript(todo.map(t => ({ file: t.file, min: t.min })), false), timeout: 40 * 60e3 });
-  for (const m of r.out.matchAll(/^SLOT_OK (\d+)$/gm)) { const t = todo.find(x => x.min === +m[1]); state.slots[t.slot] = t.file; }
+  const r = run('ego-browser', ['nodejs'], { input: egoScript(todo.map(t => ({ file: t.file, t: t.slot })), false), timeout: 40 * 60e3 });
+  for (const m of r.out.matchAll(/^SLOT_OK (\d\d:\d\d)$/gm)) { const t = todo.find(x => x.slot === m[1]); if (t) state.slots[t.slot] = t.file; }
   save();
   const okN = [...r.out.matchAll(/^SLOT_OK /gm)].length;
   const skipped = rows.filter(x => !x.file).length;

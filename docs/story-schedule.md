@@ -8,6 +8,7 @@
 - **자동:** 맥 launchd(`~/Library/LaunchAgents/com.rawdance.story-schedule.plist`, 저장소에는 없음)가 **일·월·화·수·목 밤 21:00**에 `node tools/daily-story/schedule_stories.js --tomorrow --yes` 실행 → 다음 날(월~금) 스토리 예약. 금요일 밤(=토요일 것)은 쉼. 자동 실행은 확인 없이 예약해도 된다고 원장님이 허락함
 - **손으로:** `4_스토리예약.command` 더블클릭 → 날짜(엔터 = 내일) → 표 → `y`. Claude가 할 때는 `node tools/daily-story/schedule_stories.js YYYY-MM-DD` (표만 보고 싶으면 입력 없이 실행하면 예약 안 함)
 - 스크립트가 하는 일: 최신 받기(3_업데이트 방식, 이 맥에 안 올린 커밋·고친 파일이 있으면 건너뜀) → 시간표 영상(`~/Movies/RAW 영상공장/**/MMDD_시간표.mp4`가 있으면 그것, 없으면 render.js — 음원 파일 없으면 무음) → plan.js → 수업 영상(날짜 파일 → 그 쌤 최근 15초 → 없으면 건너뜀) → Ego Lite 예약(누르기 전 날짜·시각·업로드 확인, 다르면 멈춤)
+- **지난 시각 다시 올리기 (2026-11-27~):** `--at HH:MM`으로 시작 시각을 바꾼다. 예) 그날 시간이 바뀌어 다시 올릴 때 `node tools/daily-story/schedule_stories.js 2026-11-27 --at 01:30` → 01:30 시간표, 01:31·01:32 수업. 이미 올라간 옛 스토리는 원장님이 직접 삭제
 - 두 번 예약 방지: `~/Library/Application Support/raw-story/<날짜>.json`에 예약한 칸 기록 (다시 하려면 `--force`). 점검만: `--check`
 - 결과: macOS 알림("MM/DD 예약 N개 완료" / "스토리 예약 확인 필요"), 로그 `~/Library/Logs/raw-story.log`, 실패 화면 `~/Library/Application Support/raw-story/fail-<날짜>.png`
 - 조건: 21:00에 맥이 켜져 있고(잠자기면 깨어날 때 실행, 자정 넘으면 건너뛰고 알림) Ego Lite가 Meta 비즈니스 스위트에 로그인돼 있어야 함

@@ -1,6 +1,7 @@
 """12월 A홀·B홀 프로그램표 (11월 v3 배치 + 겨울·눈 콘셉트, 1080x1350)
 원장님 2026-11-25: "12월 시간표, 겨울이고 눈 내리는 시즌에 맞게 / 힐코레오가 팝핑으로"
-12월 변경: 월 19:40 HEELSCHOREO → POPPING (T. SUNGMI — 11/23 팝업 쌤, 원장님 확인 필요), 성인 K-POP 없음, 수 19:30~20:50 오디션반(YUNI, B홀) 다시
+12월 변경: 월 19:40 HEELSCHOREO → POPPING (T. SUNGMI — 11/23 팝업 쌤, 원장님 확인 필요), 수 19:30~20:50 오디션반(YUNI, B홀) 복귀
+원장님 2026-11-26: "릴스 비율로", "월요일 8:00~9:00 성인 케이팝 B홀" → 월 20:00~21:00 성인 K-POP(B홀, 쌤 확인 필요) 추가, 1080x1920 릴스판(-reels) 같이 만듦
 사용: python3 make_dec.py  → hall-a-2026-12.png, hall-b-2026-12.png (node + playwright로 캡처)"""
 import json, random, subprocess
 from pathlib import Path
@@ -28,10 +29,17 @@ A += [("TUE", 18.5, 19 + 40 / 60, "BASIC", "18:30–19:40", "GAON", "basic"), ("
 SAT_A = [("유아 K-POP", "13:00–14:00"), ("키즈 K-POP", "14:00–15:00"), ("취미 K-POP", "15:00–16:10")]
 B = [(d, 18, 19 + 10 / 60, "취미 K-POP", "18:00–19:10", t, "kpop") for d, t in [("MON", "YUNI"), ("TUE", "MINKYUNG"), ("WED", "YUNI"), ("THU", "MINKYUNG")]]
 B += [("WED", 19.5, 20 + 50 / 60, "오디션반", "19:30–20:50", "YUNI", "aud")]
+ADULT_T = "ADULT"   # 월 성인 K-POP 쌤: 원장님 확인 전이라 이름 대신 대상 표시
+B += [("MON", 20, 21, "성인 K-POP", "20:00–21:00", ADULT_T, "kpop")]
 
 T0, T1 = 16, 22
-GX, GY, GW, GH = 128, 300, 1080 - 128 - 48, 790
-PX = GH / (T1 - T0); CW = GW / 5
+GX, GW = 128, 1080 - 128 - 48; CW = GW / 5
+# 판형: feed 1080x1350 / reels 1080x1920 (위 220·아래 260은 인스타 화면 글자에 가려서 비움)
+FMT = {"feed": dict(H=1350, OY=0, GY=300, GH=790, FB=40), "reels": dict(H=1920, OY=190, GY=540, GH=900, FB=250)}
+def use(f):
+    global H, OY, GY, GH, FB, PX
+    H, OY, GY, GH, FB = (FMT[f][k] for k in ("H", "OY", "GY", "GH", "FB")); PX = GH / (T1 - T0)
+use("feed")
 FLAKE = '<svg viewBox="-50 -50 100 100"><g stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none">' + "".join(
     f'<g transform="rotate({a})"><line x1="0" y1="0" x2="0" y2="-44"/><line x1="0" y1="-26" x2="-11" y2="-36"/><line x1="0" y1="-26" x2="11" y2="-36"/><line x1="0" y1="-12" x2="-8" y2="-19"/><line x1="0" y1="-12" x2="8" y2="-19"/></g>'
     for a in range(0, 360, 60)) + '</g></svg>'
@@ -45,13 +53,13 @@ def blk(d, s, e, name, tm, sub, key):
 def snow(seed, n=150):
     random.seed(seed); out = []
     for _ in range(n):
-        x, y, r = random.uniform(0, 1080), random.uniform(0, 1350), random.choice([1.2, 1.6, 2, 2.4, 3, 3.6])
-        o = random.uniform(.25, .85) * (0.55 if 300 < y < 1110 and 110 < x < 1040 else 1)   # 표 위는 옅게
+        x, y, r = random.uniform(0, 1080), random.uniform(0, H), random.choice([1.2, 1.6, 2, 2.4, 3, 3.6])
+        o = random.uniform(.25, .85) * (0.55 if GY < y < GY + GH + 150 and 110 < x < 1040 else 1)   # 표 위는 옅게
         out.append(f'<i style="left:{x:.0f}px;top:{y:.0f}px;width:{r*2:.1f}px;height:{r*2:.1f}px;opacity:{o:.2f};filter:blur({0 if r<2.4 else .6}px)"></i>')
     return "".join(out)
 
 def flakes(seed):
-    random.seed(seed + 7); spots = [(470, 64, 34, .45), (560, 196, 24, .5), (780, 120, 40, .35), (1040, 720, 34, .22), (6, 560, 30, .22)]
+    random.seed(seed + 7); spots = [(470, 64 + OY, 34, .45), (560, 196 + OY, 24, .5), (780, 120 + OY, 40, .35), (1040, GY + 420, 34, .22), (6, GY + 260, 30, .22)]
     return "".join(f'<div class="fk" style="left:{x}px;top:{y}px;width:{s}px;height:{s}px;opacity:{o};transform:rotate({random.randint(0,30)}deg)">{FLAKE}</div>' for x, y, s, o in spots)
 
 def page(hall, blocks, sat):
@@ -68,24 +76,24 @@ def page(hall, blocks, sat):
     else:
         satband = '<div class="sat empty"><div class="sl">SAT<small>토</small></div><p>B홀 토요일 수업 없음</p></div>'
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
-*{{box-sizing:border-box;margin:0;padding:0}}html,body{{width:1080px;height:1350px}}
+*{{box-sizing:border-box;margin:0;padding:0}}html,body{{width:1080px;height:{H}px}}
 body{{background:linear-gradient(180deg,#0b1530 0%,#0a1124 45%,#0c1022 100%);color:#f3f7ff;font-family:Montserrat,"Noto Sans KR",sans-serif;position:relative;overflow:hidden}}
 .g1{{position:absolute;width:1300px;height:1300px;border-radius:50%;right:-700px;top:-720px;background:radial-gradient(circle,rgba(120,180,255,.42),rgba(120,180,255,0) 62%)}}
 .g2{{position:absolute;width:1100px;height:1100px;border-radius:50%;left:-600px;bottom:-640px;background:radial-gradient(circle,rgba(150,130,255,.26),rgba(150,130,255,0) 62%)}}
 .sn{{position:absolute;inset:0;pointer-events:none}}.sn i{{position:absolute;border-radius:50%;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.7)}}
 .fk{{position:absolute;color:#dff0ff}}.fk svg{{width:100%;height:100%;filter:drop-shadow(0 0 6px rgba(190,225,255,.7))}}
 .drift{{position:absolute;left:-40px;right:-40px;bottom:-60px;height:150px;border-radius:50% 50% 0 0/100% 100% 0 0;background:radial-gradient(ellipse at 50% 0%,rgba(230,242,255,.16),rgba(230,242,255,0) 70%)}}
-.top{{position:absolute;left:48px;right:48px;top:48px;display:flex;justify-content:space-between;align-items:flex-start}}
+.top{{position:absolute;left:48px;right:48px;top:{48+OY}px;display:flex;justify-content:space-between;align-items:flex-start}}
 .top img{{height:36px}}
 .top .r{{text-align:right;font-size:13px;font-weight:600;letter-spacing:.32em;line-height:1.8;color:#b9cbe8;margin-right:-.32em}}
-.hero{{position:absolute;left:44px;top:96px;display:flex;align-items:flex-end;gap:22px}}
+.hero{{position:absolute;left:44px;top:{96+OY}px;display:flex;align-items:flex-end;gap:22px}}
 .hero .n{{position:relative;font-weight:800;font-style:italic;font-size:170px;line-height:.82;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:3px #cfe6ff;text-shadow:0 0 28px rgba(160,210,255,.45)}}
 .cap{{position:absolute;left:30px;top:-9px;width:150px;height:20px;background:radial-gradient(ellipse at 50% 100%,#fff 0 40%,rgba(255,255,255,0) 70%);border-radius:50%;opacity:.8}}
 .hero .t{{padding-bottom:8px}}
 .hero .t b{{display:block;font-weight:800;font-size:44px;letter-spacing:.02em;line-height:1}}
 .hero .t span{{display:block;margin-top:8px;font-size:17px;font-weight:600;letter-spacing:.3em;color:#b9cbe8}}
 .hero .t em{{display:inline-block;margin-top:10px;font-style:normal;font-size:13px;font-weight:700;letter-spacing:.28em;color:#0b1530;background:#dff0ff;padding:4px 10px;border-radius:20px}}
-.hall{{position:absolute;right:48px;top:118px;width:104px;height:104px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#cfe6ff 70%);color:#0b1530;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(180,220,255,.45)}}
+.hall{{position:absolute;right:48px;top:{118+OY}px;width:104px;height:104px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#cfe6ff 70%);color:#0b1530;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(180,220,255,.45)}}
 .hall b{{font-size:52px;font-weight:800;line-height:1}}.hall span{{font-size:12px;font-weight:700;letter-spacing:.3em;margin-top:2px;margin-right:-.3em}}
 .dh{{position:absolute;top:{GY-48}px;height:40px;display:flex;align-items:baseline;justify-content:center;gap:6px;font-size:19px;font-weight:800;letter-spacing:.1em}}
 .dh small{{font-family:"Noto Sans KR";font-size:14px;font-weight:500;color:#8ea0bf;letter-spacing:0}}
@@ -106,7 +114,7 @@ body{{background:linear-gradient(180deg,#0b1530 0%,#0a1124 45%,#0c1022 100%);col
 .sc b{{font-family:"Noto Sans KR";font-weight:900;font-size:20px}}.sc span{{font-size:14px;font-weight:700;color:#a9c8ff}}
 .sc em{{position:absolute;right:12px;top:12px;font-style:normal;font-family:"Noto Sans KR";font-size:12px;font-weight:700;color:#ffd27a;background:rgba(255,210,122,.16);padding:2px 7px;border-radius:4px}}
 .sat.empty p{{font-family:"Noto Sans KR";font-size:20px;color:#8ea0bf}}
-.ft{{position:absolute;left:48px;right:48px;bottom:40px;display:flex;justify-content:space-between;align-items:center}}
+.ft{{position:absolute;left:48px;right:48px;bottom:{FB}px;display:flex;justify-content:space-between;align-items:center}}
 .lg{{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;font-weight:600;color:#c3d0e8;max-width:700px}}
 .lg span{{display:flex;align-items:center;gap:6px}}.lg i{{display:block;width:11px;height:11px;border-radius:3px}}
 .ct{{font-size:14px;font-weight:600;color:#8ea0bf;text-align:right;letter-spacing:.06em;line-height:1.6}}
@@ -120,11 +128,14 @@ body{{background:linear-gradient(180deg,#0b1530 0%,#0a1124 45%,#0c1022 100%);col
 </body></html>"""
 
 files = []
-for hall, blocks, sat in [("A", A, SAT_A), ("B", B, [])]:
-    name = f"hall-{hall.lower()}-2026-12"
-    (HERE / f"{name}.html").write_text(page(hall, blocks, sat), encoding="utf-8"); files.append(name)
-js = """const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1080,height:1350}});
-for(const n of %s){await p.goto('file://'+%s+'/'+n+'.html');await p.evaluate(()=>document.fonts.ready);await p.waitForTimeout(300);await p.screenshot({path:%s+'/'+n+'.png'});}await b.close();})();""" % (
+for f in ("feed", "reels"):
+    use(f)
+    for hall, blocks, sat in [("A", A, SAT_A), ("B", B, [])]:
+        name = f"hall-{hall.lower()}-2026-12" + ("-reels" if f == "reels" else "")
+        (HERE / f"{name}.html").write_text(page(hall, blocks, sat), encoding="utf-8"); files.append((name, H))
+js = """const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();
+for(const [n,h] of %s){const p=await b.newPage({viewport:{width:1080,height:h}});await p.goto('file://'+%s+'/'+n+'.html');await p.evaluate(()=>document.fonts.ready);await p.waitForTimeout(300);await p.screenshot({path:%s+'/'+n+'.png'});await p.close();}await b.close();})();""" % (
     json.dumps(files), json.dumps(str(HERE)), json.dumps(str(HERE)))
 subprocess.run(["node", "-e", js], check=True)
+files = [n for n, _ in files]
 print("\n".join(str(HERE / f"{n}.png") for n in files))

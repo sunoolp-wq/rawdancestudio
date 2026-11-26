@@ -9,9 +9,9 @@ from pathlib import Path
 HERE = Path(__file__).parent
 POP_T = "SUNGMI"
 C = {"kpop": "#6f9bff", "basic": "#5cc4ff", "pro": "#ffd27a", "pop": "#7ff0ff", "girlish": "#ff9ed2",
-     "waack": "#4fd8c8", "hiphop": "#9a8cff", "jazz": "#c29bff", "choreo": "#a9d8ff", "open": "#ffd27a", "aud": "#ffb38a"}
+     "waack": "#4fd8c8", "hiphop": "#9a8cff", "jazz": "#c29bff", "choreo": "#a9d8ff", "open": "#ffd27a", "aud": "#ffb38a", "kpro": "#ff6b7a"}
 NAMES = {"kpop": "K-POP", "basic": "Basic", "pro": "PRO", "pop": "Popping", "girlish": "Girlish", "waack": "Waacking",
-         "hiphop": "Hip Hop", "jazz": "Jazz", "choreo": "Choreo", "aud": "Audition"}
+         "hiphop": "Hip Hop", "jazz": "Jazz", "choreo": "Choreo", "aud": "Audition", "kpro": "Kids Pro"}
 WD = ["MON", "TUE", "WED", "THU", "FRI"]; KR = {"MON": "월", "TUE": "화", "WED": "수", "THU": "목", "FRI": "금"}
 A = []
 for d, t in [("MON", "YUNI"), ("TUE", "MINKYUNG"), ("WED", "YUNI"), ("THU", "MINKYUNG")]:
@@ -27,7 +27,11 @@ A += [("TUE", 18.5, 19 + 40 / 60, "BASIC", "18:30–19:40", "GAON", "basic"), ("
       ("WED", 20 + 50 / 60, 22, "JAZZ", "20:50–22:00", "KIRY", "jazz"),
       ("THU", 20 + 50 / 60, 22, "CHOREO", "20:50–22:00", "HWAN.U", "choreo")]
 SAT_A = [("유아 K-POP", "13:00–14:00"), ("키즈 K-POP", "14:00–15:00"), ("취미 K-POP", "15:00–16:10")]
-B = [(d, 18, 19 + 10 / 60, "취미 K-POP", "18:00–19:10", t, "kpop") for d, t in [("MON", "YUNI"), ("TUE", "MINKYUNG"), ("WED", "YUNI"), ("THU", "MINKYUNG")]]
+# 원장님 2026-11-26: 화 취미 K-POP → 키즈 전문반 시간(B홀), 목 취미 K-POP 유지, 목 18:00~19:00 키즈 전문반은 C홀 → C홀은 따로 표 없이 B홀 표 아래 띠로
+B = [(d, 18, 19 + 10 / 60, "취미 K-POP", "18:00–19:10", t, "kpop") for d, t in [("MON", "YUNI"), ("WED", "YUNI"), ("THU", "MINKYUNG")]]
+KPRO_T = "RAW KIDZ 1기"   # 키즈 전문반 쌤: 원장님 확인 전
+B += [("TUE", 18, 19, "키즈 전문반", "18:00–19:00", KPRO_T, "kpro", "모집중")]
+C_HALL = [("THU", "목", "키즈 전문반", "18:00–19:00", KPRO_T)]
 B += [("WED", 19.5, 20 + 50 / 60, "오디션반", "19:30–20:50", "YUNI", "aud")]
 ADULT_T = "ADULT"   # 월 성인 K-POP 쌤: 원장님 확인 전이라 이름 대신 대상 표시
 B += [("MON", 20, 21, "성인 K-POP", "20:00–21:00", ADULT_T, "kpop")]
@@ -44,11 +48,11 @@ FLAKE = '<svg viewBox="-50 -50 100 100"><g stroke="currentColor" stroke-width="5
     f'<g transform="rotate({a})"><line x1="0" y1="0" x2="0" y2="-44"/><line x1="0" y1="-26" x2="-11" y2="-36"/><line x1="0" y1="-26" x2="11" y2="-36"/><line x1="0" y1="-12" x2="-8" y2="-19"/><line x1="0" y1="-12" x2="8" y2="-19"/></g>'
     for a in range(0, 360, 60)) + '</g></svg>'
 
-def blk(d, s, e, name, tm, sub, key):
+def blk(d, s, e, name, tm, sub, key, badge=None):
     x = GX + WD.index(d) * CW + 5; y = GY + (s - T0) * PX + 3; w = CW - 10; h = (e - s) * PX - 6; c = C[key]
     small = ' style="font-size:16px"' if len(name) > 10 else ""
     return (f'<div class="b" style="left:{x:.0f}px;top:{y:.0f}px;width:{w:.0f}px;height:{h:.0f}px;--c:{c}">'
-            f'<b{small}>{name}</b><span>{tm}</span><small>{sub}</small></div>')
+            f'<b{small}>{name}</b><span>{tm}</span><small>{sub}</small>' + (f'<em class="bd">{badge}</em>' if badge else '') + '</div>')
 
 def snow(seed, n=150):
     random.seed(seed); out = []
@@ -67,14 +71,16 @@ def page(hall, blocks, sat):
     for b in blocks:
         if b[6] not in keys: keys.append(b[6])
     if sat and "kpop" not in keys: keys.insert(0, "kpop")
+    if not sat and "kpro" not in keys: keys.append("kpro")
     leg = "".join(f'<span><i style="background:{C[k]}"></i>{NAMES[k]}</span>' for k in keys)
     ruler = "".join(f'<div class="rl" style="top:{GY+(t-T0)*PX:.0f}px"><span>{t}:00</span></div>' for t in range(T0, T1 + 1))
     heads = "".join(f'<div class="dh" style="left:{GX+i*CW:.0f}px;width:{CW:.0f}px">{d}<small>{KR[d]}</small></div>' for i, d in enumerate(WD))
     if sat:
         chips = "".join(f'<div class="sc"><b>{n}</b><span>{tm}</span><em>모집중</em></div>' for n, tm in sat)
         satband = f'<div class="sat"><div class="sl">SAT<small>토</small><i>REGINA</i></div>{chips}</div>'
-    else:
-        satband = '<div class="sat empty"><div class="sl">SAT<small>토</small></div><p>B홀 토요일 수업 없음</p></div>'
+    else:   # B홀 표: 토요일 수업이 없어서 그 자리에 C홀(키즈 전문반) 띠
+        cc = "".join(f'<div class="sc kp"><b>{n}</b><span>{d} {kr} · {tm}</span><em>모집중</em></div>' for d, kr, n, tm, t in C_HALL)
+        satband = f'<div class="sat"><div class="sl" style="width:150px;white-space:nowrap">C HALL<small>C홀</small></div>{cc}<p class="cn">RAW KIDZ 1기 · 10~13세<br>화요일은 B홀, 목요일은 C홀</p></div>'
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
 *{{box-sizing:border-box;margin:0;padding:0}}html,body{{width:1080px;height:{H}px}}
 body{{background:linear-gradient(180deg,#0b1530 0%,#0a1124 45%,#0c1022 100%);color:#f3f7ff;font-family:Montserrat,"Noto Sans KR",sans-serif;position:relative;overflow:hidden}}
@@ -114,6 +120,9 @@ body{{background:linear-gradient(180deg,#0b1530 0%,#0a1124 45%,#0c1022 100%);col
 .sc b{{font-family:"Noto Sans KR";font-weight:900;font-size:20px}}.sc span{{font-size:14px;font-weight:700;color:#a9c8ff}}
 .sc em{{position:absolute;right:12px;top:12px;font-style:normal;font-family:"Noto Sans KR";font-size:12px;font-weight:700;color:#ffd27a;background:rgba(255,210,122,.16);padding:2px 7px;border-radius:4px}}
 .sat.empty p{{font-family:"Noto Sans KR";font-size:20px;color:#8ea0bf}}
+.sc.kp{{flex:0 0 330px;border-color:rgba(255,107,122,.55);background:rgba(255,107,122,.14)}}.sc.kp span{{color:#ffb3bb}}
+.cn{{font-family:"Noto Sans KR";font-size:17px;font-weight:500;line-height:1.55;color:#b9cbe8;margin-left:10px}}
+.bd{{position:absolute;right:10px;top:10px;font-style:normal;font-family:"Noto Sans KR";font-size:11px;font-weight:700;color:#ffd27a;background:rgba(255,210,122,.16);padding:2px 6px;border-radius:4px}}
 .ft{{position:absolute;left:48px;right:48px;bottom:{FB}px;display:flex;justify-content:space-between;align-items:center}}
 .lg{{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;font-weight:600;color:#c3d0e8;max-width:700px}}
 .lg span{{display:flex;align-items:center;gap:6px}}.lg i{{display:block;width:11px;height:11px;border-radius:3px}}

@@ -135,5 +135,33 @@
     }
    }
   ]
+ },
+ "2026-11-30": {
+  "_memo": "원장님 2026-11-28: 12월까지 힐코레오 대신 팝핑",
+  "replace": [
+   {
+    "start": "19:40",
+    "name": "HEELSCHOREO",
+    "set": {
+     "name": "POPPING",
+     "teacher": "SUNGMI",
+     "mark": "popup",
+     "key": "pop"
+    }
+   }
+  ]
+ },
+ "2026-12-03": {
+  "_memo": "원장님 2026-11-28: 목요일 환유 대신 맥스투 대강",
+  "replace": [
+   {
+    "start": "20:50",
+    "name": "CHOREO",
+    "set": {
+     "teacher": "MAX TO",
+     "mark": "popup"
+    }
+   }
+  ]
  }
 }

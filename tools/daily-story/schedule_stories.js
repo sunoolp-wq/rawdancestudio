@@ -108,7 +108,7 @@ function allVideos() {
     for (const e of ents) {
       const p = path.join(dir, e.name);
       if (e.isDirectory() && depth < 2) walk(p, depth + 1);
-      else if (e.isFile() && /\.mp4$/i.test(e.name)) out.push({ p, name: e.name, mtime: fs.statSync(p).mtimeMs });
+      else if (e.isFile() && /\.mp4$/i.test(e.name)) out.push({ p, name: e.name.normalize('NFC'), mtime: fs.statSync(p).mtimeMs });   // 맥 한글 파일 이름은 자모 분리(NFD)라 '쌤15초'·'시간표'가 안 맞던 문제 (2026-11-28)
     }
   };
   walk(MOVIES, 0);

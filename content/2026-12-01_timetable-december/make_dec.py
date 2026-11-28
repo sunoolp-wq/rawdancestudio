@@ -28,9 +28,12 @@ A += [("TUE", 18.5, 19 + 40 / 60, "BASIC", "18:30–19:40", "GAON", "basic"), ("
       ("THU", 20 + 50 / 60, 22, "CHOREO", "20:50–22:00", "HWAN.U", "choreo")]
 SAT_A = [("유아 K-POP", "13:00–14:00"), ("키즈 K-POP", "14:00–15:00"), ("취미 K-POP", "15:00–16:10")]
 # 원장님 2026-11-26: 화 취미 K-POP → 키즈 전문반 시간(B홀), 목 취미 K-POP 유지, 목 18:00~19:00 키즈 전문반은 C홀 → C홀은 따로 표 없이 B홀 표 아래 띠로
-B = [(d, 18, 19 + 10 / 60, "취미 K-POP", "18:00–19:10", t, "kpop") for d, t in [("MON", "YUNI"), ("WED", "YUNI"), ("THU", "MINKYUNG")]]
-KPRO_T = "RAW KIDZ 1기"   # 키즈 전문반 쌤: 원장님 확인 전
-B += [("TUE", 18, 19, "키즈 전문반", "18:00–19:00", KPRO_T, "kpro", "모집중")]
+# 원장님 2026-11-28: 키즈 전문반은 12월 말 시작 → 그때부터 화 취미 K-POP이 키즈 전문반으로 바뀌고 취미 K-POP(민경쌤 반)은 주 1회(목). 그 전까지는 화 취미 K-POP 그대로
+B = [(d, 18, 19 + 10 / 60, "취미 K-POP", "18:00–19:10", t, "kpop") for d, t in [("MON", "YUNI"), ("TUE", "MINKYUNG"), ("WED", "YUNI"), ("THU", "MINKYUNG")]]
+KPRO_T = "MINKYUNG"   # 키즈 전문반 쌤 (원장님 2026-11-28)
+KIDZ_START = False   # 키즈 전문반 시작하면 True → 화 B홀 키즈 전문반 + C홀 띠(목)
+if KIDZ_START:
+    B = [b for b in B if not (b[0] == "TUE" and b[3] == "취미 K-POP")] + [("TUE", 18, 19, "키즈 전문반", "18:00–19:00", KPRO_T, "kpro", "모집중")]
 C_HALL = [("THU", "목", "키즈 전문반", "18:00–19:00", KPRO_T)]
 B += [("WED", 19.5, 20 + 50 / 60, "오디션반", "19:30–20:50", "YUNI", "aud")]
 ADULT_T = "YUNI"   # 월 성인 K-POP 쌤 (원장님 2026-11-28)
@@ -71,7 +74,7 @@ def page(hall, blocks, sat):
     for b in blocks:
         if b[6] not in keys: keys.append(b[6])
     if sat and "kpop" not in keys: keys.insert(0, "kpop")
-    if not sat and "kpro" not in keys: keys.append("kpro")
+    if not sat and KIDZ_START and "kpro" not in keys: keys.append("kpro")
     leg = "".join(f'<span><i style="background:{C[k]}"></i>{NAMES[k]}</span>' for k in keys)
     ruler = "".join(f'<div class="rl" style="top:{GY+(t-T0)*PX:.0f}px"><span>{t}:00</span></div>' for t in range(T0, T1 + 1))
     heads = "".join(f'<div class="dh" style="left:{GX+i*CW:.0f}px;width:{CW:.0f}px">{d}<small>{KR[d]}</small></div>' for i, d in enumerate(WD))
@@ -79,8 +82,11 @@ def page(hall, blocks, sat):
         chips = "".join(f'<div class="sc"><b>{n}</b><span>{tm}</span><em>모집중</em></div>' for n, tm in sat)
         satband = f'<div class="sat"><div class="sl">SAT<small>토</small><i>REGINA</i></div>{chips}</div>'
     else:   # B홀 표: 토요일 수업이 없어서 그 자리에 C홀(키즈 전문반) 띠
-        cc = "".join(f'<div class="sc kp"><b>{n}</b><span>{d} {kr} · {tm}</span><em>모집중</em></div>' for d, kr, n, tm, t in C_HALL)
-        satband = f'<div class="sat"><div class="sl" style="width:150px;white-space:nowrap">C HALL<small>C홀</small></div>{cc}<p class="cn">RAW KIDZ 1기 · 10~13세<br>화요일은 B홀, 목요일은 C홀</p></div>'
+        if KIDZ_START:
+            cc = "".join(f'<div class="sc kp"><b>{n}</b><span>{d} {kr} · {tm}</span><em>모집중</em></div>' for d, kr, n, tm, t in C_HALL)
+            satband = f'<div class="sat"><div class="sl" style="width:150px;white-space:nowrap">C HALL<small>C홀</small></div>{cc}<p class="cn">RAW KIDZ 1기 · 10~13세<br>화요일은 B홀, 목요일은 C홀</p></div>'
+        else:   # 시작 전: 토요일 B홀은 비어 있으니 그 자리에 모집 안내
+            satband = '<div class="sat"><div class="sl" style="width:185px;white-space:nowrap">KIDS PRO<small>키즈 전문반</small></div><div class="sc kp"><b>RAW KIDZ 1기</b><span>12월 말 개강 예정 · 10~13세</span><em>모집중</em></div><p class="cn">상담 DM · 카톡 \'로우댄스수원점학원\'<br>B홀 토요일 수업 없음</p></div>'
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
 *{{box-sizing:border-box;margin:0;padding:0}}html,body{{width:1080px;height:{H}px}}
 body{{background:linear-gradient(180deg,#0b1530 0%,#0a1124 45%,#0c1022 100%);color:#f3f7ff;font-family:Montserrat,"Noto Sans KR",sans-serif;position:relative;overflow:hidden}}

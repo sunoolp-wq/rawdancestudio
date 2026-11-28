@@ -67,7 +67,10 @@ function keepContent() {
 function update() {
   const g = (...a) => run('git', a);
   const head = g('rev-parse', 'HEAD').stdout.trim();
-  const known = g('rev-parse', '--verify', '-q', `refs/remotes/origin/${BR}`).stdout.trim();
+  // 마지막으로 받은 버전을 기록해 두고 비교 (2026-11-28: 받아만 두고 적용 안 한 상태를 '안 올린 커밋'으로 오해해 건너뛴 일)
+  const syncedPath = path.join(STATE_DIR, 'synced-head');
+  const synced = fs.existsSync(syncedPath) ? fs.readFileSync(syncedPath, 'utf8').trim() : '';
+  const known = synced || g('rev-parse', '--verify', '-q', `refs/remotes/origin/${BR}`).stdout.trim();
   // 이 맥에서 만든 커밋이나 고친 파일이 있으면 reset --hard로 지워지므로 받지 않는다 (content는 괜찮음. extra.json은 클라우드 것을 그대로 씀)
   if (known && head !== known) { log('⚠ 최신 받기 건너뜀: 이 맥에 올리지 않은 커밋이 있음'); return false; }
   const dirty = g('status', '--porcelain', '-z', '--untracked-files=no').stdout.split('\0').filter(Boolean)
@@ -77,6 +80,7 @@ function update() {
   const pkgBefore = pkg();
   if (!g('fetch', '-q', '--depth', '1', 'origin', BR).ok) { log('⚠ 최신 받기 실패 (인터넷·GitHub 로그인 확인) → 지금 버전으로 계속'); return false; }
   g('reset', '-q', '--hard', 'FETCH_HEAD');
+  fs.mkdirSync(STATE_DIR, { recursive: true }); fs.writeFileSync(syncedPath, g('rev-parse', 'HEAD').stdout.trim());
   g('sparse-checkout', 'set', '--no-cone', '/*', '!/content/', ...keepContent());   // 원장님 2026-11-23 "맥 용량": content는 안 받고 keep-content.txt 폴더만 남김
   // 대강·팝업(extra.json)은 클라우드(GitHub) 것을 그대로 씀 — 맥에서 고친 건 덮어씀 (원장님 2026-11-23 "대강은 클라우드에서만 고칠게")
   if (pkg() !== pkgBefore) run('npm', ['install', '--no-audit', '--no-fund', '--silent']);
@@ -104,7 +108,7 @@ function allVideos() {
     for (const e of ents) {
       const p = path.join(dir, e.name);
       if (e.isDirectory() && depth < 2) walk(p, depth + 1);
-      else if (e.isFile() && /\.mp4$/i.test(e.name)) out.push({ p, name: e.name, mtime: fs.statSync(p).mtimeMs });
+      else if (e.isFile() && /\.mp4$/i.test(e.name)) out.push({ p, name: e.name.normalize('NFC'), mtime: fs.statSync(p).mtimeMs });   // 맥 한글 파일 이름은 자모 분리(NFD)라 '쌤15초'·'시간표'가 안 맞던 문제 (2026-11-28)
     }
   };
   walk(MOVIES, 0);
